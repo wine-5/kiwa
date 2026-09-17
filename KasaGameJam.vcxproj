@@ -95,6 +95,9 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\game\scene\IScene.h" />
+    <ClInclude Include="src\game\scene\SceneContext.h" />
+    <ClInclude Include="src\game\scene\SceneType.h" />
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\infrastructure\input\InputProvider.h" />
