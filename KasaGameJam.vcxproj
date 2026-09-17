@@ -91,6 +91,8 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\core\utility\Color.h" />
+    <ClInclude Include="src\core\utility\Vector2.h" />
     <ClInclude Include="src\core\base\NonCopyable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
