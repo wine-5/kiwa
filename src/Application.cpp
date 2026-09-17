@@ -1,6 +1,7 @@
 ﻿// 自前ヘッダを先に include する（DxLib のマクロと定数名が衝突するのを防ぐ）
 #include "Application.h"
 #include "core/constant/ScreenConstants.h"
+#include "game/constant/Palette.h"
 #include "DxLib.h"
 
 namespace
@@ -16,8 +17,11 @@ namespace
 } // namespace
 
 Application::Application(int screenWidth, int screenHeight)
-    : m_screen{ screenWidth, screenHeight }, m_sceneManager{ m_renderer, m_input, m_resource, m_screen }
+    : m_screen{ screenWidth, screenHeight },
+      m_sceneManager{ m_renderer, m_renderer3D, m_camera, m_input, m_resource, m_screen }
 {
+	// 画面を暗く落としておくと、枡と液体だけが浮かび上がる
+	m_screen.setBackgroundColor(game::constant::palette::BACKGROUND);
 	m_sceneManager.start(game::scene::SceneType::Title);
 }
 

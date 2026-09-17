@@ -2,6 +2,7 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IScreen.h"
+#include "game/constant/Palette.h"
 #include <cmath>
 
 namespace
@@ -30,11 +31,11 @@ namespace game::scene
 		const float centerY{ m_context.screen.getHeight() * 0.5f };
 
 		m_context.renderer.drawTextCentered(core::utility::Vector2{ centerX, centerY - 40.0f }, "かさ ゲームジャム",
-		                                    core::utility::colors::WHITE);
+		                                    game::constant::palette::TEXT_PRIMARY);
 
 		// 点滅させて「入力を待っている」ことを伝える
 		if (std::fmod(m_elapsedTime, BLINK_CYCLE) < BLINK_CYCLE * 0.5f)
 			m_context.renderer.drawTextCentered(core::utility::Vector2{ centerX, centerY + 20.0f },
-			                                    "PRESS ENTER", core::utility::colors::GRAY);
+			                                    "PRESS ENTER", game::constant::palette::TEXT_SUB);
 	}
 } // namespace game::scene

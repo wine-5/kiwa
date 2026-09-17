@@ -26,6 +26,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
+	// 3D 描画の下ごしらえ。Zバッファが無いと奥のものが手前に描かれてしまう
+	SetUseZBuffer3D(TRUE);
+	SetWriteZBuffer3D(TRUE);
+	SetUseBackCulling(TRUE);
+	// ライティングは使わない。面ごとに指定した色がそのまま出るので、
+	// 木の陰影は色の選び方で作る（光源に頼ると枡の内側が真っ黒に潰れる）
+	SetUseLighting(FALSE);
+
+	// 和風の見た目に寄せる。明朝体が無い環境では既定のフォントのままになる
+	ChangeFont("游明朝");
+	SetFontSize(26);
+
 	{
 		// リソースの解放を DxLib_End より先に済ませるため、スコープで囲む
 		Application app{ core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT };

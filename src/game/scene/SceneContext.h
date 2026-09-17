@@ -4,10 +4,12 @@
 
 namespace core::iface
 {
+	class ICamera;        // 前方宣言
 	class IInputProvider; // 前方宣言
-	class IRenderer;
-	class IResourceManager;
-	class IScreen;
+	class IRenderer;      // 前方宣言
+	class IRenderer3D;    // 前方宣言
+	class IResourceManager; // 前方宣言
+	class IScreen;        // 前方宣言
 } // namespace core::iface
 
 namespace game::scene
@@ -22,6 +24,12 @@ namespace game::scene
 	{
 		/// @brief 2D 描画
 		core::iface::IRenderer& renderer;
+
+		/// @brief 3D 描画
+		core::iface::IRenderer3D& renderer3D;
+
+		/// @brief カメラ
+		core::iface::ICamera& camera;
 
 		/// @brief 入力の取得
 		core::iface::IInputProvider& input;

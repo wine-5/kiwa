@@ -20,11 +20,14 @@ namespace game::scene
 		/**
 		 * @brief SceneManager のコンストラクタ
 		 * @param renderer 2D 描画
+		 * @param renderer3D 3D 描画
+		 * @param camera カメラ
 		 * @param input 入力の取得
 		 * @param resource 画像・音の読み込み
 		 * @param screen 画面サイズの取得
 		 */
-		SceneManager(core::iface::IRenderer& renderer, core::iface::IInputProvider& input,
+		SceneManager(core::iface::IRenderer& renderer, core::iface::IRenderer3D& renderer3D,
+		             core::iface::ICamera& camera, core::iface::IInputProvider& input,
 		             core::iface::IResourceManager& resource, core::iface::IScreen& screen);
 
 		/**

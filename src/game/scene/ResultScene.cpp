@@ -2,6 +2,7 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IScreen.h"
+#include "game/constant/Palette.h"
 
 namespace game::scene
 {
@@ -21,8 +22,8 @@ namespace game::scene
 		const float centerY{ m_context.screen.getHeight() * 0.5f };
 
 		m_context.renderer.drawTextCentered(core::utility::Vector2{ centerX, centerY - 20.0f }, "RESULT",
-		                                    core::utility::colors::WHITE);
+		                                    game::constant::palette::TEXT_PRIMARY);
 		m_context.renderer.drawTextCentered(core::utility::Vector2{ centerX, centerY + 20.0f },
-		                                    "Enter でタイトルへ", core::utility::colors::GRAY);
+		                                    "Enter でタイトルへ", game::constant::palette::TEXT_SUB);
 	}
 } // namespace game::scene
