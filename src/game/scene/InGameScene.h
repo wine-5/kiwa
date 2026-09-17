@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/utility/Vector2.h"
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
 
