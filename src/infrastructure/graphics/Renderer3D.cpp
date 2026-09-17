@@ -49,6 +49,34 @@ namespace infrastructure::graphics
 		DrawSphere3D(toDxVector(center), radius, DIVISION_COUNT, toDxColor(color), GetColor(0, 0, 0), TRUE);
 	}
 
+	void Renderer3D::setBlend(core::utility::BlendMode mode, float strength)
+	{
+		// 状態を変える前に、溜まっているぶんを今の設定で描き切る
+		RenderVertex();
+
+		const int value{ static_cast<int>(strength * 255.0f) };
+		const int clamped{ value < 0 ? 0 : (value > 255 ? 255 : value) };
+
+		switch (mode)
+		{
+		case core::utility::BlendMode::Alpha:
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, clamped);
+			SetWriteZBuffer3D(FALSE); // 透けているものが奥行きを埋めてしまわないように
+			break;
+
+		case core::utility::BlendMode::Add:
+			SetDrawBlendMode(DX_BLENDMODE_ADD, clamped);
+			SetWriteZBuffer3D(FALSE);
+			break;
+
+		case core::utility::BlendMode::None:
+		default:
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			SetWriteZBuffer3D(TRUE);
+			break;
+		}
+	}
+
 	void Renderer3D::flush()
 	{
 		RenderVertex();

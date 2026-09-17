@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/utility/BlendMode.h"
 #include "core/utility/Color.h"
 #include "core/utility/Vector3.h"
 
@@ -43,6 +44,16 @@ namespace core::iface
 		 */
 		virtual void drawSphere(const core::utility::Vector3& center, float radius,
 		                        const core::utility::Color& color) = 0;
+
+		/**
+		 * @brief 以降の描画の重ね方を変える
+		 *
+		 * 透かしたり光を足したりしている間は奥行きの書き込みを止めるため、
+		 * 使い終えたら必ず None へ戻すこと（戻さないと後続の描画の前後関係が壊れる）
+		 * @param mode 重ね方
+		 * @param strength 濃さ（0.0〜1.0）。None のときは無視される
+		 */
+		virtual void setBlend(core::utility::BlendMode mode, float strength) = 0;
 
 		/**
 		 * @brief 溜まっている 3D の描画を吐き出す

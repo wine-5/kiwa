@@ -21,6 +21,8 @@ namespace infrastructure::graphics
 		void drawSphere(const core::utility::Vector3& center, float radius,
 		                const core::utility::Color& color) override;
 
+		void setBlend(core::utility::BlendMode mode, float strength) override;
+
 		void flush() override;
 	};
 } // namespace infrastructure::graphics

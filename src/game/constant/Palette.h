@@ -41,8 +41,20 @@ namespace game::constant
 		/// @brief こぼれて台に広がったぶん（枡の中より沈んだ色）
 		inline constexpr core::utility::Color LIQUID_SPILLED{ 150, 105, 52 };
 
+		/// @brief 水面のひとかわ（本体より明るくして面を見せる）
+		inline constexpr core::utility::Color LIQUID_SURFACE{ 236, 190, 96 };
+
+		/// @brief 水面の照り（光を足すように重ねる）
+		inline constexpr core::utility::Color LIQUID_SHINE{ 255, 246, 214 };
+
+		/// @brief 広がる波紋
+		inline constexpr core::utility::Color RIPPLE{ 250, 226, 165 };
+
 		/// @brief 注がれている筋
 		inline constexpr core::utility::Color STREAM{ 240, 221, 154 };
+
+		/// @brief 跳ねたしずく
+		inline constexpr core::utility::Color DROPLET{ 246, 214, 130 };
 
 		// ========== 印 ==========
 
