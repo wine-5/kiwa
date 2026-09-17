@@ -97,9 +97,11 @@
     <ClCompile Include="src\game\scene\ResultScene.cpp" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
     <ClCompile Include="src\game\scene\SceneManager.cpp" />
+    <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\game\scene\SceneManager.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
     <ClInclude Include="src\game\scene\ResultScene.h" />
