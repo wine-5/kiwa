@@ -92,9 +92,11 @@
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\input\InputProvider.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
+    <ClCompile Include="src\game\scene\TitleScene.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\game\scene\TitleScene.h" />
     <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\game\scene\SceneContext.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />
