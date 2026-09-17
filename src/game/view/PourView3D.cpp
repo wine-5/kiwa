@@ -4,43 +4,30 @@
 #include "core/interface/IRenderer3D.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Palette.h"
+#include "game/view/MasuGeometry.h"
 
 namespace
 {
 	using core::utility::Vector3;
 	namespace palette = game::constant::palette;
-
-	// ---- 枡の形（原点を枡の底の中心に置く） ----
-
-	/// @brief 枡の外側の半分の幅
-	constexpr float OUTER_HALF{ 1.0f };
-
-	/// @brief 板の厚み
-	constexpr float WALL_THICKNESS{ 0.12f };
-
-	/// @brief 枡の高さ
-	constexpr float MASU_HEIGHT{ 1.4f };
-
-	/// @brief 内側の底の高さ
-	constexpr float FLOOR_TOP{ 0.14f };
-
-	/// @brief 内側の半分の幅
-	constexpr float INNER_HALF{ OUTER_HALF - WALL_THICKNESS };
-
-	/// @brief 内側に液体が入る高さ
-	constexpr float INNER_HEIGHT{ MASU_HEIGHT - FLOOR_TOP };
+	namespace masu = game::view::masu;
 
 	/// @brief 際を示す線の太さ
 	constexpr float LINE_THICKNESS{ 0.02f };
 
-	/// @brief 注がれる筋の半径
-	constexpr float STREAM_RADIUS{ 0.05f };
-
-	/// @brief 注ぎ口の高さ
-	constexpr float STREAM_TOP{ 2.6f };
-
 	/// @brief こぼれが広がる範囲の半分の幅
 	constexpr float PUDDLE_HALF{ 1.45f };
+
+	/// @brief こぼれの厚み
+	constexpr float PUDDLE_THICKNESS{ 0.03f };
+
+	// ---- 台 ----
+
+	/// @brief 台の半分の幅
+	constexpr float TABLE_HALF{ 6.0f };
+
+	/// @brief 台の厚み
+	constexpr float TABLE_THICKNESS{ 0.3f };
 
 	// ---- カメラ ----
 
@@ -59,18 +46,24 @@ namespace game::view
 	{
 	}
 
+	void PourView3D::advance(float deltaTime)
+	{
+		m_liquid.advance(deltaTime, m_isPouring, m_amountRatio);
+	}
+
 	void PourView3D::draw()
 	{
 		m_camera.setPerspective(CAMERA_FOV, CAMERA_NEAR, CAMERA_FAR);
 		m_camera.lookAt(CAMERA_POSITION, CAMERA_TARGET);
 
 		// 台
-		m_renderer3D.drawBox(Vector3{ -6.0f, -0.3f, -6.0f }, Vector3{ 6.0f, 0.0f, 6.0f }, palette::TABLE);
+		m_renderer3D.drawBox(Vector3{ -TABLE_HALF, -TABLE_THICKNESS, -TABLE_HALF },
+		                     Vector3{ TABLE_HALF, 0.0f, TABLE_HALF }, palette::TABLE);
 
 		drawMasu();
-		drawLiquid();
+		drawPuddle();
 		drawLimitLine();
-		drawStream();
+		m_liquid.draw(m_renderer3D);
 
 		// 文字は 3D の手前に出したいので、ここで 3D を吐き出してから描く
 		m_renderer3D.flush();
@@ -80,35 +73,31 @@ namespace game::view
 	void PourView3D::drawMasu() const
 	{
 		// 底板
-		m_renderer3D.drawBox(Vector3{ -OUTER_HALF, 0.0f, -OUTER_HALF },
-		                     Vector3{ OUTER_HALF, FLOOR_TOP, OUTER_HALF }, palette::MASU_FLOOR);
+		m_renderer3D.drawBox(Vector3{ -masu::OUTER_HALF, 0.0f, -masu::OUTER_HALF },
+		                     Vector3{ masu::OUTER_HALF, masu::FLOOR_TOP, masu::OUTER_HALF },
+		                     palette::MASU_FLOOR);
 
 		// 側板は3枚だけ描く。手前の板を省くと中の液面がいつでも見えるため
 		// （実物を切り開いて覗いているような見え方になる）
-		m_renderer3D.drawBox(Vector3{ -OUTER_HALF, 0.0f, INNER_HALF },
-		                     Vector3{ OUTER_HALF, MASU_HEIGHT, OUTER_HALF }, palette::MASU_BACK);
-		m_renderer3D.drawBox(Vector3{ INNER_HALF, 0.0f, -OUTER_HALF },
-		                     Vector3{ OUTER_HALF, MASU_HEIGHT, OUTER_HALF }, palette::MASU_RIGHT);
-		m_renderer3D.drawBox(Vector3{ -OUTER_HALF, 0.0f, -OUTER_HALF },
-		                     Vector3{ -INNER_HALF, MASU_HEIGHT, OUTER_HALF }, palette::MASU_LEFT);
+		m_renderer3D.drawBox(Vector3{ -masu::OUTER_HALF, 0.0f, masu::INNER_HALF },
+		                     Vector3{ masu::OUTER_HALF, masu::HEIGHT, masu::OUTER_HALF },
+		                     palette::MASU_BACK);
+		m_renderer3D.drawBox(Vector3{ masu::INNER_HALF, 0.0f, -masu::OUTER_HALF },
+		                     Vector3{ masu::OUTER_HALF, masu::HEIGHT, masu::OUTER_HALF },
+		                     palette::MASU_RIGHT);
+		m_renderer3D.drawBox(Vector3{ -masu::OUTER_HALF, 0.0f, -masu::OUTER_HALF },
+		                     Vector3{ -masu::INNER_HALF, masu::HEIGHT, masu::OUTER_HALF },
+		                     palette::MASU_LEFT);
 	}
 
-	void PourView3D::drawLiquid() const
+	void PourView3D::drawPuddle() const
 	{
-		if (m_amountRatio <= 0.0f)
-			return;
-
-		const float top{ FLOOR_TOP + INNER_HEIGHT * m_amountRatio };
-
-		m_renderer3D.drawBox(Vector3{ -INNER_HALF, FLOOR_TOP, -INNER_HALF },
-		                     Vector3{ INNER_HALF, top, INNER_HALF }, palette::LIQUID);
-
 		if (!m_isOverflowed)
 			return;
 
-		// こぼれたぶんは枡の外へ広がる
 		m_renderer3D.drawBox(Vector3{ -PUDDLE_HALF, 0.0f, -PUDDLE_HALF },
-		                     Vector3{ PUDDLE_HALF, 0.03f, PUDDLE_HALF }, palette::LIQUID_SPILLED);
+		                     Vector3{ PUDDLE_HALF, PUDDLE_THICKNESS, PUDDLE_HALF },
+		                     palette::LIQUID_SPILLED);
 	}
 
 	void PourView3D::drawLimitLine() const
@@ -116,26 +105,19 @@ namespace game::view
 		if (!m_isLimitVisible)
 			return;
 
-		const float y{ FLOOR_TOP + INNER_HEIGHT * m_limitRatio };
+		const float y{ masu::surfaceHeight(m_limitRatio) };
 
 		// 内側の3面に沿って細い線を回す
-		m_renderer3D.drawBox(Vector3{ -INNER_HALF, y, INNER_HALF - LINE_THICKNESS },
-		                     Vector3{ INNER_HALF, y + LINE_THICKNESS, INNER_HALF }, palette::LIMIT_LINE);
-		m_renderer3D.drawBox(Vector3{ INNER_HALF - LINE_THICKNESS, y, -INNER_HALF },
-		                     Vector3{ INNER_HALF, y + LINE_THICKNESS, INNER_HALF }, palette::LIMIT_LINE);
-		m_renderer3D.drawBox(Vector3{ -INNER_HALF, y, -INNER_HALF },
-		                     Vector3{ -INNER_HALF + LINE_THICKNESS, y + LINE_THICKNESS, INNER_HALF },
+		m_renderer3D.drawBox(Vector3{ -masu::INNER_HALF, y, masu::INNER_HALF - LINE_THICKNESS },
+		                     Vector3{ masu::INNER_HALF, y + LINE_THICKNESS, masu::INNER_HALF },
 		                     palette::LIMIT_LINE);
-	}
-
-	void PourView3D::drawStream() const
-	{
-		if (!m_isPouring)
-			return;
-
-		const float surface{ FLOOR_TOP + INNER_HEIGHT * m_amountRatio };
-		m_renderer3D.drawCapsule(Vector3{ 0.0f, STREAM_TOP, 0.0f }, Vector3{ 0.0f, surface, 0.0f },
-		                         STREAM_RADIUS, palette::STREAM);
+		m_renderer3D.drawBox(Vector3{ masu::INNER_HALF - LINE_THICKNESS, y, -masu::INNER_HALF },
+		                     Vector3{ masu::INNER_HALF, y + LINE_THICKNESS, masu::INNER_HALF },
+		                     palette::LIMIT_LINE);
+		m_renderer3D.drawBox(Vector3{ -masu::INNER_HALF, y, -masu::INNER_HALF },
+		                     Vector3{ -masu::INNER_HALF + LINE_THICKNESS, y + LINE_THICKNESS,
+		                              masu::INNER_HALF },
+		                     palette::LIMIT_LINE);
 	}
 
 	void PourView3D::drawTexts() const

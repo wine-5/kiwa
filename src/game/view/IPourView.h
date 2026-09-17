@@ -52,6 +52,15 @@ namespace game::view
 		virtual void showPrompt(const std::string& prompt) = 0;
 
 		/**
+		 * @brief 見た目だけの動きを進める
+		 *
+		 * 液面の揺れや波紋のように、ゲームの状態とは関係のない動きのための時間。
+		 * Model も Presenter もこれらを知らず、進行の結果は何も変わらない
+		 * @param deltaTime 進める時間（秒）
+		 */
+		virtual void advance(float deltaTime) = 0;
+
+		/**
 		 * @brief 伝えられた内容を描く
 		 */
 		virtual void draw() = 0;

@@ -2,55 +2,55 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{3146699a-8c8c-4362-a973-e6e3734d6e84}</UniqueIdentifier>
+      <UniqueIdentifier>{3449be87-46ce-4a91-8a4b-c613622d6e1d}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core">
-      <UniqueIdentifier>{b389a7ec-4132-4587-aea6-aa49b2b51da3}</UniqueIdentifier>
+      <UniqueIdentifier>{6e0e1d34-bf17-410c-90ec-86b3daa8b2a9}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\base">
-      <UniqueIdentifier>{e8a2a535-8e42-44bf-914e-dcc4470ab4f1}</UniqueIdentifier>
+      <UniqueIdentifier>{56395344-614a-4bc3-8e93-9f27e590a076}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\constant">
-      <UniqueIdentifier>{26d82a54-5df8-4024-b1d3-1d29bd997d22}</UniqueIdentifier>
+      <UniqueIdentifier>{569abff6-69c8-4827-9046-73b1ce3165ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\input">
-      <UniqueIdentifier>{e616b0da-25cb-45f1-91c3-e401280f8a04}</UniqueIdentifier>
+      <UniqueIdentifier>{3f398ab5-31a5-4d3e-8765-c779f937df79}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\interface">
-      <UniqueIdentifier>{f4b07384-db5c-4a3e-9d9c-3ece15bc95c2}</UniqueIdentifier>
+      <UniqueIdentifier>{e7caefb0-a8ca-453f-b0ae-3429ec325e11}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\utility">
-      <UniqueIdentifier>{cfb3d14e-fb41-48eb-b98b-93e1f3e91a95}</UniqueIdentifier>
+      <UniqueIdentifier>{4455c3b8-ef83-43d9-8435-2a1c5869103a}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game">
-      <UniqueIdentifier>{ec0a8160-c8bb-4609-af6c-0063810dfcc7}</UniqueIdentifier>
+      <UniqueIdentifier>{304fe0ee-42e0-4d7b-8270-0c2f752d1093}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\constant">
-      <UniqueIdentifier>{a45b2f96-f442-4523-bb68-d2c9a709a6e5}</UniqueIdentifier>
+      <UniqueIdentifier>{2e918768-20e6-458c-a0a7-688c8eb08f1a}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\model">
-      <UniqueIdentifier>{f424517a-9a6f-446e-974b-ef593c5261a2}</UniqueIdentifier>
+      <UniqueIdentifier>{d29113a5-8706-4513-9b25-4f10a838bdf6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\presenter">
-      <UniqueIdentifier>{f2c0d4c5-4c84-41f0-bfe7-7da63d708ad6}</UniqueIdentifier>
+      <UniqueIdentifier>{22781551-a15d-40c1-9da9-24b7ad698951}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\scene">
-      <UniqueIdentifier>{6df24f95-5740-4a13-922b-2101bde38e12}</UniqueIdentifier>
+      <UniqueIdentifier>{f380ff4f-22bd-4b87-a602-1bd58ec33e6e}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\view">
-      <UniqueIdentifier>{fc1f6f68-3342-42f0-bcee-d7bdba6c8059}</UniqueIdentifier>
+      <UniqueIdentifier>{6610d122-101e-4223-bfd5-73d0bec4e320}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure">
-      <UniqueIdentifier>{88e5cea5-e408-4b90-9b34-e6f78148c80a}</UniqueIdentifier>
+      <UniqueIdentifier>{8463893b-c089-481c-acc6-8ae828e8bd2b}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\graphics">
-      <UniqueIdentifier>{a3405fcf-b84a-46ed-b377-a490cc17866a}</UniqueIdentifier>
+      <UniqueIdentifier>{6915b098-c568-4315-abe7-d438fc560e42}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\input">
-      <UniqueIdentifier>{478ceea3-275a-4c3f-bfea-8abf902d0439}</UniqueIdentifier>
+      <UniqueIdentifier>{6ee9d92c-4166-4771-82ea-9f4dd4f61c82}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\resource">
-      <UniqueIdentifier>{627155c2-2c39-401a-9799-7157799df6cc}</UniqueIdentifier>
+      <UniqueIdentifier>{a60f0529-dbc4-40fd-990f-0e5cbae4f576}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -80,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="src\game\scene\TitleScene.cpp">
       <Filter>src\game\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\LiquidVisual.cpp">
+      <Filter>src\game\view</Filter>
     </ClCompile>
     <ClCompile Include="src\game\view\PourView3D.cpp">
       <Filter>src\game\view</Filter>
@@ -134,6 +137,9 @@
     <ClInclude Include="src\core\interface\IScreen.h">
       <Filter>src\core\interface</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\utility\BlendMode.h">
+      <Filter>src\core\utility</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\utility\Color.h">
       <Filter>src\core\utility</Filter>
     </ClInclude>
@@ -180,6 +186,12 @@
       <Filter>src\game\scene</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\IPourView.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\LiquidVisual.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\MasuGeometry.h">
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\PourView3D.h">

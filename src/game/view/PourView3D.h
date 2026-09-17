@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "game/view/IPourView.h"
+#include "game/view/LiquidVisual.h"
 
 namespace core::iface
 {
@@ -13,6 +14,8 @@ namespace game::view
 {
 	/**
 	 * @brief 枡と液体を 3D で描く IPourView の実装
+	 *
+	 * 枡・台・際の線・文字を受け持ち、液体の見せ方は LiquidVisual に任せる
 	 */
 	class PourView3D final : public IPourView
 	{
@@ -58,6 +61,8 @@ namespace game::view
 			m_prompt = prompt;
 		}
 
+		void advance(float deltaTime) override;
+
 		void draw() override;
 
 	  private:
@@ -67,19 +72,14 @@ namespace game::view
 		void drawMasu() const;
 
 		/**
-		 * @brief 枡の中の液体を描く
+		 * @brief こぼれて台に広がったぶんを描く
 		 */
-		void drawLiquid() const;
+		void drawPuddle() const;
 
 		/**
 		 * @brief こぼれる際を示す線を描く
 		 */
 		void drawLimitLine() const;
-
-		/**
-		 * @brief 注がれている筋を描く
-		 */
-		void drawStream() const;
 
 		/**
 		 * @brief 文字を描く
@@ -90,6 +90,9 @@ namespace game::view
 		core::iface::IRenderer& m_renderer;
 		core::iface::ICamera& m_camera;
 		core::iface::IScreen& m_screen;
+
+		/// @brief 液体の見せ方（揺れ・波紋・しぶき・照り）
+		LiquidVisual m_liquid{};
 
 		float m_amountRatio{ 0.0f };
 		float m_limitRatio{ 1.0f };
