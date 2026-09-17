@@ -89,9 +89,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\infrastructure\graphics\Renderer.h" />
+    <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\infrastructure\graphics\Screen.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\constant\ScreenConstants.h" />
