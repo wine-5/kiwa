@@ -1,18 +1,13 @@
 ﻿// 自前ヘッダを先に include する（DxLib のマクロと定数名が衝突するのを防ぐ）
+#include "Application.h"
+#include "core/constant/ScreenConstants.h"
 #include "DxLib.h"
-
-namespace
-{
-	constexpr int COLOR_BIT{ 32 };
-	constexpr int RENDER_WIDTH{ 1280 };
-	constexpr int RENDER_HEIGHT{ 720 };
-} // namespace
 
 /**
  * @brief アプリケーションのエントリポイント
  *
- * DxLib の初期化と終了だけを受け持ち、ゲームの中身には立ち入らない。
- * 初期化に失敗したときだけ -1 を返して即座に終了する
+ * DxLib の初期化・終了だけを受け持ち、ゲームの中身には立ち入らない。
+ * 初期化より後の一切は Application が引き受ける
  * @return 正常終了なら0、初期化に失敗したら-1
  */
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -21,7 +16,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// （DxLib_Init より前でしか変更できない）
 	SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
-	SetGraphMode(RENDER_WIDTH, RENDER_HEIGHT, COLOR_BIT);
+	SetGraphMode(core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT, core::constant::COLOR_BIT);
 	ChangeWindowMode(TRUE);
 	SetMainWindowText("KasaGameJam");
 	SetAlwaysRunFlag(TRUE); // 非アクティブでも描画を続ける（デバッグ中に止まらないように）
@@ -31,11 +26,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
-		ClearDrawScreen();
-		DrawString(16, 16, "KasaGameJam", GetColor(255, 255, 255));
-		ScreenFlip();
+		// リソースの解放を DxLib_End より先に済ませるため、スコープで囲む
+		Application app{ core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT };
+		app.run();
 	}
 
 	DxLib_End();
