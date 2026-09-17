@@ -90,9 +90,11 @@
   <ItemGroup>
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
+    <ClCompile Include="src\infrastructure\input\InputProvider.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\infrastructure\input\InputProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\infrastructure\graphics\Renderer.h" />
