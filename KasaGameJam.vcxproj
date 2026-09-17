@@ -93,6 +93,8 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\core\interface\IInputProvider.h" />
+    <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\infrastructure\graphics\Renderer.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\infrastructure\graphics\Screen.h" />
