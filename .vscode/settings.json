@@ -1,0 +1,30 @@
+{
+  // ユーザー設定で IntelliSense を切っているため、このワークスペースだけ有効へ戻す
+  // （これが無いと F12 の定義ジャンプが効かない）
+  "C_Cpp.intelliSenseEngine": "default",
+  // clangd は別のエンジンとして同じ役目を奪い合うので、このワークスペースでは止める
+  "clangd.enable": false,
+  "C_Cpp.cppStandard": "c++20",
+  "C_Cpp.cStandard": "c17",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/src",
+    "${workspaceFolder}/thirdparty/dxlib",
+    "${workspaceFolder}"
+  ],
+  "C_Cpp.default.defines": [
+    "_DEBUG",
+    "WIN32",
+    "_WINDOWS"
+  ],
+  "C_Cpp.default.compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+  "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+  "C_Cpp.autocomplete": "enabled",
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.formatting": "clangFormat",
+  "C_Cpp.clangFormatPath": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin/clang-format.exe",
+  "C_Cpp.clang_format_style": "file",
+  "editor.formatOnSave": false,
+  "files.associations": {
+    "*.h": "cpp"
+  }
+}
