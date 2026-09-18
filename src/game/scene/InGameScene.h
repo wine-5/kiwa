@@ -1,14 +1,15 @@
 ﻿#pragma once
-#include "core/utility/Vector2.h"
+#include "game/presenter/PourPresenter.h"
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
+#include "game/view/PourView3D.h"
 
 namespace game::scene
 {
 	/**
-	 * @brief ゲーム本編のシーン
+	 * @brief 注ぎ勝負のシーン
 	 *
-	 * 中身はこれから決めるため、いまは基盤の動作確認（固定ステップの更新と入力）だけを持つ
+	 * 自分ではルールも描画も持たず、View と Presenter を組み立てて繋ぐだけにしている
 	 */
 	class InGameScene final : public IScene
 	{
@@ -23,10 +24,13 @@ namespace game::scene
 
 		void draw() override;
 
+		void drawOverlay() override;
+
 	  private:
 		SceneContext m_context;
 
-		/// @brief 動作確認用に動かしている四角の位置
-		core::utility::Vector2 m_position{ 0.0f, 0.0f };
+		// View を先に作ってから Presenter へ渡すため、この順で宣言する
+		view::PourView3D m_view;
+		presenter::PourPresenter m_presenter;
 	};
 } // namespace game::scene

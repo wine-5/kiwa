@@ -2,43 +2,55 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{724ebe2c-71fd-43b7-a735-afcaf7c1d885}</UniqueIdentifier>
+      <UniqueIdentifier>{b0e9f06e-68d3-45d7-84f2-58586d68051f}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core">
-      <UniqueIdentifier>{0bc6806c-485d-4e44-885e-ce3239b94662}</UniqueIdentifier>
+      <UniqueIdentifier>{f6ed94c0-a691-4346-8ff8-f345fca033e3}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\base">
-      <UniqueIdentifier>{2c6f4f99-ff74-4dcc-bca0-6a61d0d7d2b1}</UniqueIdentifier>
+      <UniqueIdentifier>{7bed3143-d0ca-4746-8b5a-0631b7d8b3ac}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\constant">
-      <UniqueIdentifier>{7eccbf9a-e12b-4324-990e-2dcb459a7101}</UniqueIdentifier>
+      <UniqueIdentifier>{e8498026-71cd-4968-95ad-b858ebb99b08}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\input">
-      <UniqueIdentifier>{e4fda5d1-c145-4127-bfc1-3c44f16a4c43}</UniqueIdentifier>
+      <UniqueIdentifier>{f6fc9791-45f1-4d46-bb20-caf72ec6ed0d}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\interface">
-      <UniqueIdentifier>{51b72fe4-40b3-4d34-880d-ab660b1aeeb1}</UniqueIdentifier>
+      <UniqueIdentifier>{7897cb8b-a2f2-4ad8-a873-bf68a81fd018}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\utility">
-      <UniqueIdentifier>{6cdde538-fc1f-42f7-9539-b445b7345edb}</UniqueIdentifier>
+      <UniqueIdentifier>{e2e23777-5c15-4d5d-ac41-f63e36f1b6a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game">
-      <UniqueIdentifier>{7d273ae7-e9c2-4886-bb8e-93c2c39dffb4}</UniqueIdentifier>
+      <UniqueIdentifier>{28409937-af21-41b0-b70f-ced94ed30087}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\constant">
+      <UniqueIdentifier>{024e8581-d67b-4ae0-ba70-87457f4aa7be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\model">
+      <UniqueIdentifier>{3cfcd3d6-2e7f-450a-9385-437b4e78ef48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\presenter">
+      <UniqueIdentifier>{80b23251-4081-45a9-9095-94534fadde8e}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\scene">
-      <UniqueIdentifier>{2cd43495-91bf-4aab-a6ed-722bc3ff22c6}</UniqueIdentifier>
+      <UniqueIdentifier>{8f25a501-504d-4d1e-8ca8-8e09be83fc9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\game\view">
+      <UniqueIdentifier>{160df889-e332-4fb5-93bf-6472900d24b4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure">
-      <UniqueIdentifier>{368a0057-8aff-4a21-8d1e-f4066273e0c7}</UniqueIdentifier>
+      <UniqueIdentifier>{a4bea702-a0c4-4ab8-8d81-12884e0126e5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\graphics">
-      <UniqueIdentifier>{6775d409-e03e-4cd5-88e3-901a83681a6d}</UniqueIdentifier>
+      <UniqueIdentifier>{7ca8511d-d41b-4a88-bdc2-d958e3892aaa}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\input">
-      <UniqueIdentifier>{2907be98-38d0-44d6-a698-a062a6d9fec3}</UniqueIdentifier>
+      <UniqueIdentifier>{725ccf64-4485-4b6f-8204-70ac6fa93a39}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\resource">
-      <UniqueIdentifier>{2ddab511-ee25-4824-8323-1d4d15daa3a5}</UniqueIdentifier>
+      <UniqueIdentifier>{25955c66-d702-492a-ad4d-e1dc654fa945}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +59,12 @@
     </ClCompile>
     <ClCompile Include="src\Main.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\model\PourMatch.cpp">
+      <Filter>src\game\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\presenter\PourPresenter.cpp">
+      <Filter>src\game\presenter</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\InGameScene.cpp">
       <Filter>src\game\scene</Filter>
@@ -63,7 +81,34 @@
     <ClCompile Include="src\game\scene\TitleScene.cpp">
       <Filter>src\game\scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\view\LiquidVisual.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\PourStream.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\PourView3D.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\SceneryMesh.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\WaterSurface.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\graphics\Camera.cpp">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\graphics\ModelRenderer.cpp">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\graphics\PostEffect.cpp">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\graphics\Renderer3D.cpp">
       <Filter>src\infrastructure\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp">
@@ -89,10 +134,22 @@
     <ClInclude Include="src\core\input\KeyCode.h">
       <Filter>src\core\input</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\interface\ICamera.h">
+      <Filter>src\core\interface</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\interface\IInputProvider.h">
       <Filter>src\core\interface</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\interface\IModelRenderer.h">
+      <Filter>src\core\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\interface\IPostEffect.h">
+      <Filter>src\core\interface</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\interface\IRenderer.h">
+      <Filter>src\core\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\interface\IRenderer3D.h">
       <Filter>src\core\interface</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IResourceManager.h">
@@ -101,11 +158,35 @@
     <ClInclude Include="src\core\interface\IScreen.h">
       <Filter>src\core\interface</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\utility\BlendMode.h">
+      <Filter>src\core\utility</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\utility\Color.h">
+      <Filter>src\core\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\utility\MathConstants.h">
       <Filter>src\core\utility</Filter>
     </ClInclude>
     <ClInclude Include="src\core\utility\Vector2.h">
       <Filter>src\core\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\utility\Vector3.h">
+      <Filter>src\core\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\utility\Vertex3D.h">
+      <Filter>src\core\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\constant\Palette.h">
+      <Filter>src\game\constant</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\model\Judgement.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\model\PourMatch.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\presenter\PourPresenter.h">
+      <Filter>src\game\presenter</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\IScene.h">
       <Filter>src\game\scene</Filter>
@@ -131,7 +212,40 @@
     <ClInclude Include="src\game\scene\TitleScene.h">
       <Filter>src\game\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\view\CupGeometry.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\IPourView.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\LiquidVisual.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\PourStream.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\PourView3D.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\SceneryMesh.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\WaterSurface.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\graphics\Camera.h">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\graphics\ModelRenderer.h">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\graphics\PostEffect.h">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\infrastructure\graphics\Renderer.h">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\graphics\Renderer3D.h">
       <Filter>src\infrastructure\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\graphics\Screen.h">

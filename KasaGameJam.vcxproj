@@ -57,6 +57,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/execution-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -75,6 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/execution-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -98,9 +100,43 @@
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
     <ClCompile Include="src\game\scene\SceneManager.cpp" />
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Camera.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Renderer3D.cpp" />
+    <ClCompile Include="src\game\model\PourMatch.cpp" />
+    <ClCompile Include="src\game\view\PourView3D.cpp" />
+    <ClCompile Include="src\game\presenter\PourPresenter.cpp" />
+    <ClCompile Include="src\game\view\LiquidVisual.cpp" />
+    <ClCompile Include="src\game\view\WaterSurface.cpp" />
+    <ClCompile Include="src\game\view\PourStream.cpp" />
+    <ClCompile Include="src\game\view\SceneryMesh.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\ModelRenderer.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\PostEffect.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\game\view\CupGeometry.h" />
+    <ClInclude Include="src\infrastructure\graphics\PostEffect.h" />
+    <ClInclude Include="src\core\interface\IPostEffect.h" />
+    <ClInclude Include="src\infrastructure\graphics\ModelRenderer.h" />
+    <ClInclude Include="src\core\interface\IModelRenderer.h" />
+    <ClInclude Include="src\core\utility\MathConstants.h" />
+    <ClInclude Include="src\game\view\SceneryMesh.h" />
+    <ClInclude Include="src\game\view\PourStream.h" />
+    <ClInclude Include="src\game\view\WaterSurface.h" />
+    <ClInclude Include="src\core\utility\Vertex3D.h" />
+    <ClInclude Include="src\game\view\LiquidVisual.h" />
+    <ClInclude Include="src\core\utility\BlendMode.h" />
+    <ClInclude Include="src\game\constant\Palette.h" />
+    <ClInclude Include="src\game\presenter\PourPresenter.h" />
+    <ClInclude Include="src\game\view\PourView3D.h" />
+    <ClInclude Include="src\game\view\IPourView.h" />
+    <ClInclude Include="src\game\model\PourMatch.h" />
+    <ClInclude Include="src\game\model\Judgement.h" />
+    <ClInclude Include="src\infrastructure\graphics\Renderer3D.h" />
+    <ClInclude Include="src\infrastructure\graphics\Camera.h" />
+    <ClInclude Include="src\core\interface\IRenderer3D.h" />
+    <ClInclude Include="src\core\interface\ICamera.h" />
+    <ClInclude Include="src\core\utility\Vector3.h" />
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\game\scene\SceneManager.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />

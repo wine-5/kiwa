@@ -26,6 +26,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	SetDrawScreen(DX_SCREEN_BACK);
 
+	// 3D 描画の下ごしらえ。Zバッファが無いと奥のものが手前に描かれてしまう
+	SetUseZBuffer3D(TRUE);
+	SetWriteZBuffer3D(TRUE);
+	SetUseBackCulling(TRUE);
+	SetDrawMode(DX_DRAWMODE_BILINEAR); // テクスチャを滑らかに拡大する
+	// 自前で組んだメッシュは陰影を頂点に焼いてあるのでライティングは切っておく。
+	// モデルを描く間だけ ModelRenderer が点ける。その光の向きと強さをここで決める
+	SetUseLighting(FALSE);
+	ChangeLightTypeDir(VGet(-0.36f, -0.88f, 0.31f));
+	SetLightDifColor(GetColorF(1.0f, 0.97f, 0.92f, 0.0f));
+	SetLightAmbColor(GetColorF(0.42f, 0.42f, 0.45f, 0.0f));
+	SetLightSpcColor(GetColorF(0.9f, 0.9f, 0.9f, 0.0f));
+
+	// 和風の見た目に寄せる。明朝体が無い環境では既定のフォントのままになる
+	ChangeFont("游明朝");
+	SetFontSize(26);
+
 	{
 		// リソースの解放を DxLib_End より先に済ませるため、スコープで囲む
 		Application app{ core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT };

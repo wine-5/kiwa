@@ -20,12 +20,17 @@ namespace game::scene
 		/**
 		 * @brief SceneManager のコンストラクタ
 		 * @param renderer 2D 描画
+		 * @param renderer3D 3D 描画
+		 * @param camera カメラ
+		 * @param modelRenderer モデルの描画
 		 * @param input 入力の取得
 		 * @param resource 画像・音の読み込み
 		 * @param screen 画面サイズの取得
 		 */
-		SceneManager(core::iface::IRenderer& renderer, core::iface::IInputProvider& input,
-		             core::iface::IResourceManager& resource, core::iface::IScreen& screen);
+		SceneManager(core::iface::IRenderer& renderer, core::iface::IRenderer3D& renderer3D,
+		             core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
+		             core::iface::IInputProvider& input, core::iface::IResourceManager& resource,
+		             core::iface::IScreen& screen);
 
 		/**
 		 * @brief 最初のシーンを開始する
@@ -49,6 +54,11 @@ namespace game::scene
 		 * @brief 現在のシーンを描画する
 		 */
 		void draw();
+
+		/**
+		 * @brief 現在のシーンの、仕上げのあとに重ねるものを描く
+		 */
+		void drawOverlay();
 
 		/**
 		 * @brief 現在のシーンの種類を返す
