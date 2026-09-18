@@ -14,10 +14,10 @@ namespace
 	namespace palette = game::constant::palette;
 
 	/// @brief 筋を縦に何段に分けるか
-	constexpr int RING_COUNT{ 22 };
+	constexpr int RING_COUNT{ 30 };
 
 	/// @brief 筒の周りを何角形で作るか
-	constexpr int SIDE_COUNT{ 10 };
+	constexpr int SIDE_COUNT{ 14 };
 
 	/// @brief 注ぎ口のところの太さ
 	constexpr float RADIUS_TOP{ 0.052f };
@@ -46,8 +46,10 @@ namespace
 	/// @brief 縁の明るさ
 	constexpr float RIM_STRENGTH{ 0.85f };
 
-	/// @brief 筋の濃さ（少し透けるほうが液体らしい）
-	constexpr float STREAM_ALPHA{ 0.88f };
+	/// @brief 筋の濃さ
+	///
+	/// 透かすと筒の手前と奥が重なって縞に見えてしまうので、不透明で描く
+	constexpr float STREAM_ALPHA{ 1.0f };
 
 	/**
 	 * @brief 筒の表面の色を決める

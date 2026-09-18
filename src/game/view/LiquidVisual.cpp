@@ -80,6 +80,8 @@ namespace game::view
 	{
 		m_vertices.clear();
 		m_indices.clear();
+		m_streamVertices.clear();
+		m_streamIndices.clear();
 		m_causticVertices.clear();
 		m_causticIndices.clear();
 
@@ -89,7 +91,8 @@ namespace game::view
 		const float levelHeight{ m_surface.getLevelHeight() };
 		const float impactX{ m_stream.getImpactX(levelHeight) };
 		const float impactZ{ m_stream.getImpactZ(levelHeight) };
-		m_stream.build(m_vertices, m_indices, m_surface.heightAt(impactX, impactZ), cameraPosition);
+		m_stream.build(m_streamVertices, m_streamIndices, m_surface.heightAt(impactX, impactZ),
+		               cameraPosition);
 
 		// 自前で組んだメッシュは裏表を取り違えやすいので、面の省略は切っておく
 		renderer.setBackCulling(false);
@@ -101,7 +104,14 @@ namespace game::view
 			renderer.drawTriangles(m_causticVertices, m_causticIndices);
 		}
 
-		// 上面と筋は透かして重ねる。真上から覗くと底がうっすら見える
+		// 注ぎ筋は液体だが厚みがあり向こうは見えない。奥行きを書き込んで普通に描く
+		if (!m_streamIndices.empty())
+		{
+			renderer.setBlend(core::utility::BlendMode::None, 1.0f);
+			renderer.drawTriangles(m_streamVertices, m_streamIndices);
+		}
+
+		// 上面は透かして重ねる。真上から覗くと底がうっすら見える
 		if (!m_indices.empty())
 		{
 			renderer.setBlend(core::utility::BlendMode::Alpha, 1.0f);
