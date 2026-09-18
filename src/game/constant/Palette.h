@@ -20,13 +20,13 @@ namespace game::constant
 		// ========== 液体 ==========
 
 		/// @brief 枡に注がれた液体
-		inline constexpr core::utility::Color LIQUID{ 217, 164, 65 };
+		inline constexpr core::utility::Color LIQUID{ 198, 138, 38 };
 
 		/// @brief こぼれて台に広がったぶん（枡の中より沈んだ色）
 		inline constexpr core::utility::Color LIQUID_SPILLED{ 150, 105, 52 };
 
 		/// @brief 水面のひとかわ（本体より明るくして面を見せる）
-		inline constexpr core::utility::Color LIQUID_SURFACE{ 236, 190, 96 };
+		inline constexpr core::utility::Color LIQUID_SURFACE{ 226, 174, 74 };
 
 		/// @brief 水面の照り（光を足すように重ねる）
 		inline constexpr core::utility::Color LIQUID_SHINE{ 255, 246, 214 };

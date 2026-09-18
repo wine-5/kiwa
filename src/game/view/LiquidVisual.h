@@ -89,8 +89,11 @@ namespace game::view
 		WaterSurface m_surface{};
 		PourStream m_stream{};
 
-		/// @brief 次に波としぶきを起こすまでの時間（秒）
+		/// @brief 次にしぶきを飛ばすまでの時間（秒）
 		float m_splashTimer{ 0.0f };
+
+		/// @brief 次に波紋を起こすまでの時間（秒）
+		float m_rippleTimer{ 0.0f };
 
 		/// @brief 前のフレームで注いでいたか（注ぎ終わりに一度だけ波を起こすために見る）
 		bool m_wasPouring{ false };

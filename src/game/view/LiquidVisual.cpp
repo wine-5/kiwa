@@ -9,8 +9,13 @@ namespace
 	using core::utility::Vector3;
 	namespace palette = game::constant::palette;
 
-	/// @brief 波としぶきを起こす間隔（秒）
+	/// @brief しぶきを飛ばす間隔（秒）
 	constexpr float SPLASH_INTERVAL{ 0.085f };
+
+	/// @brief 波紋を起こす間隔（秒）
+	///
+	/// 詰めすぎると波どうしが重なって打ち消し合い、面が平らになってしまう
+	constexpr float RIPPLE_INTERVAL{ 0.22f };
 
 	/// @brief 一度に飛ぶしずくの数
 	constexpr int SPLASH_COUNT{ 3 };
@@ -45,9 +50,15 @@ namespace game::view
 			m_splashTimer -= deltaTime;
 			if (m_splashTimer <= 0.0f)
 			{
-				m_surface.disturb(impactX, impactZ, m_stream.getFlow());
 				spawnSplash(impactX, impactZ, m_surface.heightAt(impactX, impactZ));
 				m_splashTimer = SPLASH_INTERVAL;
+			}
+
+			m_rippleTimer -= deltaTime;
+			if (m_rippleTimer <= 0.0f)
+			{
+				m_surface.disturb(impactX, impactZ, m_stream.getFlow());
+				m_rippleTimer = RIPPLE_INTERVAL;
 			}
 		}
 

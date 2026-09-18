@@ -34,16 +34,19 @@ namespace
 	constexpr float WAVE_SPEED{ 1.15f };
 
 	/// @brief 波の高さ
-	constexpr float WAVE_AMPLITUDE{ 0.042f };
+	constexpr float WAVE_AMPLITUDE{ 0.07f };
 
 	/// @brief 波が収まる速さ
-	constexpr float WAVE_DECAY{ 1.1f };
+	constexpr float WAVE_DECAY{ 0.9f };
 
 	/// @brief 波の峰の幅（小さいほど細い輪になる）
-	constexpr float WAVE_WIDTH{ 0.30f };
+	constexpr float WAVE_WIDTH{ 0.34f };
 
 	/// @brief 波の細かさ
-	constexpr float WAVE_FREQUENCY{ 18.0f };
+	///
+	/// 細かくすると、間隔を詰めて起こした波どうしが打ち消し合って面が平らになる。
+	/// 輪が輪として見える程度に伸ばしておく
+	constexpr float WAVE_FREQUENCY{ 12.0f };
 
 	/// @brief 波を保っておく時間（秒）
 	constexpr float WAVE_LIFE{ 2.6f };
@@ -80,11 +83,22 @@ namespace
 	/// @brief 光が来る向き（正規化済み）
 	constexpr Vector3 LIGHT_DIRECTION{ 0.36f, 0.88f, -0.31f };
 
-	/// @brief 照りの鋭さ（大きいほど小さく強く光る）
-	constexpr float SPECULAR_POWER{ 48.0f };
+	/// @brief 鋭い照りの絞り（点光源のきらめき）
+	constexpr float SPECULAR_POWER{ 90.0f };
 
-	/// @brief 照りの強さ
-	constexpr float SPECULAR_STRENGTH{ 1.5f };
+	/// @brief 鋭い照りの強さ
+	///
+	/// 1を超える値を入れて白飛びさせる。あふれたぶんは滲みの処理が拾って光る
+	constexpr float SPECULAR_STRENGTH{ 3.2f };
+
+	/// @brief 広い照りの絞り（窓や行灯のような面で光るもの）
+	///
+	/// 上から覗く角度では映り込みがほとんど効かないため、水面のうねりは
+	/// この広い照りでしか見えない。写真の水面が光って見えるのもこれ
+	constexpr float SHEEN_POWER{ 10.0f };
+
+	/// @brief 広い照りの強さ
+	constexpr float SHEEN_STRENGTH{ 0.85f };
 
 	/// @brief 映り込みの効き方（浅い角度ほど強く映る）
 	constexpr float REFLECT_MIN{ 0.10f };
@@ -105,7 +119,7 @@ namespace
 	// ---- 透け方 ----
 
 	/// @brief 深さで濁っていく速さ（液体が光を吸うぶん。大きいほど早く底が見えなくなる）
-	constexpr float ABSORPTION{ 2.6f };
+	constexpr float ABSORPTION{ 4.6f };
 
 	/// @brief 浅い角度から見たときに増す濃さ（映り込みで底が見えなくなる）
 	constexpr float GRAZING_OPACITY{ 0.45f };
@@ -167,13 +181,17 @@ namespace
 			                     toChannel(base.b * diffuse) },
 			              reflection, reflectRate) };
 
-		// 光源そのものの映り込み（きらめき）
-		const float specular{ std::pow(std::max(0.0f, normal.dot(halfway)), SPECULAR_POWER) *
-			                  SPECULAR_STRENGTH };
+		// 光の映り込みは二段構え。広い照りで面のうねりを見せ、
+		// 鋭い照りで峰にきらめきを載せる
+		const float alignment{ std::max(0.0f, normal.dot(halfway)) };
+		const float sheen{ std::pow(alignment, SHEEN_POWER) * SHEEN_STRENGTH };
+		const float specular{ std::pow(alignment, SPECULAR_POWER) * SPECULAR_STRENGTH };
+		const float shine{ sheen + specular };
+
 		const Color shineColor{ palette::LIQUID_SHINE };
-		result = Color{ toChannel(result.r + shineColor.r * specular),
-			            toChannel(result.g + shineColor.g * specular),
-			            toChannel(result.b + shineColor.b * specular) };
+		result = Color{ toChannel(result.r + shineColor.r * shine),
+			            toChannel(result.g + shineColor.g * shine),
+			            toChannel(result.b + shineColor.b * shine) };
 
 		// 浅ければ底が透け、深ければ濁る。浅い角度から見たときも映り込みで濁る
 		outAlpha = std::clamp(absorbed + grazing * GRAZING_OPACITY, 0.0f, 0.98f);
@@ -287,14 +305,14 @@ namespace game::view
 			foam += std::exp(-distance * distance);
 		}
 
-		// 波の峰にも泡が少し乗って一緒に広がっていく（強くすると水面が白く濁る）
+		// 波の峰にも泡が乗って一緒に広がっていく
 		for (const Wave& wave : m_waves)
 		{
 			const float dx{ x - wave.originX };
 			const float dz{ z - wave.originZ };
 			const float distance{ std::sqrt(dx * dx + dz * dz) };
 			const float offset{ (distance - WAVE_SPEED * wave.age) / (WAVE_WIDTH * 0.5f) };
-			foam += 0.10f * wave.strength * std::exp(-WAVE_DECAY * 2.4f * wave.age) *
+			foam += 0.20f * wave.strength * std::exp(-WAVE_DECAY * 1.8f * wave.age) *
 			        std::exp(-offset * offset);
 		}
 
