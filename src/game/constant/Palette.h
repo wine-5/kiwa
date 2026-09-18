@@ -13,25 +13,9 @@ namespace game::constant
 	{
 		// ========== 場 ==========
 
-		/// @brief 画面の背景（暗く落として枡と液体を浮かび上がらせる）
-		inline constexpr core::utility::Color BACKGROUND{ 26, 28, 34 };
+		/// @brief 画面の背景（ほぼ闇。写真のように被写体だけを浮かび上がらせる）
+		inline constexpr core::utility::Color BACKGROUND{ 12, 11, 10 };
 
-		/// @brief 枡が置かれている台
-		inline constexpr core::utility::Color TABLE{ 96, 84, 70 };
-
-		// ========== 枡 ==========
-
-		/// @brief 枡の奥の板（一番明るい面）
-		inline constexpr core::utility::Color MASU_BACK{ 176, 131, 87 };
-
-		/// @brief 枡の左の板
-		inline constexpr core::utility::Color MASU_LEFT{ 150, 111, 73 };
-
-		/// @brief 枡の右の板（陰になる側）
-		inline constexpr core::utility::Color MASU_RIGHT{ 122, 90, 59 };
-
-		/// @brief 枡の底板
-		inline constexpr core::utility::Color MASU_FLOOR{ 138, 102, 67 };
 
 		// ========== 液体 ==========
 
@@ -58,8 +42,8 @@ namespace game::constant
 
 		// ========== 印 ==========
 
-		/// @brief こぼれる際（きわ）を示す線
-		inline constexpr core::utility::Color LIMIT_LINE{ 156, 43, 43 };
+		/// @brief こぼれる際（きわ）を示す線（漆で引いた細い線のつもり）
+		inline constexpr core::utility::Color LIMIT_LINE{ 112, 30, 26 };
 
 		// ========== 文字 ==========
 
