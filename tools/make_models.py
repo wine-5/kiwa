@@ -170,79 +170,86 @@ def smooth_profile(points, subdivisions):
     return result
 
 
-def make_kyusu():
-    """急須。丸い胴・注ぎ口・取っ手・蓋。"""
-    mesh = Mesh()
-    segments = 48
+def make_dobin():
+    """土瓶。丸い胴・短い注ぎ口・蓋・上に渡した弦（つる）。
 
-    # 胴。底は少し平らで、肩に向かってふくらみ、口でつぼまる
+    弦は籐を巻いた意匠にするため、胴とは別の材質にする。
+    """
+    mesh = Mesh()
+    segments = 56
+
+    # 胴。腰が張って上でつぼまる、平たい丸
     body = smooth_profile([
-        (0.00, 0.00), (0.26, 0.00), (0.34, 0.04), (0.45, 0.16),
-        (0.52, 0.32), (0.53, 0.46), (0.50, 0.58), (0.42, 0.68),
-        (0.34, 0.74), (0.33, 0.76),
+        (0.00, 0.00), (0.20, 0.00), (0.32, 0.02), (0.46, 0.09),
+        (0.57, 0.20), (0.62, 0.32), (0.61, 0.43), (0.54, 0.53),
+        (0.44, 0.60), (0.37, 0.635), (0.355, 0.645),
     ], 2)
     mesh.extend(revolve(body, segments, 0, closed_bottom=True))
 
-    # 口の縁（内側へ折り返す）
-    rim = [(0.33, 0.76), (0.31, 0.75), (0.31, 0.70)]
+    # 口の縁（内へ折り返して蓋を受ける）
+    rim = [(0.355, 0.645), (0.335, 0.655), (0.325, 0.62)]
     mesh.extend(revolve(rim, segments, 0))
 
-    # 蓋。少しふくらんだ皿に、つまみを載せる
+    # 蓋。浅い皿につまみを載せる
     lid = smooth_profile([
-        (0.00, 0.86), (0.12, 0.855), (0.22, 0.835), (0.30, 0.79), (0.335, 0.765), (0.335, 0.745),
+        (0.00, 0.735), (0.12, 0.730), (0.24, 0.712), (0.32, 0.678), (0.355, 0.652), (0.355, 0.640),
     ], 2)
-    mesh.extend(revolve(lid, segments, 0, closed_bottom=False))
+    mesh.extend(revolve(lid, segments, 0))
 
     knob = smooth_profile([
-        (0.00, 0.86), (0.04, 0.865), (0.055, 0.90), (0.05, 0.945), (0.03, 0.965), (0.00, 0.97),
+        (0.00, 0.735), (0.035, 0.740), (0.052, 0.772), (0.045, 0.806), (0.026, 0.822), (0.00, 0.826),
     ], 2)
     mesh.extend(revolve(knob, segments, 0))
 
-    # 注ぎ口。胴から斜め上へ伸びて、先で細くなる
+    # 注ぎ口。短く、先が斜めに切れている
     spout_path = [
-        (0.44, 0.40, 0.0), (0.58, 0.48, 0.0), (0.70, 0.58, 0.0),
-        (0.80, 0.68, 0.0), (0.88, 0.76, 0.0), (0.93, 0.80, 0.0),
+        (0.50, 0.30, 0.0), (0.62, 0.36, 0.0), (0.74, 0.43, 0.0),
+        (0.84, 0.50, 0.0), (0.90, 0.545, 0.0),
     ]
-    spout_radii = [0.115, 0.100, 0.086, 0.072, 0.060, 0.053]
-    mesh.extend(sweep(spout_path, spout_radii, 24, 0, cap_end=False))
+    spout_radii = [0.125, 0.105, 0.085, 0.068, 0.058]
+    mesh.extend(sweep(spout_path, spout_radii, 24, 0))
 
-    # 取っ手。胴の肩から腰へ、外へふくらむ C 字を描いて取り付く
-    handle_start = (-0.40, 0.66, 0.0)
-    handle_control = (-1.02, 0.40, 0.0)
-    handle_end = (-0.34, 0.13, 0.0)
+    # 弦を受ける耳。肩の左右に立てる
+    for side in (-1.0, 1.0):
+        lug_path = [
+            (side * 0.46, 0.50, 0.0), (side * 0.50, 0.58, 0.0), (side * 0.50, 0.66, 0.0),
+        ]
+        mesh.extend(sweep(lug_path, [0.055, 0.045, 0.038], 12, 0, cap_start=True, cap_end=True))
 
+    # 弦。耳から耳へ、蓋の上を跨いで弧を描く
     handle_path = []
     handle_radii = []
-    for i in range(22):
-        t = i / 21.0
-        handle_path.append(_bezier(handle_start, handle_control, handle_end, t))
-        # 付け根は太く、中ほどは細く
-        handle_radii.append(0.062 - 0.018 * math.sin(math.pi * t))
-    mesh.extend(sweep(handle_path, handle_radii, 18, 0, cap_start=True, cap_end=True))
+    for i in range(26):
+        t = i / 25.0
+        angle = math.pi * t
+        handle_path.append((-math.cos(angle) * 0.50, 0.64 + math.sin(angle) * 0.52, 0.0))
+        handle_radii.append(0.040)
+    mesh.extend(sweep(handle_path, handle_radii, 14, 1, cap_start=True, cap_end=True))
 
     return mesh
 
 
 def make_yunomi():
-    """湯呑。口が開いた筒で、底に高台。"""
+    """湯呑。腰から口へ向かって開く、取っ手のない碗。"""
     mesh = Mesh()
-    segments = 48
+    segments = 56
 
     outer = smooth_profile([
-        (0.00, 0.00), (0.21, 0.00), (0.24, 0.02), (0.26, 0.10),
-        (0.30, 0.28), (0.33, 0.48), (0.345, 0.62), (0.35, 0.66),
+        (0.00, 0.00), (0.17, 0.00), (0.21, 0.015), (0.25, 0.07),
+        (0.31, 0.20), (0.37, 0.36), (0.41, 0.50), (0.425, 0.575), (0.428, 0.60),
     ], 2)
     mesh.extend(revolve(outer, segments, 0, closed_bottom=True))
 
-    # 内側は少し細く、底は浅い
+    # 口縁は色を変える（写真の湯呑は縁だけ土の色が出ている）
+    lip = [(0.428, 0.60), (0.420, 0.607), (0.408, 0.603)]
+    mesh.extend(revolve(lip, segments, 2))
+
+    # 内側。底は厚く取る
     inner = smooth_profile([
-        (0.335, 0.66), (0.325, 0.60), (0.29, 0.42), (0.25, 0.20), (0.21, 0.07), (0.00, 0.05),
+        (0.408, 0.603), (0.395, 0.52), (0.35, 0.36), (0.285, 0.18),
+        (0.22, 0.085), (0.17, 0.075), (0.00, 0.07),
     ], 2)
     mesh.extend(revolve(inner, segments, 0))
-
-    # 口縁の色違い（写真の湯呑は縁が濃い）
-    lip = [(0.35, 0.66), (0.3425, 0.665), (0.335, 0.66)]
-    mesh.extend(revolve(lip, segments, 1))
 
     return mesh
 
@@ -263,8 +270,12 @@ def make_saucer():
 
 
 MATERIAL_TEMPLATES = {
-    "porcelain": '"porcelain" shader(3) col(0.960 0.955 0.930 1.000) dif(0.850) amb(0.450) emi(0.000) spc(0.550) power(28.00)',
-    "rim": '"rim" shader(3) col(0.330 0.200 0.150 1.000) dif(0.800) amb(0.400) emi(0.000) spc(0.250) power(12.00)',
+    # 青磁のような、やや緑がかった灰色の釉薬。つやを強めに出す
+    "celadon": '"celadon" shader(3) col(0.470 0.530 0.500 1.000) dif(0.820) amb(0.420) emi(0.000) spc(0.900) power(42.00)',
+    # 弦に巻いた籐（濃い茶）
+    "cord": '"cord" shader(3) col(0.280 0.170 0.150 1.000) dif(0.780) amb(0.380) emi(0.000) spc(0.350) power(16.00)',
+    # 口縁に出る土の色
+    "clay": '"clay" shader(3) col(0.620 0.570 0.470 1.000) dif(0.820) amb(0.420) emi(0.000) spc(0.300) power(14.00)',
     "lacquer": '"lacquer" shader(3) col(0.260 0.140 0.100 1.000) dif(0.820) amb(0.400) emi(0.000) spc(0.600) power(34.00)',
 }
 
@@ -323,8 +334,8 @@ def write_mqo(path, name, mesh, materials, facet=60.0):
 
 
 def main():
-    write_mqo("kyusu.mqo", "kyusu", make_kyusu(), ["porcelain"])
-    write_mqo("yunomi.mqo", "yunomi", make_yunomi(), ["porcelain", "rim"])
+    write_mqo("dobin.mqo", "dobin", make_dobin(), ["celadon", "cord"])
+    write_mqo("yunomi.mqo", "yunomi", make_yunomi(), ["celadon", "cord", "clay"])
     write_mqo("saucer.mqo", "saucer", make_saucer(), ["lacquer"])
 
 
