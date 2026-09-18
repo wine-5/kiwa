@@ -18,7 +18,8 @@ namespace
 
 Application::Application(int screenWidth, int screenHeight)
     : m_screen{ screenWidth, screenHeight },
-      m_sceneManager{ m_renderer, m_renderer3D, m_camera, m_input, m_resource, m_screen }
+      m_sceneManager{ m_renderer,     m_renderer3D, m_camera,  m_modelRenderer,
+	                  m_input,        m_resource,   m_screen }
 {
 	// 画面を暗く落としておくと、枡と液体だけが浮かび上がる
 	m_screen.setBackgroundColor(game::constant::palette::BACKGROUND);

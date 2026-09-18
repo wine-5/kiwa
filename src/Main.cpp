@@ -30,9 +30,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetUseZBuffer3D(TRUE);
 	SetWriteZBuffer3D(TRUE);
 	SetUseBackCulling(TRUE);
-	// ライティングは使わない。面ごとに指定した色がそのまま出るので、
-	// 木の陰影は色の選び方で作る（光源に頼ると枡の内側が真っ黒に潰れる）
+	SetDrawMode(DX_DRAWMODE_BILINEAR); // テクスチャを滑らかに拡大する
+	// 自前で組んだメッシュは陰影を頂点に焼いてあるのでライティングは切っておく。
+	// モデルを描く間だけ ModelRenderer が点ける。その光の向きと強さをここで決める
 	SetUseLighting(FALSE);
+	ChangeLightTypeDir(VGet(-0.36f, -0.88f, 0.31f));
+	SetLightDifColor(GetColorF(1.0f, 0.97f, 0.92f, 0.0f));
+	SetLightAmbColor(GetColorF(0.42f, 0.42f, 0.45f, 0.0f));
+	SetLightSpcColor(GetColorF(0.9f, 0.9f, 0.9f, 0.0f));
 
 	// 和風の見た目に寄せる。明朝体が無い環境では既定のフォントのままになる
 	ChangeFont("游明朝");

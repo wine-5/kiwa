@@ -5,7 +5,8 @@
 namespace core::iface
 {
 	class ICamera;        // 前方宣言
-	class IInputProvider; // 前方宣言
+	class IInputProvider;  // 前方宣言
+	class IModelRenderer;  // 前方宣言
 	class IRenderer;      // 前方宣言
 	class IRenderer3D;    // 前方宣言
 	class IResourceManager; // 前方宣言
@@ -30,6 +31,9 @@ namespace game::scene
 
 		/// @brief カメラ
 		core::iface::ICamera& camera;
+
+		/// @brief モデルの描画
+		core::iface::IModelRenderer& modelRenderer;
 
 		/// @brief 入力の取得
 		core::iface::IInputProvider& input;
