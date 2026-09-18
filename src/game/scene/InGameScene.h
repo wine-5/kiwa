@@ -24,6 +24,8 @@ namespace game::scene
 
 		void draw() override;
 
+		void drawOverlay() override;
+
 	  private:
 		SceneContext m_context;
 

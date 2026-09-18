@@ -4,6 +4,7 @@
 #include "infrastructure/graphics/Camera.h"
 #include "infrastructure/graphics/Renderer.h"
 #include "infrastructure/graphics/ModelRenderer.h"
+#include "infrastructure/graphics/PostEffect.h"
 #include "infrastructure/graphics/Renderer3D.h"
 #include "infrastructure/graphics/Screen.h"
 #include "infrastructure/input/InputProvider.h"
@@ -44,6 +45,7 @@ class Application final : private core::base::NonCopyable
 	infrastructure::graphics::Renderer3D m_renderer3D{};
 	infrastructure::graphics::Camera m_camera{};
 	infrastructure::graphics::ModelRenderer m_modelRenderer{};
+	infrastructure::graphics::PostEffect m_postEffect;
 	infrastructure::input::InputProvider m_input{};
 	infrastructure::resource::ResourceManager m_resource{};
 	game::scene::SceneManager m_sceneManager;

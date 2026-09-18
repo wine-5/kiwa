@@ -17,7 +17,7 @@ namespace
 } // namespace
 
 Application::Application(int screenWidth, int screenHeight)
-    : m_screen{ screenWidth, screenHeight },
+    : m_screen{ screenWidth, screenHeight }, m_postEffect{ screenWidth, screenHeight },
       m_sceneManager{ m_renderer,     m_renderer3D, m_camera,  m_modelRenderer,
 	                  m_input,        m_resource,   m_screen }
 {
@@ -53,8 +53,13 @@ void Application::run()
 			accumulatedTime -= core::constant::FIXED_TIME_STEP;
 		}
 
-		ClearDrawScreen();
+		// 3D は一度別の面へ描き、光を滲ませてから画面へ戻す。
+		// 文字や画面全体に被せるものは、滲ませたあとに重ねる
+		m_postEffect.begin();
 		m_sceneManager.draw();
+		m_postEffect.end();
+		m_sceneManager.drawOverlay();
+
 		ScreenFlip();
 
 		m_input.updatePreviousState();

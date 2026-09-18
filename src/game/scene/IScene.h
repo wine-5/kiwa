@@ -36,7 +36,18 @@ namespace game::scene
 
 		/**
 		 * @brief シーンを描画する（フレームに必ず1回呼ばれる）
+		 * @details ここで描いたものには、後から掛ける仕上げ（光の滲みなど）が乗る
 		 */
 		virtual void draw() = 0;
+
+		/**
+		 * @brief 仕上げのあとに重ねるものを描く
+		 *
+		 * 文字や画面全体に被せる効果は、光を滲ませたあとに描かないと
+		 * 一緒に滲んでしまう。何もしなくてよいシーンのために既定実装を置く
+		 */
+		virtual void drawOverlay()
+		{
+		}
 	};
 } // namespace game::scene

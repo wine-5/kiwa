@@ -56,6 +56,11 @@ namespace game::scene
 		void draw();
 
 		/**
+		 * @brief 現在のシーンの、仕上げのあとに重ねるものを描く
+		 */
+		void drawOverlay();
+
+		/**
 		 * @brief 現在のシーンの種類を返す
 		 * @return 現在のシーンの種類
 		 */

@@ -2,55 +2,55 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{b601839b-8a0c-482c-8435-a1810ce0ab1f}</UniqueIdentifier>
+      <UniqueIdentifier>{58036391-04ff-4e02-8555-1da04f178d57}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core">
-      <UniqueIdentifier>{995d13b9-5a25-44be-b13b-0427598e4d0a}</UniqueIdentifier>
+      <UniqueIdentifier>{669afd92-aef4-414c-8392-39576f89e844}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\base">
-      <UniqueIdentifier>{7bd74327-02d2-45ef-8990-28edae468542}</UniqueIdentifier>
+      <UniqueIdentifier>{02c0ed0e-b777-44be-9953-ee816e9a6aa0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\constant">
-      <UniqueIdentifier>{c8ef9ae0-1445-47f7-bdec-78c9f4d0be7b}</UniqueIdentifier>
+      <UniqueIdentifier>{f048e49d-0637-4c4e-91c6-bc29a8e66e5a}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\input">
-      <UniqueIdentifier>{2c41d722-d2d1-49fc-b4de-9a773195920e}</UniqueIdentifier>
+      <UniqueIdentifier>{f2e64d7b-b814-4998-b253-722ba9423f07}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\interface">
-      <UniqueIdentifier>{828a9ad2-467f-4897-9a79-ba320e843dff}</UniqueIdentifier>
+      <UniqueIdentifier>{21c5844a-3b23-4e73-8e93-a2ae074fc5ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\utility">
-      <UniqueIdentifier>{87d7ae3a-b45b-41b7-b598-6f34bbb65246}</UniqueIdentifier>
+      <UniqueIdentifier>{0c6f42ca-ec1b-4704-b6ca-e69ddceac675}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game">
-      <UniqueIdentifier>{b0686bbe-cc93-4104-ae02-4e3a542021e3}</UniqueIdentifier>
+      <UniqueIdentifier>{e5418aa9-2afa-4df1-b200-ac156df332d9}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\constant">
-      <UniqueIdentifier>{ad90d771-9271-4381-8751-6c275e0900ac}</UniqueIdentifier>
+      <UniqueIdentifier>{fe596f8f-5cd1-457c-8f80-a74f61474a5b}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\model">
-      <UniqueIdentifier>{89aa5e6c-9e55-4cf8-9838-87de11080ce2}</UniqueIdentifier>
+      <UniqueIdentifier>{a267766d-5f58-4d07-aaff-7b2937fc4c3a}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\presenter">
-      <UniqueIdentifier>{6eb1a575-0376-466c-83f8-6dbde64ebc33}</UniqueIdentifier>
+      <UniqueIdentifier>{6063f3c7-ed50-4999-a4bb-fd7cbd1097dd}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\scene">
-      <UniqueIdentifier>{7274cdb8-5e43-4a7e-a5fd-d855b0992ef0}</UniqueIdentifier>
+      <UniqueIdentifier>{d0881895-49ed-4521-9bb1-7e3e39b87ca3}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\view">
-      <UniqueIdentifier>{89a0a3ec-11bb-493d-b1c8-339428a9a268}</UniqueIdentifier>
+      <UniqueIdentifier>{d6ca7c0c-1488-4604-a004-6635c0a991f0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure">
-      <UniqueIdentifier>{2162ee42-4798-40a0-84e1-e8cf7c94b536}</UniqueIdentifier>
+      <UniqueIdentifier>{9bc07058-df5a-4e0c-b203-58f5e318f332}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\graphics">
-      <UniqueIdentifier>{da1da421-6c64-4802-9a63-b01b74ec20f1}</UniqueIdentifier>
+      <UniqueIdentifier>{f8662930-af24-4793-b98d-bfb4064085f5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\input">
-      <UniqueIdentifier>{1e18b945-2dbb-4333-9cc2-09a9e72a03a3}</UniqueIdentifier>
+      <UniqueIdentifier>{94182f28-5222-4beb-8737-56a3533d76b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\resource">
-      <UniqueIdentifier>{e7a3b47b-97fb-40d5-9402-1f8029d53d7e}</UniqueIdentifier>
+      <UniqueIdentifier>{9534f32c-9b19-498f-a064-b7e6703ce542}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +102,9 @@
     <ClCompile Include="src\infrastructure\graphics\ModelRenderer.cpp">
       <Filter>src\infrastructure\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\infrastructure\graphics\PostEffect.cpp">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp">
       <Filter>src\infrastructure\graphics</Filter>
     </ClCompile>
@@ -138,6 +141,9 @@
       <Filter>src\core\interface</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IModelRenderer.h">
+      <Filter>src\core\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\interface\IPostEffect.h">
       <Filter>src\core\interface</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IRenderer.h">
@@ -231,6 +237,9 @@
       <Filter>src\infrastructure\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\graphics\ModelRenderer.h">
+      <Filter>src\infrastructure\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\graphics\PostEffect.h">
       <Filter>src\infrastructure\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\graphics\Renderer.h">

@@ -64,5 +64,10 @@ namespace game::view
 		 * @brief 伝えられた内容を描く
 		 */
 		virtual void draw() = 0;
+
+		/**
+		 * @brief 仕上げのあとに重ねるもの（文字や画面効果）を描く
+		 */
+		virtual void drawOverlay() = 0;
 	};
 } // namespace game::view

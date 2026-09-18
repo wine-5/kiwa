@@ -72,6 +72,8 @@ namespace game::view
 
 		void draw() override;
 
+		void drawOverlay() override;
+
 	  private:
 		/**
 		 * @brief 枡と台を描く（どちらも動かないので形は作り直さない）

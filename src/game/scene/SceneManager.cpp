@@ -39,6 +39,12 @@ namespace game::scene
 			m_currentScene->draw();
 	}
 
+	void SceneManager::drawOverlay()
+	{
+		if (m_currentScene)
+			m_currentScene->drawOverlay();
+	}
+
 	void SceneManager::applyPendingChange()
 	{
 		if (!m_pendingSceneType.has_value())

@@ -136,8 +136,12 @@ namespace game::view
 		drawLimitLine();
 		m_liquid.draw(m_renderer3D, CAMERA_POSITION);
 
-		// 2D は 3D の手前に出したいので、ここで 3D を吐き出してから描く
+		// 溜まっている 3D を吐き出しておく
 		m_renderer3D.flush();
+	}
+
+	void PourView3D::drawOverlay()
+	{
 		drawFilmLook();
 		drawTexts();
 	}

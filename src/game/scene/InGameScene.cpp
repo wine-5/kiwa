@@ -24,4 +24,9 @@ namespace game::scene
 	{
 		m_view.draw();
 	}
+
+	void InGameScene::drawOverlay()
+	{
+		m_view.drawOverlay();
+	}
 } // namespace game::scene
