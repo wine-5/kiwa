@@ -38,6 +38,37 @@ namespace core::utility
 		}
 
 		/**
+		 * @brief 内積を返す
+		 * @details 掛け算の記号は拡大縮小に使っているため、演算子ではなく名前で持つ
+		 * @param rhs もう一方のベクトル
+		 * @return 内積
+		 */
+		[[nodiscard]] constexpr float dot(const Vector3& rhs) const noexcept
+		{
+			return x * rhs.x + y * rhs.y + z * rhs.z;
+		}
+
+		/**
+		 * @brief 外積を返す
+		 * @param rhs もう一方のベクトル
+		 * @return 外積
+		 */
+		[[nodiscard]] constexpr Vector3 cross(const Vector3& rhs) const noexcept
+		{
+			return Vector3{ y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x };
+		}
+
+		/**
+		 * @brief 面で跳ね返したベクトルを返す
+		 * @param normal 面の向き（正規化済みであること）
+		 * @return 跳ね返したベクトル
+		 */
+		[[nodiscard]] constexpr Vector3 reflected(const Vector3& normal) const noexcept
+		{
+			return normal * (2.0f * dot(normal)) - *this;
+		}
+
+		/**
 		 * @brief ベクトルの長さを返す
 		 * @return 長さ
 		 */
