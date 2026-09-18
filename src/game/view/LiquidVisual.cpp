@@ -1,7 +1,7 @@
 ﻿#include "game/view/LiquidVisual.h"
 #include "core/interface/IRenderer3D.h"
 #include "game/constant/Palette.h"
-#include "game/view/MasuGeometry.h"
+#include "game/view/CupGeometry.h"
 #include <algorithm>
 
 namespace
@@ -10,7 +10,7 @@ namespace
 	namespace palette = game::constant::palette;
 
 	/// @brief しぶきを飛ばす間隔（秒）
-	constexpr float SPLASH_INTERVAL{ 0.085f };
+	constexpr float SPLASH_INTERVAL{ 0.075f };
 
 	/// @brief 波紋を起こす間隔（秒）
 	///
@@ -22,6 +22,9 @@ namespace
 
 	/// @brief しずくにかかる重力
 	constexpr float DROPLET_GRAVITY{ 6.5f };
+
+	/// @brief しずくの飛ぶ大きさ（器が小さいので控えめにする）
+	constexpr float SPLASH_SCALE{ 0.42f };
 
 	/// @brief 注ぎ終わりに起こす波の強さ（最後のひと落ちぶん）
 	constexpr float FINAL_WAVE_STRENGTH{ 1.4f };
@@ -97,6 +100,7 @@ namespace game::view
 		m_causticIndices.clear();
 
 		m_surface.buildCaustics(m_causticVertices, m_causticIndices);
+		m_surface.buildWall(m_streamVertices, m_streamIndices);
 		m_surface.build(m_vertices, m_indices, cameraPosition);
 
 		const float levelHeight{ m_surface.getLevelHeight() };
@@ -115,7 +119,7 @@ namespace game::view
 			renderer.drawTriangles(m_causticVertices, m_causticIndices);
 		}
 
-		// 注ぎ筋は液体だが厚みがあり向こうは見えない。奥行きを書き込んで普通に描く
+		// 液体の厚みと注ぎ筋は向こうが透けない。奥行きを書き込んで普通に描く
 		if (!m_streamIndices.empty())
 		{
 			renderer.setBlend(core::utility::BlendMode::None, 1.0f);
@@ -146,11 +150,12 @@ namespace game::view
 		for (int i{ 0 }; i < SPLASH_COUNT; ++i)
 		{
 			Droplet droplet{};
-			droplet.position = Vector3{ x + randomRange(-0.04f, 0.04f), surfaceHeight + 0.02f,
-				                        z + randomRange(-0.04f, 0.04f) };
+			droplet.position = Vector3{ x + randomRange(-0.015f, 0.015f), surfaceHeight + 0.008f,
+				                        z + randomRange(-0.015f, 0.015f) };
 			droplet.velocity = Vector3{ randomRange(-0.75f, 0.75f), randomRange(1.2f, 2.1f),
-				                        randomRange(-0.75f, 0.75f) };
-			droplet.radius = randomRange(0.012f, 0.026f);
+				                        randomRange(-0.75f, 0.75f) } *
+			                   SPLASH_SCALE;
+			droplet.radius = randomRange(0.005f, 0.011f);
 			droplet.life = randomRange(0.3f, 0.55f);
 			m_droplets.push_back(droplet);
 		}

@@ -7,22 +7,13 @@
 namespace game::view
 {
 	/**
-	 * @brief 枡と台をテクスチャ付きのメッシュとして組む
+	 * @brief 台と影をメッシュとして組む
 	 *
-	 * 直方体を描く関数では木目を貼れないため、面ごとに頂点を並べて自前で組む。
-	 * 面の向きに応じた明るさもここで頂点色に焼き込む
+	 * 器や急須はモデルで読むが、台は木目を貼って明暗を焼き込みたいので自前で組む
 	 */
 	class SceneryMesh
 	{
 	  public:
-		/**
-		 * @brief 枡を組む（底板と側板3枚）
-		 * @param vertices 頂点の出力先
-		 * @param indices 三角形の出力先
-		 */
-		static void buildMasu(std::vector<core::utility::Vertex3D>& vertices,
-		                      std::vector<unsigned short>& indices);
-
 		/**
 		 * @brief 枡を載せる台を組む
 		 *

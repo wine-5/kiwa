@@ -1,5 +1,4 @@
 ﻿#include "game/view/SceneryMesh.h"
-#include "game/view/MasuGeometry.h"
 #include <algorithm>
 #include <cmath>
 
@@ -10,13 +9,9 @@ namespace
 	using core::utility::toChannel;
 	using core::utility::Vector3;
 	using core::utility::Vertex3D;
-	namespace masu = game::view::masu;
-
-	/// @brief 木目の貼り具合（1ワールド単位あたりの繰り返し数）
-	constexpr float WOOD_UV_SCALE{ 0.55f };
 
 	/// @brief 台の木目の貼り具合
-	constexpr float TABLE_UV_SCALE{ 0.16f };
+	constexpr float TABLE_UV_SCALE{ 0.32f };
 
 	/// @brief 台の半分の幅
 	constexpr float TABLE_HALF{ 7.0f };
@@ -25,13 +20,13 @@ namespace
 	constexpr int TABLE_DIVISIONS{ 28 };
 
 	/// @brief 光だまりの広さ
-	constexpr float LIGHT_POOL_RADIUS{ 2.3f };
+	constexpr float LIGHT_POOL_RADIUS{ 1.15f };
 
 	/// @brief 光だまりの外の明るさ
 	constexpr float LIGHT_POOL_FLOOR{ 0.12f };
 
 	/// @brief 影が広がる半径
-	constexpr float SHADOW_RADIUS{ 1.7f };
+	constexpr float SHADOW_RADIUS{ 0.8f };
 
 	/// @brief 影の濃さ
 	constexpr float SHADOW_STRENGTH{ 0.78f };
@@ -94,10 +89,10 @@ namespace
 	}
 
 	/// @brief 明かりの位置（行灯のつもり。面の中でも距離で明るさが変わる）
-	constexpr Vector3 LAMP_POSITION{ 1.9f, 3.4f, -1.7f };
+	constexpr Vector3 LAMP_POSITION{ 0.95f, 1.75f, -0.85f };
 
 	/// @brief 明かりが届く距離のめやす
-	constexpr float LAMP_RANGE{ 3.2f };
+	constexpr float LAMP_RANGE{ 1.6f };
 
 	/// @brief 明かりが当たらないところの明るさ
 	constexpr float AMBIENT{ 0.26f };
@@ -247,24 +242,6 @@ namespace game::view
 				}
 			}
 		}
-	}
-
-	void SceneryMesh::buildMasu(std::vector<core::utility::Vertex3D>& vertices,
-	                            std::vector<unsigned short>& indices)
-	{
-		// 底板
-		appendBox(vertices, indices, Vector3{ -masu::OUTER_HALF, 0.0f, -masu::OUTER_HALF },
-		          Vector3{ masu::OUTER_HALF, masu::FLOOR_TOP, masu::OUTER_HALF }, WOOD_UV_SCALE);
-
-		// 側板は4枚とも組む。手前を省くと断面図のようになって、器に見えなくなる
-		appendBox(vertices, indices, Vector3{ -masu::OUTER_HALF, 0.0f, -masu::OUTER_HALF },
-		          Vector3{ masu::OUTER_HALF, masu::HEIGHT, -masu::INNER_HALF }, WOOD_UV_SCALE);
-		appendBox(vertices, indices, Vector3{ -masu::OUTER_HALF, 0.0f, masu::INNER_HALF },
-		          Vector3{ masu::OUTER_HALF, masu::HEIGHT, masu::OUTER_HALF }, WOOD_UV_SCALE);
-		appendBox(vertices, indices, Vector3{ masu::INNER_HALF, 0.0f, -masu::OUTER_HALF },
-		          Vector3{ masu::OUTER_HALF, masu::HEIGHT, masu::OUTER_HALF }, WOOD_UV_SCALE);
-		appendBox(vertices, indices, Vector3{ -masu::OUTER_HALF, 0.0f, -masu::OUTER_HALF },
-		          Vector3{ -masu::INNER_HALF, masu::HEIGHT, masu::OUTER_HALF }, WOOD_UV_SCALE);
 	}
 
 	void SceneryMesh::buildTable(std::vector<core::utility::Vertex3D>& vertices,

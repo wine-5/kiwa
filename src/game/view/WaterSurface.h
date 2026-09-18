@@ -48,7 +48,7 @@ namespace game::view
 		void disturb(float x, float z, float strength);
 
 		/**
-		 * @brief 波を進め、格子の高さを焼き直す
+		 * @brief 波を進める
 		 * @param deltaTime 進める時間（秒）
 		 */
 		void advance(float deltaTime);
@@ -79,7 +79,18 @@ namespace game::view
 
 
 		/**
-		 * @brief 枡の底に落ちる光の模様をメッシュに焼く
+		 * @brief 液体の厚み（器の内側に沿う面）をメッシュに焼く
+		 *
+		 * これが無いと液面の下に器の内側がそのまま見えて、空の器に円盤が
+		 * 浮いているように見えてしまう
+		 * @param vertices 頂点の出力先
+		 * @param indices 三角形の出力先
+		 */
+		void buildWall(std::vector<core::utility::Vertex3D>& vertices,
+		               std::vector<unsigned short>& indices) const;
+
+		/**
+		 * @brief 器の底に落ちる光の模様をメッシュに焼く
 		 *
 		 * 波打つ水面はレンズの役目をして、光を集めたり散らしたりする。
 		 * 底に揺れる網目が出るのはそのため。光を足すように重ねて使う
@@ -102,17 +113,20 @@ namespace game::view
 		};
 
 		/**
-		 * @brief 格子の各点の高さを焼き直す
-		 */
-		void refreshHeights();
-
-		/**
 		 * @brief 波と細かなうねりによる高さの変化を返す
 		 * @param x X座標
 		 * @param z Z座標
 		 * @return 平らな液面からの差
 		 */
 		[[nodiscard]] float displacementAt(float x, float z) const;
+
+		/**
+		 * @brief その場所の面の向きを返す
+		 * @param x X座標
+		 * @param z Z座標
+		 * @return 法線
+		 */
+		[[nodiscard]] core::utility::Vector3 normalAt(float x, float z) const;
 
 		/**
 		 * @brief その場所の泡立ちの強さを返す
@@ -138,7 +152,5 @@ namespace game::view
 		/// @brief 広がっている波
 		std::vector<Wave> m_waves{};
 
-		/// @brief 格子の各点の高さ（毎フレーム焼き直す）
-		std::vector<float> m_heights{};
 	};
 } // namespace game::view

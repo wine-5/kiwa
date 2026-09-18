@@ -76,7 +76,7 @@ namespace game::view
 
 	  private:
 		/**
-		 * @brief 枡と台を描く（どちらも動かないので形は作り直さない）
+		 * @brief 台と影を描く（どちらも動かないので形は作り直さない）
 		 */
 		void drawScenery() const;
 
@@ -106,10 +106,6 @@ namespace game::view
 		core::iface::IModelRenderer& m_modelRenderer;
 		core::iface::IScreen& m_screen;
 
-		/// @brief 枡の形（動かないので最初に一度だけ組む）
-		std::vector<core::utility::Vertex3D> m_masuVertices{};
-		std::vector<unsigned short> m_masuIndices{};
-
 		/// @brief 台の形
 		std::vector<core::utility::Vertex3D> m_tableVertices{};
 		std::vector<unsigned short> m_tableIndices{};
@@ -117,9 +113,6 @@ namespace game::view
 		/// @brief 枡が落とす影の形
 		std::vector<core::utility::Vertex3D> m_shadowVertices{};
 		std::vector<unsigned short> m_shadowIndices{};
-
-		/// @brief 枡の木目
-		int m_masuTexture{ -1 };
 
 		/// @brief 台の木目
 		int m_tableTexture{ -1 };
@@ -130,8 +123,14 @@ namespace game::view
 		/// @brief 粒状感
 		int m_grainTexture{ -1 };
 
-		/// @brief 急須のモデル
-		int m_kyusuModel{ -1 };
+		/// @brief 湯呑のモデル
+		int m_cupModel{ -1 };
+
+		/// @brief 土瓶のモデル
+		int m_potModel{ -1 };
+
+		/// @brief いまの土瓶の傾き（ラジアン）
+		float m_potTilt{ 0.0f };
 
 		/// @brief 粒状感をずらすための経過時間（毎フレーム同じ位置だと模様が固まって見える）
 		float m_grainTime{ 0.0f };

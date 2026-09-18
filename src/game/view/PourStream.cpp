@@ -14,22 +14,22 @@ namespace
 	namespace palette = game::constant::palette;
 
 	/// @brief 筋を縦に何段に分けるか
-	constexpr int RING_COUNT{ 30 };
+	constexpr int RING_COUNT{ 16 };
 
 	/// @brief 筒の周りを何角形で作るか
 	constexpr int SIDE_COUNT{ 14 };
 
 	/// @brief 注ぎ口のところの太さ
-	constexpr float RADIUS_TOP{ 0.052f };
+	constexpr float RADIUS_TOP{ 0.022f };
 
 	/// @brief 落ちきったところの太さ（速くなるぶん細くなる）
-	constexpr float RADIUS_BOTTOM{ 0.022f };
+	constexpr float RADIUS_BOTTOM{ 0.012f };
 
 	/// @brief 太さのむらの大きさ（大きくすると縞に見えてしまう）
-	constexpr float BULGE{ 0.05f };
+	constexpr float BULGE{ 0.03f };
 
 	/// @brief 中心の横ぶれの大きさ
-	constexpr float SWAY{ 0.012f };
+	constexpr float SWAY{ 0.005f };
 
 	/// @brief 勢いが立ち上がる速さ
 	constexpr float FLOW_RISE{ 9.0f };

@@ -107,7 +107,7 @@ namespace game::view
 		mutable std::vector<core::utility::Vertex3D> m_vertices{};
 		mutable std::vector<unsigned short> m_indices{};
 
-		// 注ぎ筋は透かさずに描くので別の組にする
+		// 液体の厚みと注ぎ筋は透かさずに描くので別の組にする
 		mutable std::vector<core::utility::Vertex3D> m_streamVertices{};
 		mutable std::vector<unsigned short> m_streamIndices{};
 

@@ -114,6 +114,7 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\game\view\CupGeometry.h" />
     <ClInclude Include="src\infrastructure\graphics\PostEffect.h" />
     <ClInclude Include="src\core\interface\IPostEffect.h" />
     <ClInclude Include="src\infrastructure\graphics\ModelRenderer.h" />
@@ -124,7 +125,6 @@
     <ClInclude Include="src\game\view\WaterSurface.h" />
     <ClInclude Include="src\core\utility\Vertex3D.h" />
     <ClInclude Include="src\game\view\LiquidVisual.h" />
-    <ClInclude Include="src\game\view\MasuGeometry.h" />
     <ClInclude Include="src\core\utility\BlendMode.h" />
     <ClInclude Include="src\game\constant\Palette.h" />
     <ClInclude Include="src\game\presenter\PourPresenter.h" />
