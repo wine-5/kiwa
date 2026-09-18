@@ -132,18 +132,56 @@ def save(image, name):
     print("書き出し:", path)
 
 
+def blur(image, radius):
+    """箱ぼかし。ピントの外れた背景を作るのに使う。"""
+    result = image.astype(np.float64)
+    for axis in (0, 1):
+        accumulated = np.zeros_like(result)
+        for offset in range(-radius, radius + 1):
+            accumulated += np.roll(result, offset, axis=axis)
+        result = accumulated / (2 * radius + 1)
+    return np.clip(result, 0, 255).astype(np.uint8)
+
+
+def make_vignette(size):
+    """周辺減光。四隅を落として中央へ目を集める。黒＋アルファで作る。"""
+    axis = np.linspace(-1.0, 1.0, size)
+    x, y = np.meshgrid(axis, axis)
+    radius = np.sqrt(x * x + y * y) / np.sqrt(2.0)
+
+    alpha = np.clip((radius - 0.35) / 0.65, 0.0, 1.0) ** 1.6
+    rgba = np.zeros((size, size, 4), dtype=np.uint8)
+    rgba[..., 3] = (alpha * 235).astype(np.uint8)
+    return rgba
+
+
+def make_grain(size, seed):
+    """粒状感。写真のフィルム粒子のように、ごく薄く重ねて使う。"""
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0.5, 0.16, (size, size))
+    noise = np.clip(noise, 0.0, 1.0)
+
+    rgba = np.zeros((size, size, 4), dtype=np.uint8)
+    rgba[..., 0] = rgba[..., 1] = rgba[..., 2] = (noise * 255).astype(np.uint8)
+    rgba[..., 3] = 255
+    return rgba
+
+
 def main():
     # 枡は白木。明るく、年輪は細かい
     save(make_wood(SIZE, seed=20260918, light=(228, 201, 160), dark=(176, 140, 96),
                    ring_count=12.0, pore_strength=0.24, roughness=0.09,
                    warp_amount=0.8, pore_cells=220), "wood_masu.png")
 
-    # 台は使い込まれた濃い木。年輪は粗い
-    save(make_wood(SIZE, seed=771, light=(126, 104, 84), dark=(72, 56, 42),
-                   ring_count=11.0, pore_strength=0.34, roughness=0.14,
-                   warp_amount=1.8, pore_cells=180), "wood_table.png")
+    # 台は写真でいうピントの外れた背景。あらかじめぼかしておけば実行時の負荷はゼロ
+    table = make_wood(SIZE, seed=771, light=(126, 104, 84), dark=(72, 56, 42),
+                      ring_count=11.0, pore_strength=0.34, roughness=0.14,
+                      warp_amount=1.8, pore_cells=180)
+    save(blur(table, 9), "wood_table.png")
 
     save(make_water_normal(SIZE, seed=31415), "water_normal.png")
+    save(make_vignette(512), "vignette.png")
+    save(make_grain(512, seed=99), "grain.png")
 
 
 main()
