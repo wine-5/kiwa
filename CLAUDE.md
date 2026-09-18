@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 このファイルは Claude AI がこのリポジトリで作業する際に参照するコンテキストです。
 
@@ -6,10 +6,11 @@
 
 ## プロジェクト概要
 
-テーマ「かさ」のゲームジャム作品。DxLib を使用した Windows 専用アプリケーション。
+テーマ「かさ」のゲームジャム作品「**際 -KIWA- 注ぎ勝負**」。
+お題を「嵩」と読み替え、枡へ交互に注ぎ、こぼした方が負けという勝負にする。
+DxLib を使用した Windows 専用アプリケーション。
 
-ゲームの内容（ジャンル・ルール）は未定。決まるまでは基盤のみを整備する。
-学習目的でアーキテクチャを選ぶため、Game 層の設計方針はゲーム内容の決定後に定める。
+詳細: [game_concept.md](docs/design/game_concept.md)
 
 ---
 
@@ -30,6 +31,29 @@ platform → infrastructure → game → core
 
 依存は Singleton やグローバルな取得口を使わず、`Application`（コンポジションルート）が
 実体を所有してコンストラクタで注入する。シーンへは `SceneContext` にまとめて手渡す。
+
+### Game 層の設計（MVP / Passive View）
+
+| 役 | 置き場 | 責任 |
+|---|---|---|
+| Model | `game/model/` | ルールだけ。時間も乱数も描画も知らない |
+| View | `game/view/` | 渡されたものを映すだけ。Model も入力も見ない |
+| Presenter | `game/presenter/` | 入力を読んで Model へ伝え、Model の状態を View へ渡す |
+
+View を差し替えれば画面を出さずに進行を動かせる状態を保つこと。
+液面の揺れのような「見た目だけの動き」は View 側が自前の時間（`advance`）で持ち、
+Model や Presenter には持ち込まない。
+
+### 描画の流れ
+
+1. `IPostEffect::begin()` で別の面へ切り替える
+2. `IScene::draw()` … 3D を描く
+3. `IPostEffect::end()` … 明るいところを滲ませて画面へ戻す
+4. `IScene::drawOverlay()` … 文字や周辺減光を重ねる（滲ませたあとに描く）
+
+3D は `IRenderer3D` 越しに描く。出来合いの形で足りないもの（波打つ水面・注ぎ筋）は
+`drawTriangles` に頂点を渡して自前で組み、陰影も頂点色に焼き込む。
+器や急須のように形の決まったものは `IModelRenderer` でモデルとして読む。
 
 ### メインループ
 
@@ -65,8 +89,27 @@ platform → infrastructure → game → core
 - **`if` の中身が1行の場合は `{}` を省略する**（複数行のときのみブロックにする）
 - public 関数には **Doxygen コメント**（`@brief`, `@param`, `@return`）を記載する
 - スマートポインタは `make_unique` / `make_shared` を使用する
-- ソースは **UTF-8（BOM 付き）**。DxLib 側も `SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8)` で
-  UTF-8 に揃えてあるため、日本語の文字列リテラルをそのまま描画できる
+- ソースは **UTF-8（BOM 付き）**。BOM は必須。付け忘れると MSVC がソースを CP932 として読み、
+  日本語コメント中のバイトが行継続と解釈されて次の行の宣言ごと消え、原因の分かりにくい
+  コンパイルエラーになる
+- 実行時の文字コードは `/execution-charset:utf-8` と `SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8)`
+  で UTF-8 に揃えてある。`/utf-8`（ソース側も UTF-8 に固定）は使わないこと。
+  Shift-JIS で書かれた `DxLib.h` のコメントが壊れて大量の警告が出る
+
+---
+
+## 素材の生成
+
+素材は外から持ってこず、ツールで生成して `assets/` へ書き出す。パラメータを変えて
+作り直せるので、見た目の調整はツール側を直す。
+
+```
+python tools/make_textures.py   # 木目・周辺減光・粒状感・水面の法線
+python tools/make_models.py     # 急須・湯呑・茶托（MQO 形式）
+```
+
+モデルは MQO（テキスト形式）で書き出す。DxLib が確実に読めて、中身を目で追えるため。
+Blender や Metasequoia で開いて手直しすることもできる。
 
 ---
 
