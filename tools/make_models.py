@@ -145,6 +145,16 @@ def _normalize(a):
     return (a[0] / length, a[1] / length, a[2] / length)
 
 
+def _bezier(p0, p1, p2, t):
+    """2次ベジエ曲線上の点を返す。"""
+    inverse = 1.0 - t
+    return (
+        inverse * inverse * p0[0] + 2.0 * inverse * t * p1[0] + t * t * p2[0],
+        inverse * inverse * p0[1] + 2.0 * inverse * t * p1[1] + t * t * p2[1],
+        inverse * inverse * p0[2] + 2.0 * inverse * t * p1[2] + t * t * p2[2],
+    )
+
+
 def smooth_profile(points, subdivisions):
     """断面の角を丸める（何度か中点を取って均す）。"""
     result = list(points)
@@ -196,14 +206,18 @@ def make_kyusu():
     spout_radii = [0.115, 0.100, 0.086, 0.072, 0.060, 0.053]
     mesh.extend(sweep(spout_path, spout_radii, 24, 0, cap_end=False))
 
-    # 取っ手。胴の反対側から弧を描く
+    # 取っ手。胴の肩から腰へ、外へふくらむ C 字を描いて取り付く
+    handle_start = (-0.40, 0.66, 0.0)
+    handle_control = (-1.02, 0.40, 0.0)
+    handle_end = (-0.34, 0.13, 0.0)
+
     handle_path = []
     handle_radii = []
-    for i in range(18):
-        t = i / 17.0
-        angle = math.pi * (0.62 + 0.76 * t)
-        handle_path.append((-0.40 - math.cos(angle) * 0.30, 0.34 + 0.30 + math.sin(angle) * 0.34, 0.0))
-        handle_radii.append(0.050 + 0.014 * math.sin(math.pi * t))
+    for i in range(22):
+        t = i / 21.0
+        handle_path.append(_bezier(handle_start, handle_control, handle_end, t))
+        # 付け根は太く、中ほどは細く
+        handle_radii.append(0.062 - 0.018 * math.sin(math.pi * t))
     mesh.extend(sweep(handle_path, handle_radii, 18, 0, cap_start=True, cap_end=True))
 
     return mesh
