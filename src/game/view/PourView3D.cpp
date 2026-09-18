@@ -88,9 +88,9 @@ namespace
 	// 画角は狭めにして、写真のように歪みを抑える
 	// 器の中が見える限界まで下げた、写真に近い高さ。
 	// これ以上下げると手前の板に隠れて液面が見えなくなる
-	constexpr Vector3 CAMERA_POSITION{ 0.55f, 3.45f, -3.15f };
-	constexpr Vector3 CAMERA_TARGET{ -0.1f, 0.95f, 0.0f };
-	constexpr float CAMERA_FOV{ 0.72f };
+	constexpr Vector3 CAMERA_POSITION{ 0.6f, 3.9f, -3.5f };
+	constexpr Vector3 CAMERA_TARGET{ -0.15f, 1.1f, 0.0f };
+	constexpr float CAMERA_FOV{ 0.8f };
 	constexpr float CAMERA_NEAR{ 0.1f };
 	constexpr float CAMERA_FAR{ 100.0f };
 } // namespace
