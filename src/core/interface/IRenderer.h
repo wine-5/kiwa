@@ -71,6 +71,18 @@ namespace core::iface
 		virtual void drawTexture(int handle, const core::utility::Vector2& position) = 0;
 
 		/**
+		 * @brief 画像を指定した矩形いっぱいに引き伸ばして重ねる
+		 *
+		 * 周辺減光や粒状感のように、画面全体へ薄く被せるものに使う
+		 * @param handle 画像ハンドル
+		 * @param position 左上の座標
+		 * @param size 幅と高さ
+		 * @param alpha 濃さ（0.0〜1.0）
+		 */
+		virtual void drawTextureStretched(int handle, const core::utility::Vector2& position,
+		                                  const core::utility::Vector2& size, float alpha) = 0;
+
+		/**
 		 * @brief 画像を中心・拡大率・回転を指定して描く
 		 * @param handle ResourceManager が返した画像ハンドル
 		 * @param center 中心の座標

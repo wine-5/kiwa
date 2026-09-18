@@ -31,5 +31,8 @@ namespace infrastructure::graphics
 
 		void drawTextureRotated(int handle, const core::utility::Vector2& center, float scale,
 		                        float angleRadian) override;
+
+		void drawTextureStretched(int handle, const core::utility::Vector2& position,
+		                          const core::utility::Vector2& size, float alpha) override;
 	};
 } // namespace infrastructure::graphics

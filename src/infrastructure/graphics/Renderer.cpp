@@ -58,6 +58,20 @@ namespace infrastructure::graphics
 		DrawGraph(static_cast<int>(position.x), static_cast<int>(position.y), handle, TRUE);
 	}
 
+	void Renderer::drawTextureStretched(int handle, const core::utility::Vector2& position,
+	                                    const core::utility::Vector2& size, float alpha)
+	{
+		if (handle < 0)
+			return;
+
+		const int value{ static_cast<int>(alpha * 255.0f) };
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, value < 0 ? 0 : (value > 255 ? 255 : value));
+		DrawExtendGraph(static_cast<int>(position.x), static_cast<int>(position.y),
+		                static_cast<int>(position.x + size.x), static_cast<int>(position.y + size.y),
+		                handle, TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
+
 	void Renderer::drawTextureRotated(int handle, const core::utility::Vector2& center, float scale,
 	                                  float angleRadian)
 	{
