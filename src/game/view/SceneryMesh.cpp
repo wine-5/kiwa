@@ -12,9 +12,6 @@ namespace
 	using core::utility::Vertex3D;
 	namespace masu = game::view::masu;
 
-	/// @brief 光が来る向き（水面と同じものを使い、陰影の向きを揃える）
-	constexpr Vector3 LIGHT_DIRECTION{ 0.36f, 0.88f, -0.31f };
-
 	/// @brief 木目の貼り具合（1ワールド単位あたりの繰り返し数）
 	constexpr float WOOD_UV_SCALE{ 0.55f };
 
@@ -96,19 +93,50 @@ namespace
 		}
 	}
 
+	/// @brief 明かりの位置（行灯のつもり。面の中でも距離で明るさが変わる）
+	constexpr Vector3 LAMP_POSITION{ 1.9f, 3.4f, -1.7f };
+
+	/// @brief 明かりが届く距離のめやす
+	constexpr float LAMP_RANGE{ 3.2f };
+
+	/// @brief 明かりが当たらないところの明るさ
+	constexpr float AMBIENT{ 0.26f };
+
+	/// @brief 台や周りから回り込む光の強さ（上を向いた面ほど受ける）
+	constexpr float BOUNCE{ 0.16f };
+
+	/// @brief 手前から当てる弱い補助光の向き（写真のレフ板にあたるもの）
+	constexpr Vector3 FILL_DIRECTION{ 0.15f, 0.55f, -0.82f };
+
+	/// @brief 補助光の強さ
+	constexpr float FILL{ 0.22f };
+
 	/**
-	 * @brief 面の向きから明るさだけを返す
+	 * @brief その点の明るさを返す
 	 *
 	 * 色は木目のテクスチャが持っているので、頂点側は陰影に徹する。
-	 * ここで色を掛けると二重になって濁る
+	 * 面ごとに一色だと板が平らな紙に見えるため、明かりからの距離でも変える
+	 * @param position 座標
 	 * @param normal 面の向き
 	 * @return 明るさを表す灰色
 	 */
-	Color shadeFace(const Vector3& normal) noexcept
+	Color shadePoint(const Vector3& position, const Vector3& normal) noexcept
 	{
-		// 真上を向いた面が一番明るく、陰の側は落ちる
-		const float brightness{ 0.52f + 0.48f * std::max(0.0f, normal.dot(LIGHT_DIRECTION)) };
-		const int level{ toChannel(255.0f * brightness) };
+		const Vector3 toLamp{ LAMP_POSITION - position };
+		const float distance{ toLamp.length() };
+		const Vector3 direction{ toLamp.normalized() };
+
+		// 遠いほど暗い（距離の二乗で落ちる）
+		const float falloff{ 1.0f / (1.0f + (distance / LAMP_RANGE) * (distance / LAMP_RANGE)) };
+		const float diffuse{ std::max(0.0f, normal.dot(direction)) * falloff * 1.85f };
+
+		// 光は一度きりでは終わらない。周りから回り込むぶんを足して陰を沈ませすぎない
+		const float bounce{ BOUNCE * (0.5f + 0.5f * normal.y) };
+
+		// 手前からの弱い補助光。これが無いと陰の側が潰れて形が読めなくなる
+		const float fill{ FILL * std::max(0.0f, normal.dot(FILL_DIRECTION)) };
+
+		const int level{ toChannel(255.0f * (AMBIENT + diffuse + bounce + fill)) };
 		return Color{ level, level, level };
 	}
 } // namespace
@@ -170,32 +198,54 @@ namespace game::view
 			  sizeX, sizeZ },
 		};
 
+		// 面は細かく割る。1枚の三角形では明かりの減衰が乗らず、板が平らな紙に見える
+		constexpr int FACE_DIVISIONS{ 6 };
+		constexpr int FACE_POINTS{ FACE_DIVISIONS + 1 };
+
 		for (const Face& face : faces)
 		{
 			const auto base{ static_cast<unsigned short>(vertices.size()) };
-			const Color shaded{ shadeFace(face.normal) };
 
-			const float uvU[4]{ 0.0f, face.uWidth * uvScale, face.uWidth * uvScale, 0.0f };
-			const float uvV[4]{ face.vHeight * uvScale, face.vHeight * uvScale, 0.0f, 0.0f };
-
-			for (int i{ 0 }; i < 4; ++i)
+			for (int iv{ 0 }; iv < FACE_POINTS; ++iv)
 			{
-				Vertex3D vertex{};
-				vertex.position = face.corners[i];
-				vertex.normal = face.normal;
-				vertex.color = shaded;
-				vertex.u = uvU[i];
-				vertex.v = uvV[i];
-				vertices.push_back(vertex);
+				for (int iu{ 0 }; iu < FACE_POINTS; ++iu)
+				{
+					const float u{ static_cast<float>(iu) / FACE_DIVISIONS };
+					const float v{ static_cast<float>(iv) / FACE_DIVISIONS };
+
+					// 四隅から双一次で内側の点を作る
+					const Vector3 bottom{ face.corners[0] + (face.corners[1] - face.corners[0]) * u };
+					const Vector3 top{ face.corners[3] + (face.corners[2] - face.corners[3]) * u };
+					const Vector3 position{ bottom + (top - bottom) * v };
+
+					Vertex3D vertex{};
+					vertex.position = position;
+					vertex.normal = face.normal;
+					vertex.color = shadePoint(position, face.normal);
+					vertex.u = u * face.uWidth * uvScale;
+					vertex.v = (1.0f - v) * face.vHeight * uvScale;
+					vertices.push_back(vertex);
+				}
 			}
 
-			indices.push_back(base);
-			indices.push_back(static_cast<unsigned short>(base + 2));
-			indices.push_back(static_cast<unsigned short>(base + 1));
+			for (int iv{ 0 }; iv < FACE_DIVISIONS; ++iv)
+			{
+				for (int iu{ 0 }; iu < FACE_DIVISIONS; ++iu)
+				{
+					const auto corner{ static_cast<unsigned short>(base + iv * FACE_POINTS + iu) };
+					const auto right{ static_cast<unsigned short>(corner + 1) };
+					const auto above{ static_cast<unsigned short>(corner + FACE_POINTS) };
+					const auto diagonal{ static_cast<unsigned short>(above + 1) };
 
-			indices.push_back(base);
-			indices.push_back(static_cast<unsigned short>(base + 3));
-			indices.push_back(static_cast<unsigned short>(base + 2));
+					indices.push_back(corner);
+					indices.push_back(diagonal);
+					indices.push_back(right);
+
+					indices.push_back(corner);
+					indices.push_back(above);
+					indices.push_back(diagonal);
+				}
+			}
 		}
 	}
 
@@ -222,13 +272,13 @@ namespace game::view
 	{
 		appendGrid(vertices, indices, TABLE_HALF, TABLE_DIVISIONS, 0.0f,
 		           [](Vertex3D& vertex, float x, float z) {
-			           // 枡の周りだけを明るくし、外へ向かって闇へ落とす
+			           // 明かりからの距離で落とし、遠くは闇へ沈める
+			           const Color lit{ shadePoint(vertex.position, vertex.normal) };
 			           const float distance{ std::sqrt(x * x + z * z) / LIGHT_POOL_RADIUS };
-			           const float pool{ std::exp(-distance * distance) };
-			           const float brightness{ LIGHT_POOL_FLOOR + (1.0f - LIGHT_POOL_FLOOR) * pool };
+			           const float pool{ LIGHT_POOL_FLOOR +
+				                         (1.0f - LIGHT_POOL_FLOOR) * std::exp(-distance * distance) };
 
-			           const int level{ toChannel(255.0f * brightness) };
-			           vertex.color = Color{ level, level, level };
+			           vertex.color = core::utility::scaled(lit, pool);
 			           vertex.u = x * TABLE_UV_SCALE;
 			           vertex.v = z * TABLE_UV_SCALE;
 		           });
