@@ -7,6 +7,8 @@
 namespace
 {
 	using core::utility::Color;
+	using core::utility::mixed;
+	using core::utility::toChannel;
 	using core::utility::Vector3;
 	using core::utility::Vertex3D;
 	namespace palette = game::constant::palette;
@@ -102,11 +104,11 @@ namespace
 
 	// ---- 透け方 ----
 
-	/// @brief 水面の透け具合（真上から覗いたときは底がうっすら見える）
-	constexpr float SURFACE_ALPHA_MIN{ 0.74f };
+	/// @brief 深さで濁っていく速さ（液体が光を吸うぶん。大きいほど早く底が見えなくなる）
+	constexpr float ABSORPTION{ 2.6f };
 
-	/// @brief 浅い角度から見たときの水面の濃さ（映り込みで底は見えなくなる）
-	constexpr float SURFACE_ALPHA_MAX{ 0.97f };
+	/// @brief 浅い角度から見たときに増す濃さ（映り込みで底が見えなくなる）
+	constexpr float GRAZING_OPACITY{ 0.45f };
 
 	// ---- 水中の光の模様 ----
 
@@ -118,40 +120,6 @@ namespace
 
 	/// @brief 底から少し浮かせる高さ（同じ面に描いてちらつくのを防ぐ）
 	constexpr float CAUSTIC_LIFT{ 0.004f };
-
-	/**
-	 * @brief 内積を返す
-	 * @param a 一方のベクトル
-	 * @param b もう一方のベクトル
-	 * @return 内積
-	 */
-	float dot(const Vector3& a, const Vector3& b) noexcept
-	{
-		return a.x * b.x + a.y * b.y + a.z * b.z;
-	}
-
-	/**
-	 * @brief 0〜255 に収めて整数にする
-	 * @param value 元の値
-	 * @return 収めた値
-	 */
-	int toChannel(float value) noexcept
-	{
-		return static_cast<int>(std::clamp(value, 0.0f, 255.0f));
-	}
-
-	/**
-	 * @brief 二つの色を混ぜる
-	 * @param from 混ぜる前の色
-	 * @param to 混ぜ込む色
-	 * @param t 混ぜる割合（0.0〜1.0）
-	 * @return 混ぜた色
-	 */
-	Color mix(const Color& from, const Color& to, float t) noexcept
-	{
-		return Color{ toChannel(from.r + (to.r - from.r) * t), toChannel(from.g + (to.g - from.g) * t),
-			          toChannel(from.b + (to.b - from.b) * t) };
-	}
 
 	/**
 	 * @brief 格子の点の座標を返す
@@ -173,44 +141,47 @@ namespace
 	 * @return 頂点の色
 	 */
 	Color shadeSurface(const Vector3& position, const Vector3& normal, const Vector3& cameraPosition,
-	                   float foam, float& outAlpha)
+	                   float foam, float depth, float& outAlpha)
 	{
 		const Vector3 view{ (cameraPosition - position).normalized() };
 		const Vector3 halfway{ (LIGHT_DIRECTION + view).normalized() };
-		const float facing{ std::max(0.0f, dot(normal, view)) };
+		const float facing{ std::max(0.0f, normal.dot(view)) };
 
 		// 水が水に見えるのは、波の傾きによって「映り込む先」が変わるから。
 		// 視線を水面で跳ね返し、その向きが上を向いていれば明るい天井、
 		// 横や下を向いていれば枡の内側が映っていると見なす
-		const Vector3 reflected{ (normal * (2.0f * dot(normal, view)) - view).normalized() };
+		const Vector3 reflected{ view.reflected(normal).normalized() };
 		const float skyAmount{ std::clamp(0.5f + 0.5f * reflected.y, 0.0f, 1.0f) };
-		const Color reflection{ mix(REFLECT_ROOM, REFLECT_SKY, skyAmount * skyAmount) };
+		const Color reflection{ mixed(REFLECT_ROOM, REFLECT_SKY, skyAmount * skyAmount) };
 
 		// 浅い角度で見るほど映り込みが強くなる（フレネル）
 		const float grazing{ std::pow(1.0f - facing, 3.0f) };
 		const float reflectRate{ REFLECT_MIN + (REFLECT_MAX - REFLECT_MIN) * grazing };
 
-		const float diffuse{ 0.52f + 0.48f * std::max(0.0f, dot(normal, LIGHT_DIRECTION)) };
-		const Color base{ palette::LIQUID_SURFACE };
-		Color result{ mix(Color{ toChannel(base.r * diffuse), toChannel(base.g * diffuse),
+		// 液体は厚いほど光を吸う。浅いところは底の色が透け、深いところは液体の色になる
+		const float absorbed{ 1.0f - std::exp(-depth * ABSORPTION) };
+
+		const float diffuse{ 0.52f + 0.48f * std::max(0.0f, normal.dot(LIGHT_DIRECTION)) };
+		const Color base{ mixed(palette::LIQUID_SURFACE, palette::LIQUID, absorbed) };
+		Color result{ mixed(Color{ toChannel(base.r * diffuse), toChannel(base.g * diffuse),
 			                     toChannel(base.b * diffuse) },
 			              reflection, reflectRate) };
 
 		// 光源そのものの映り込み（きらめき）
-		const float specular{ std::pow(std::max(0.0f, dot(normal, halfway)), SPECULAR_POWER) *
+		const float specular{ std::pow(std::max(0.0f, normal.dot(halfway)), SPECULAR_POWER) *
 			                  SPECULAR_STRENGTH };
 		const Color shineColor{ palette::LIQUID_SHINE };
 		result = Color{ toChannel(result.r + shineColor.r * specular),
 			            toChannel(result.g + shineColor.g * specular),
 			            toChannel(result.b + shineColor.b * specular) };
 
-		// 真上から覗けば底が透けて見え、浅い角度では映り込みで濁る
-		outAlpha = SURFACE_ALPHA_MIN + (SURFACE_ALPHA_MAX - SURFACE_ALPHA_MIN) * grazing;
+		// 浅ければ底が透け、深ければ濁る。浅い角度から見たときも映り込みで濁る
+		outAlpha = std::clamp(absorbed + grazing * GRAZING_OPACITY, 0.0f, 0.98f);
 
 		if (foam > 0.0f)
 		{
 			const float amount{ std::min(1.0f, foam * 0.45f) };
-			result = mix(result, FOAM_COLOR, amount);
+			result = mixed(result, FOAM_COLOR, amount);
 			outAlpha = std::min(1.0f, outAlpha + amount * 0.5f); // 泡立っているところは透けない
 		}
 
@@ -359,8 +330,9 @@ namespace game::view
 				Vertex3D vertex{};
 				vertex.position = Vector3{ x, sample(ix, iz), z };
 				vertex.normal = Vector3{ -dx, 2.0f * CELL_SIZE, -dz }.normalized();
+				const float depth{ std::max(0.0f, vertex.position.y - masu::FLOOR_TOP) };
 				vertex.color = shadeSurface(vertex.position, vertex.normal, cameraPosition,
-				                            foamAt(x, z), vertex.alpha);
+				                            foamAt(x, z), depth, vertex.alpha);
 				vertex.u = static_cast<float>(ix) / GRID_DIVISIONS;
 				vertex.v = static_cast<float>(iz) / GRID_DIVISIONS;
 				vertices.push_back(vertex);
@@ -375,80 +347,6 @@ namespace game::view
 				const auto topRight{ static_cast<unsigned short>(topLeft + 1) };
 				const auto bottomLeft{ static_cast<unsigned short>(topLeft + GRID_POINTS) };
 				const auto bottomRight{ static_cast<unsigned short>(bottomLeft + 1) };
-
-				indices.push_back(topLeft);
-				indices.push_back(bottomLeft);
-				indices.push_back(topRight);
-
-				indices.push_back(topRight);
-				indices.push_back(bottomLeft);
-				indices.push_back(bottomRight);
-			}
-		}
-	}
-
-	void WaterSurface::buildSides(std::vector<core::utility::Vertex3D>& vertices,
-	                              std::vector<unsigned short>& indices) const
-	{
-		if (m_levelRatio <= 0.0f || m_heights.empty())
-			return;
-
-		const auto sample{ [this](int ix, int iz) {
-			const int clampedX{ std::clamp(ix, 0, GRID_POINTS - 1) };
-			const int clampedZ{ std::clamp(iz, 0, GRID_POINTS - 1) };
-			return m_heights[static_cast<std::size_t>(clampedZ) * GRID_POINTS + clampedX];
-		} };
-
-		// 縁の高さも波に合わせる。底へ向かって暗くすることで深さを出す
-		const Color deepColor{ toChannel(palette::LIQUID.r * DEPTH_DARKEN),
-			                   toChannel(palette::LIQUID.g * DEPTH_DARKEN),
-			                   toChannel(palette::LIQUID.b * DEPTH_DARKEN) };
-
-		struct Edge
-		{
-			int fromX;
-			int fromZ;
-			int toX;
-			int toZ;
-			Vector3 normal;
-		};
-
-		const Edge edges[]{
-			{ 0, 0, GRID_DIVISIONS, 0, Vector3{ 0.0f, 0.0f, -1.0f } },
-			{ GRID_DIVISIONS, 0, GRID_DIVISIONS, GRID_DIVISIONS, Vector3{ 1.0f, 0.0f, 0.0f } },
-			{ GRID_DIVISIONS, GRID_DIVISIONS, 0, GRID_DIVISIONS, Vector3{ 0.0f, 0.0f, 1.0f } },
-			{ 0, GRID_DIVISIONS, 0, 0, Vector3{ -1.0f, 0.0f, 0.0f } },
-		};
-
-		for (const Edge& edge : edges)
-		{
-			const auto edgeBase{ static_cast<unsigned short>(vertices.size()) };
-
-			for (int i{ 0 }; i <= GRID_DIVISIONS; ++i)
-			{
-				const float t{ static_cast<float>(i) / GRID_DIVISIONS };
-				const int ix{ static_cast<int>(edge.fromX + (edge.toX - edge.fromX) * t) };
-				const int iz{ static_cast<int>(edge.fromZ + (edge.toZ - edge.fromZ) * t) };
-
-				Vertex3D top{};
-				top.position = Vector3{ gridPosition(ix), sample(ix, iz), gridPosition(iz) };
-				top.normal = edge.normal;
-				top.color = palette::LIQUID;
-				vertices.push_back(top);
-
-				Vertex3D bottom{};
-				bottom.position = Vector3{ gridPosition(ix), masu::FLOOR_TOP, gridPosition(iz) };
-				bottom.normal = edge.normal;
-				bottom.color = deepColor;
-				vertices.push_back(bottom);
-			}
-
-			for (int i{ 0 }; i < GRID_DIVISIONS; ++i)
-			{
-				const auto topLeft{ static_cast<unsigned short>(edgeBase + i * 2) };
-				const auto bottomLeft{ static_cast<unsigned short>(topLeft + 1) };
-				const auto topRight{ static_cast<unsigned short>(topLeft + 2) };
-				const auto bottomRight{ static_cast<unsigned short>(topLeft + 3) };
 
 				indices.push_back(topLeft);
 				indices.push_back(bottomLeft);

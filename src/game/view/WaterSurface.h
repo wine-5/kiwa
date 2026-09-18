@@ -77,16 +77,6 @@ namespace game::view
 		void build(std::vector<core::utility::Vertex3D>& vertices, std::vector<unsigned short>& indices,
 		           const core::utility::Vector3& cameraPosition) const;
 
-		/**
-		 * @brief 液体の側面をメッシュに焼く
-		 *
-		 * 深いところは濁って向こうが見えないので、こちらは透かさずに描く。
-		 * 上面と分けておかないと、奥の面が手前の面の上に重なって白く濁る
-		 * @param vertices 頂点の出力先
-		 * @param indices 三角形の出力先
-		 */
-		void buildSides(std::vector<core::utility::Vertex3D>& vertices,
-		                std::vector<unsigned short>& indices) const;
 
 		/**
 		 * @brief 枡の底に落ちる光の模様をメッシュに焼く
