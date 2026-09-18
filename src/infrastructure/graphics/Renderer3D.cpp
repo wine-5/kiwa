@@ -1,5 +1,6 @@
 ﻿#include "infrastructure/graphics/Renderer3D.h"
 #include "DxLib.h"
+#include <vector>
 
 namespace
 {
@@ -47,6 +48,53 @@ namespace infrastructure::graphics
 	                            const core::utility::Color& color)
 	{
 		DrawSphere3D(toDxVector(center), radius, DIVISION_COUNT, toDxColor(color), GetColor(0, 0, 0), TRUE);
+	}
+
+	void Renderer3D::drawTriangles(std::span<const core::utility::Vertex3D> vertices,
+	                               std::span<const unsigned short> indices)
+	{
+		if (vertices.empty() || indices.size() < 3)
+			return;
+
+		// DxLib の頂点型へ詰め替える。毎フレーム作り直すので領域は使い回す
+		static std::vector<VERTEX3D> buffer;
+		buffer.clear();
+		buffer.reserve(vertices.size());
+
+		for (const core::utility::Vertex3D& vertex : vertices)
+		{
+			VERTEX3D converted{};
+			converted.pos = toDxVector(vertex.position);
+			converted.norm = toDxVector(vertex.normal);
+			const int alpha{ static_cast<int>(vertex.alpha * 255.0f) };
+			converted.dif = GetColorU8(vertex.color.r, vertex.color.g, vertex.color.b,
+			                           alpha < 0 ? 0 : (alpha > 255 ? 255 : alpha));
+			converted.spc = GetColorU8(0, 0, 0, 0);
+			converted.u = vertex.u;
+			converted.v = vertex.v;
+			converted.su = 0.0f;
+			converted.sv = 0.0f;
+			buffer.push_back(converted);
+		}
+
+		DrawPolygonIndexed3D(buffer.data(), static_cast<int>(buffer.size()), indices.data(),
+		                     static_cast<int>(indices.size() / 3),
+		                     m_textureHandle < 0 ? DX_NONE_GRAPH : m_textureHandle, TRUE);
+	}
+
+	void Renderer3D::setTexture(int textureHandle)
+	{
+		if (m_textureHandle == textureHandle)
+			return;
+
+		RenderVertex();
+		m_textureHandle = textureHandle;
+	}
+
+	void Renderer3D::setBackCulling(bool isEnabled)
+	{
+		RenderVertex();
+		SetUseBackCulling(isEnabled ? TRUE : FALSE);
 	}
 
 	void Renderer3D::setBlend(core::utility::BlendMode mode, float strength)

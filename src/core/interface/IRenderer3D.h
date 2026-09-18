@@ -2,6 +2,8 @@
 #include "core/utility/BlendMode.h"
 #include "core/utility/Color.h"
 #include "core/utility/Vector3.h"
+#include "core/utility/Vertex3D.h"
+#include <span>
 
 namespace core::iface
 {
@@ -44,6 +46,32 @@ namespace core::iface
 		 */
 		virtual void drawSphere(const core::utility::Vector3& center, float radius,
 		                        const core::utility::Color& color) = 0;
+
+		/**
+		 * @brief 三角形の集まりを描く
+		 *
+		 * 頂点ごとに色を持てるので、陰影や照りを呼ぶ側で計算して流し込める。
+		 * 波打つ水面や流れる筋のように、出来合いの形では表せないものに使う
+		 * @param vertices 頂点の並び
+		 * @param indices 三角形を組む順番（3つで1枚）
+		 */
+		virtual void drawTriangles(std::span<const core::utility::Vertex3D> vertices,
+		                           std::span<const unsigned short> indices) = 0;
+
+		/**
+		 * @brief 以降の drawTriangles に貼るテクスチャを指定する
+		 * @param textureHandle テクスチャハンドル（-1 で貼らない）
+		 */
+		virtual void setTexture(int textureHandle) = 0;
+
+		/**
+		 * @brief 裏側を向いた面を描かないかどうかを切り替える
+		 *
+		 * 自前で組んだメッシュは裏表を取り違えやすい。切っておけば
+		 * どちら向きでも必ず描かれる
+		 * @param isEnabled 裏面を省くならtrue
+		 */
+		virtual void setBackCulling(bool isEnabled) = 0;
 
 		/**
 		 * @brief 以降の描画の重ね方を変える

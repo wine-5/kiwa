@@ -12,6 +12,12 @@ namespace infrastructure::graphics
 	  public:
 		Renderer3D() = default;
 
+	  private:
+		/// @brief いま貼っているテクスチャ（-1 なら貼らない）
+		int m_textureHandle{ -1 };
+
+	  public:
+
 		void drawBox(const core::utility::Vector3& minCorner, const core::utility::Vector3& maxCorner,
 		             const core::utility::Color& color, bool isFilled = true) override;
 
@@ -20,6 +26,13 @@ namespace infrastructure::graphics
 
 		void drawSphere(const core::utility::Vector3& center, float radius,
 		                const core::utility::Color& color) override;
+
+		void drawTriangles(std::span<const core::utility::Vertex3D> vertices,
+		                   std::span<const unsigned short> indices) override;
+
+		void setTexture(int textureHandle) override;
+
+		void setBackCulling(bool isEnabled) override;
 
 		void setBlend(core::utility::BlendMode mode, float strength) override;
 
