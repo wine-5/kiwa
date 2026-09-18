@@ -19,26 +19,26 @@ namespace game::constant
 
 		// ========== 液体 ==========
 
-		/// @brief 枡に注がれた液体
-		inline constexpr core::utility::Color LIQUID{ 198, 138, 38 };
+		/// @brief 器に注がれた液体（緑茶）
+		inline constexpr core::utility::Color LIQUID{ 150, 172, 62 };
 
-		/// @brief こぼれて台に広がったぶん（枡の中より沈んだ色）
-		inline constexpr core::utility::Color LIQUID_SPILLED{ 150, 105, 52 };
+		/// @brief こぼれて台に広がったぶん（器の中より沈んだ色）
+		inline constexpr core::utility::Color LIQUID_SPILLED{ 112, 126, 58 };
 
 		/// @brief 水面のひとかわ（本体より明るくして面を見せる）
-		inline constexpr core::utility::Color LIQUID_SURFACE{ 226, 174, 74 };
+		inline constexpr core::utility::Color LIQUID_SURFACE{ 186, 206, 96 };
 
 		/// @brief 水面の照り（光を足すように重ねる）
-		inline constexpr core::utility::Color LIQUID_SHINE{ 255, 246, 214 };
+		inline constexpr core::utility::Color LIQUID_SHINE{ 250, 252, 228 };
 
 		/// @brief 広がる波紋
-		inline constexpr core::utility::Color RIPPLE{ 250, 226, 165 };
+		inline constexpr core::utility::Color RIPPLE{ 226, 238, 176 };
 
 		/// @brief 注がれている筋
-		inline constexpr core::utility::Color STREAM{ 240, 221, 154 };
+		inline constexpr core::utility::Color STREAM{ 214, 228, 150 };
 
 		/// @brief 跳ねたしずく
-		inline constexpr core::utility::Color DROPLET{ 246, 214, 130 };
+		inline constexpr core::utility::Color DROPLET{ 220, 232, 156 };
 
 		// ========== 印 ==========
 
