@@ -1,5 +1,8 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
+#include "core/utility/Vertex3D.h"
+#include "game/view/PourStream.h"
+#include "game/view/WaterSurface.h"
 #include <random>
 #include <vector>
 
@@ -11,10 +14,10 @@ namespace core::iface
 namespace game::view
 {
 	/**
-	 * @brief 枡の中の液体と、注がれている筋の見せ方
+	 * @brief 枡の中の液体と、注がれている筋をまとめて見せる
 	 *
-	 * 液面の揺れ・波紋・しぶきは見た目だけの動きなので、ゲームの状態とは切り離して
-	 * ここが自前で時間を持つ。Model や Presenter はこれらを一切知らない
+	 * 液面（WaterSurface）と筋（PourStream）を持ち、着水のたびに波としぶきを起こす。
+	 * どれも見た目だけの動きなので、Model も Presenter もここを知らない
 	 */
 	class LiquidVisual
 	{
@@ -30,27 +33,29 @@ namespace game::view
 		void advance(float deltaTime, bool isPouring, float amountRatio);
 
 		/**
+		 * @brief 注ぎ口の位置を伝える
+		 * @param origin 液体が出てくる位置
+		 */
+		void setPourOrigin(const core::utility::Vector3& origin) noexcept
+		{
+			m_stream.setOrigin(origin);
+		}
+
+		/**
 		 * @brief 液体を描く
 		 * @param renderer 3D 描画
+		 * @param cameraPosition 視点の座標（陰影と照りの計算に使う）
 		 */
-		void draw(core::iface::IRenderer3D& renderer) const;
+		void draw(core::iface::IRenderer3D& renderer,
+		          const core::utility::Vector3& cameraPosition) const;
 
 		/**
-		 * @brief いまの液面の高さを返す（揺れを含む）
+		 * @brief 枡の中心あたりの液面の高さを返す
 		 * @return 液面の高さ
 		 */
-		[[nodiscard]] float getSurfaceHeight() const noexcept;
+		[[nodiscard]] float getSurfaceHeight() const;
 
 	  private:
-		/**
-		 * @brief 広がっていく波紋
-		 */
-		struct Ripple
-		{
-			float radius{ 0.0f };
-			float life{ 1.0f }; // 1.0 から 0.0 へ落ちていく
-		};
-
 		/**
 		 * @brief 跳ねたしずく
 		 */
@@ -62,11 +67,13 @@ namespace game::view
 			float life{ 0.0f };
 		};
 
-		/** @brief 着水の波紋を起こす */
-		void spawnRipple();
-
-		/** @brief 着水のしぶきを飛ばす */
-		void spawnSplash();
+		/**
+		 * @brief 着水のしぶきを飛ばす
+		 * @param x 着水点のX座標
+		 * @param z 着水点のZ座標
+		 * @param surfaceHeight そこの液面の高さ
+		 */
+		void spawnSplash(float x, float z, float surfaceHeight);
 
 		/**
 		 * @brief 範囲内の乱数を返す
@@ -76,40 +83,29 @@ namespace game::view
 		 */
 		[[nodiscard]] float randomRange(float min, float max);
 
-		/** @brief 溜まっている液体の本体を描く */
-		void drawBody(core::iface::IRenderer3D& renderer) const;
-
-		/** @brief 水面のひとかわと照りを描く */
-		void drawSurface(core::iface::IRenderer3D& renderer) const;
-
-		/** @brief 波紋を描く */
-		void drawRipples(core::iface::IRenderer3D& renderer) const;
-
-		/** @brief 注がれている筋を描く */
-		void drawStream(core::iface::IRenderer3D& renderer) const;
-
 		/** @brief しぶきを描く */
 		void drawDroplets(core::iface::IRenderer3D& renderer) const;
 
-		/// @brief 見た目の動きに使う経過時間（秒）
-		float m_time{ 0.0f };
+		WaterSurface m_surface{};
+		PourStream m_stream{};
 
-		/// @brief 溜まっている嵩（0.0〜1.0）
-		float m_amountRatio{ 0.0f };
+		/// @brief 次に波としぶきを起こすまでの時間（秒）
+		float m_splashTimer{ 0.0f };
 
-		/// @brief いま注がれているか
-		bool m_isPouring{ false };
+		/// @brief 前のフレームで注いでいたか（注ぎ終わりに一度だけ波を起こすために見る）
+		bool m_wasPouring{ false };
 
-		/// @brief 液面の揺れの大きさ（注ぐのをやめると収まっていく）
-		float m_wobble{ 0.0f };
-
-		/// @brief 次の波紋を起こすまでの時間（秒）
-		float m_rippleTimer{ 0.0f };
-
-		std::vector<Ripple> m_ripples{};
 		std::vector<Droplet> m_droplets{};
 
 		/// @brief しぶきのばらつきに使う乱数（見た目だけなので種は固定でよい）
 		std::mt19937 m_random{ 20260917 };
+
+		// メッシュは毎フレーム組み直すが、領域は使い回して確保を繰り返さない
+		mutable std::vector<core::utility::Vertex3D> m_vertices{};
+		mutable std::vector<unsigned short> m_indices{};
+
+		// 底に落ちる光の模様も重ね方が違うので、さらに別のメッシュとして持つ
+		mutable std::vector<core::utility::Vertex3D> m_causticVertices{};
+		mutable std::vector<unsigned short> m_causticIndices{};
 	};
 } // namespace game::view
