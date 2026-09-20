@@ -58,6 +58,16 @@ namespace game::view
 			m_isOverflowed = isOverflowed;
 		}
 
+		void showTurn(const std::string& turnLabel) override
+		{
+			m_turnLabel = turnLabel;
+		}
+
+		void showScore(const std::string& scoreLabel) override
+		{
+			m_scoreLabel = scoreLabel;
+		}
+
 		void showMessage(const std::string& message) override
 		{
 			m_message = message;
@@ -79,6 +89,11 @@ namespace game::view
 		 * @brief 台と影を描く（どちらも動かないので形は作り直さない）
 		 */
 		void drawScenery() const;
+
+		/**
+		 * @brief こぼれて台に広がったぶんの形を組む
+		 */
+		void buildPuddle();
 
 		/**
 		 * @brief こぼれて台に広がったぶんを描く
@@ -110,7 +125,11 @@ namespace game::view
 		std::vector<core::utility::Vertex3D> m_tableVertices{};
 		std::vector<unsigned short> m_tableIndices{};
 
-		/// @brief 枡が落とす影の形
+		/// @brief こぼれて広がった液体の形
+		std::vector<core::utility::Vertex3D> m_puddleVertices{};
+		std::vector<unsigned short> m_puddleIndices{};
+
+		/// @brief 器が落とす影の形
 		std::vector<core::utility::Vertex3D> m_shadowVertices{};
 		std::vector<unsigned short> m_shadowIndices{};
 
@@ -143,6 +162,8 @@ namespace game::view
 		bool m_isLimitVisible{ true };
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };
+		std::string m_turnLabel{};
+		std::string m_scoreLabel{};
 		std::string m_message{};
 		std::string m_prompt{};
 	};

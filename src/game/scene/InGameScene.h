@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "game/presenter/PourPresenter.h"
+#include "game/presenter/DuelPresenter.h"
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
 #include "game/view/PourView3D.h"
@@ -7,7 +7,7 @@
 namespace game::scene
 {
 	/**
-	 * @brief 注ぎ勝負のシーン
+	 * @brief 二人で注ぎ合う勝負のシーン
 	 *
 	 * 自分ではルールも描画も持たず、View と Presenter を組み立てて繋ぐだけにしている
 	 */
@@ -31,6 +31,6 @@ namespace game::scene
 
 		// View を先に作ってから Presenter へ渡すため、この順で宣言する
 		view::PourView3D m_view;
-		presenter::PourPresenter m_presenter;
+		presenter::DuelPresenter m_presenter;
 	};
 } // namespace game::scene

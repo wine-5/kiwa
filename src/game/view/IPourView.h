@@ -40,6 +40,18 @@ namespace game::view
 		virtual void showOverflowed(bool isOverflowed) = 0;
 
 		/**
+		 * @brief いまの手番の表示を伝える
+		 * @param turnLabel 文言（「一の手 の番」など）
+		 */
+		virtual void showTurn(const std::string& turnLabel) = 0;
+
+		/**
+		 * @brief 勝敗の表示を伝える
+		 * @param scoreLabel 文言（「一の手 2 - 1 二の手」など）
+		 */
+		virtual void showScore(const std::string& scoreLabel) = 0;
+
+		/**
 		 * @brief 画面中央に出す文言を伝える
 		 * @param message 文言（空なら何も出さない）
 		 */

@@ -25,10 +25,16 @@ namespace
 	constexpr int LINE_SEGMENTS{ 56 };
 
 	/// @brief こぼれが広がる範囲の半径
-	constexpr float PUDDLE_RADIUS{ 0.62f };
+	constexpr float PUDDLE_RADIUS{ 0.68f };
 
 	/// @brief こぼれの厚み
 	constexpr float PUDDLE_THICKNESS{ 0.012f };
+
+	/// @brief こぼれの輪の分割数
+	constexpr int PUDDLE_SEGMENTS{ 48 };
+
+	/// @brief こぼれの中心から縁までの分割数
+	constexpr int PUDDLE_RINGS{ 6 };
 
 	/// @brief 台の木目（ピントが外れている想定で、あらかじめぼかしてある）
 	constexpr const char* TABLE_TEXTURE_PATH{ "assets/textures/wood_table.png" };
@@ -132,6 +138,7 @@ namespace game::view
 		// 枡も台も動かないので、形は最初に一度だけ組んで使い回す
 		SceneryMesh::buildTable(m_tableVertices, m_tableIndices);
 		SceneryMesh::buildShadow(m_shadowVertices, m_shadowIndices);
+		buildPuddle();
 
 		m_tableTexture = resource.loadTexture(TABLE_TEXTURE_PATH);
 		m_vignetteTexture = resource.loadTexture(VIGNETTE_TEXTURE_PATH);
@@ -204,15 +211,64 @@ namespace game::view
 		m_renderer.drawTextureStretched(m_vignetteTexture, origin, size, VIGNETTE_STRENGTH);
 	}
 
+	void PourView3D::buildPuddle()
+	{
+		// 中心が濃く、外へ向かって消えていく円い染み
+		const auto base{ static_cast<unsigned short>(m_puddleVertices.size()) };
+
+		for (int ring{ 0 }; ring <= PUDDLE_RINGS; ++ring)
+		{
+			const float t{ static_cast<float>(ring) / PUDDLE_RINGS };
+			const float radius{ PUDDLE_RADIUS * t };
+
+			for (int segment{ 0 }; segment < PUDDLE_SEGMENTS; ++segment)
+			{
+				const float angle{ core::utility::math::TWO_PI * segment / PUDDLE_SEGMENTS };
+
+				core::utility::Vertex3D vertex{};
+				vertex.position = Vector3{ std::cos(angle) * radius, PUDDLE_THICKNESS,
+					                       std::sin(angle) * radius };
+				vertex.normal = Vector3{ 0.0f, 1.0f, 0.0f };
+				// 濡れた面は光を返すので、器の中の色より明るく置く
+				vertex.color = core::utility::mixed(palette::LIQUID, palette::LIQUID_SPILLED, t);
+				vertex.alpha = 0.92f * (1.0f - t * t * t);
+				m_puddleVertices.push_back(vertex);
+			}
+		}
+
+		for (int ring{ 0 }; ring < PUDDLE_RINGS; ++ring)
+		{
+			for (int segment{ 0 }; segment < PUDDLE_SEGMENTS; ++segment)
+			{
+				const int next{ (segment + 1) % PUDDLE_SEGMENTS };
+				const auto inner{ static_cast<unsigned short>(base + ring * PUDDLE_SEGMENTS + segment) };
+				const auto innerNext{ static_cast<unsigned short>(base + ring * PUDDLE_SEGMENTS + next) };
+				const auto outer{ static_cast<unsigned short>(inner + PUDDLE_SEGMENTS) };
+				const auto outerNext{ static_cast<unsigned short>(innerNext + PUDDLE_SEGMENTS) };
+
+				m_puddleIndices.push_back(inner);
+				m_puddleIndices.push_back(outer);
+				m_puddleIndices.push_back(innerNext);
+
+				m_puddleIndices.push_back(innerNext);
+				m_puddleIndices.push_back(outer);
+				m_puddleIndices.push_back(outerNext);
+			}
+		}
+	}
+
 	void PourView3D::drawPuddle() const
 	{
-		if (!m_isOverflowed)
+		if (!m_isOverflowed || m_puddleIndices.empty())
 			return;
 
-		// こぼれたぶんは器の外へ広がる
-		m_renderer3D.drawBox(Vector3{ -PUDDLE_RADIUS, 0.0f, -PUDDLE_RADIUS },
-		                     Vector3{ PUDDLE_RADIUS, PUDDLE_THICKNESS, PUDDLE_RADIUS },
-		                     palette::LIQUID_SPILLED);
+		// こぼれたぶんは器の外へ広がる。
+		// 自前で組んだメッシュは裏表を取り違えやすいので、面の省略は切っておく
+		m_renderer3D.setBackCulling(false);
+		m_renderer3D.setBlend(core::utility::BlendMode::Alpha, 1.0f);
+		m_renderer3D.drawTriangles(m_puddleVertices, m_puddleIndices);
+		m_renderer3D.setBlend(core::utility::BlendMode::None, 1.0f);
+		m_renderer3D.setBackCulling(true);
 	}
 
 	void PourView3D::drawLimitLine() const
@@ -239,6 +295,15 @@ namespace game::view
 	{
 		const float centerX{ m_screen.getWidth() * 0.5f };
 		const float height{ static_cast<float>(m_screen.getHeight()) };
+
+		if (!m_turnLabel.empty())
+			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, 58.0f }, m_turnLabel,
+			                            palette::TEXT_PRIMARY);
+
+		// 勝敗は隅に小さく置く。手番の表示と重ねると読みにくい
+		if (!m_scoreLabel.empty())
+			m_renderer.drawText(core::utility::Vector2{ 36.0f, 32.0f }, m_scoreLabel,
+			                    palette::TEXT_SUB);
 
 		if (!m_message.empty())
 			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, height - 140.0f }, m_message,
