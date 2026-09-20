@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "game/model/Duel.h"
+#include "game/view/TurnCall.h"
 #include "game/view/VesselLook.h"
 #include "core/input/KeyCode.h"
 #include <random>
@@ -46,8 +47,9 @@ namespace game::presenter
 		 */
 		enum class Phase
 		{
-			Draw,      // 花月の札で先攻を決めている
-			Ready,     // 手番の側が注ぎ始めるのを待っている
+			Draw,       // 花月の札で先攻を決めている
+			TurnPassing, // 手番が移ったことを告げている（この間は注げない）
+			Ready,      // 手番の側が注ぎ始めるのを待っている
 			Pouring,   // 注いでいる
 			RoundOver, // その局の決着がついている
 			MatchOver, // 試合の決着がついている
@@ -69,6 +71,11 @@ namespace game::presenter
 		 * @return 見た目の種類
 		 */
 		[[nodiscard]] static game::view::VesselLook lookOf(model::VesselType vessel) noexcept;
+
+		/**
+		 * @brief 手番が移ったことを告げ始める
+		 */
+		void beginTurnCall();
 
 		/**
 		 * @brief どちらかのキーが押されたかを返す
@@ -124,6 +131,9 @@ namespace game::presenter
 
 		/// @brief 手番の通し番号（渡るたびに増やし、View はこれを見て告げ直す）
 		int m_turnSerial{ 0 };
+
+		/// @brief 手番を告げ始めてから経った時間（秒）
+		float m_callTime{ 0.0f };
 
 		/// @brief 先攻と器を決める乱数
 		std::mt19937 m_random;

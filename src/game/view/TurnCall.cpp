@@ -11,15 +11,6 @@ namespace
 	using core::utility::Vector2;
 	namespace palette = game::constant::palette;
 
-	/// @brief 寄ってくるまでの時間（秒）
-	constexpr float ENTER_TIME{ 0.26f };
-
-	/// @brief 見せている時間（秒）
-	constexpr float HOLD_TIME{ 0.62f };
-
-	/// @brief 引いていく時間（秒）
-	constexpr float LEAVE_TIME{ 0.34f };
-
 	/// @brief 告知を置く高さ（画面の高さに対する割合）
 	constexpr float CALL_Y{ 0.33f };
 
@@ -93,7 +84,7 @@ namespace game::view
 	void TurnCall::draw(core::iface::IRenderer& renderer, core::iface::IScreen& screen,
 	                    int fontHandle, int fontSize) const
 	{
-		constexpr float TOTAL{ ENTER_TIME + HOLD_TIME + LEAVE_TIME };
+		constexpr float TOTAL{ TurnCall::ENTER_TIME + TurnCall::HOLD_TIME + TurnCall::LEAVE_TIME };
 		if (m_time < 0.0f || m_time > TOTAL || m_content.name.empty())
 			return;
 
@@ -101,9 +92,9 @@ namespace game::view
 		const float height{ static_cast<float>(screen.getHeight()) };
 
 		// 寄る→留まる→引く。留まっている間は動かさず、読む間を作る
-		const float enter{ Easing::easeOut(m_time / ENTER_TIME) };
-		const float leave{ Easing::easeIn(std::max(0.0f, m_time - ENTER_TIME - HOLD_TIME) /
-		                                  LEAVE_TIME) };
+		const float enter{ Easing::easeOut(m_time / TurnCall::ENTER_TIME) };
+		const float leave{ Easing::easeIn(std::max(0.0f, m_time - TurnCall::ENTER_TIME - TurnCall::HOLD_TIME) /
+		                                  TurnCall::LEAVE_TIME) };
 
 		// 自分の側から滑り込ませる。どちら側の手番かが動きだけで分かる
 		const float runUp{ width * RUN_UP * (m_content.isFromLeft ? -1.0f : 1.0f) };

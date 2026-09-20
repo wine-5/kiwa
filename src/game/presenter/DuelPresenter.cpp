@@ -57,6 +57,13 @@ namespace game::presenter
 			}
 			break;
 
+		case Phase::TurnPassing:
+			// 告げ終わるまでは誰も注げない。誰の番になったのかを見てから始めさせる
+			m_callTime += deltaTime;
+			if (m_callTime >= game::view::TurnCall::READABLE_TIME)
+				m_phase = Phase::Ready;
+			break;
+
 		case Phase::Ready:
 			if (m_input.isKeyDown(key))
 				m_phase = Phase::Pouring;
@@ -71,7 +78,10 @@ namespace game::presenter
 
 				// 渡ったときだけ告げる（届かず押し直すときに出しては紛らわしい）
 				if (m_duel.getCurrentPlayer() != previous)
-					++m_turnSerial;
+				{
+					beginTurnCall();
+					break;
+				}
 
 				m_phase = Phase::Ready;
 				break;
@@ -129,9 +139,15 @@ namespace game::presenter
 		std::uniform_int_distribution<std::size_t> pick{ 0, model::VESSELS.size() - 1 };
 		m_duel.startRound(model::VESSELS[pick(m_random)].type);
 
-		// 局の初手も、誰から始まるのかを告げる
+		// 局の初手も、誰から始まるのかを告げてから始める
+		beginTurnCall();
+	}
+
+	void DuelPresenter::beginTurnCall()
+	{
 		++m_turnSerial;
-		m_phase = Phase::Ready;
+		m_callTime = 0.0f;
+		m_phase = Phase::TurnPassing;
 	}
 
 	bool DuelPresenter::isAnyKeyPressed()
@@ -234,6 +250,12 @@ namespace game::presenter
 			m_view.showMessage(std::to_string(model::Duel::getTargetWins()) + "本先取  " +
 			                   nameOf(m_duel.getMatchWinner()) + " の勝ち");
 			m_view.showPrompt("どちらかのキーでもう一番");
+			break;
+
+		case Phase::TurnPassing:
+			// 告げている間は下の案内を伏せる。中央の告知だけに目を向けさせる
+			m_view.showMessage("");
+			m_view.showPrompt("");
 			break;
 
 		case Phase::Ready:

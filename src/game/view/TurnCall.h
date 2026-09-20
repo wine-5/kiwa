@@ -35,6 +35,21 @@ namespace game::view
 			bool isFromLeft{ true };
 		};
 
+		/// @brief 寄ってくるまでの時間（秒）
+		static constexpr float ENTER_TIME{ 0.26f };
+
+		/// @brief 見せている時間（秒）
+		static constexpr float HOLD_TIME{ 0.62f };
+
+		/// @brief 引いていく時間（秒）
+		static constexpr float LEAVE_TIME{ 0.34f };
+
+		/// @brief 読み終わるまでの時間（秒）
+		///
+		/// 告げている最中に次の手が始まってしまうと、誰の番になったのか
+		/// 分からないまま注ぐことになる。進行を止める長さをここから取る
+		static constexpr float READABLE_TIME{ ENTER_TIME + HOLD_TIME };
+
 		TurnCall() = default;
 
 		/**
