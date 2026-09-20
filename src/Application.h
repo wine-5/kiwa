@@ -1,10 +1,14 @@
 ﻿#pragma once
 #include "core/base/NonCopyable.h"
 #include "game/scene/SceneManager.h"
+#include "infrastructure/debug/FrameCapture.h"
+#include "infrastructure/debug/ScriptedInput.h"
 #include "infrastructure/graphics/Camera.h"
 #include "infrastructure/graphics/Renderer.h"
 #include "infrastructure/graphics/ModelRenderer.h"
 #include "infrastructure/graphics/PostEffect.h"
+#include "game/constant/Fonts.h"
+#include "platform/font/FontFile.h"
 #include "infrastructure/graphics/Renderer3D.h"
 #include "infrastructure/graphics/Screen.h"
 #include "infrastructure/input/InputProvider.h"
@@ -40,6 +44,9 @@ class Application final : private core::base::NonCopyable
 
   private:
 	// 宣言順にそのまま生成されるため、依存される側を先に置く
+	// 同梱のフォントは、どの資源より先に使える状態にしておく必要がある
+	platform::font::FontFile m_brushFont{ game::constant::font::HEADING_FILE };
+
 	infrastructure::graphics::Screen m_screen;
 	infrastructure::graphics::Renderer m_renderer{};
 	infrastructure::graphics::Renderer3D m_renderer3D{};
@@ -47,6 +54,10 @@ class Application final : private core::base::NonCopyable
 	infrastructure::graphics::ModelRenderer m_modelRenderer{};
 	infrastructure::graphics::PostEffect m_postEffect;
 	infrastructure::input::InputProvider m_input{};
+
+	// 動作確認のための仕掛け。普段は何も仕掛かっていないので素通しになる
+	infrastructure::debug::ScriptedInput m_scriptedInput{ m_input };
+	infrastructure::debug::FrameCapture m_frameCapture{};
 	infrastructure::resource::ResourceManager m_resource{};
 	game::scene::SceneManager m_sceneManager;
 

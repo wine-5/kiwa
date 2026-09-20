@@ -39,9 +39,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetLightAmbColor(GetColorF(0.42f, 0.42f, 0.45f, 0.0f));
 	SetLightSpcColor(GetColorF(0.9f, 0.9f, 0.9f, 0.0f));
 
-	// 和風の見た目に寄せる。明朝体が無い環境では既定のフォントのままになる
-	ChangeFont("游明朝");
-	SetFontSize(26);
 
 	{
 		// リソースの解放を DxLib_End より先に済ませるため、スコープで囲む
