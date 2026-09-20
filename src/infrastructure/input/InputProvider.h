@@ -26,6 +26,10 @@ namespace infrastructure::input
 
 		[[nodiscard]] bool isKeyReleased(core::input::KeyCode keyCode) const override;
 
+		bool consumeKeyPress(core::input::KeyCode keyCode) override;
+
+		void clearPendingPresses() override;
+
 		[[nodiscard]] core::utility::Vector2 getMousePosition() const override;
 
 		[[nodiscard]] bool isMouseLeftDown() const override;
@@ -41,6 +45,9 @@ namespace infrastructure::input
 
 		/// @brief 前フレームのキー状態
 		std::array<bool, KEY_COUNT> m_previousKeys{};
+
+		/// @brief まだ消費されていない「押された瞬間」
+		std::array<bool, KEY_COUNT> m_pendingPresses{};
 
 		/// @brief このフレームのマウス左ボタンの状態
 		bool m_currentMouseLeft{ false };

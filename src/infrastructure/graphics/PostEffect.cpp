@@ -44,10 +44,19 @@ namespace infrastructure::graphics
 	{
 		SetDrawScreen(m_sceneScreen);
 		ClearDrawScreen();
+
+		// 奥行きの判定は既定で切れている。3D を描いている間は入れておかないと、
+		// あとから描いたものが器を突き抜けて手前に出てしまう
+		SetUseZBufferFlag(TRUE);
+		SetWriteZBufferFlag(TRUE);
 	}
 
 	void PostEffect::end()
 	{
+		// このあとの 2D は奥行きと関係ないので戻しておく
+		SetWriteZBufferFlag(FALSE);
+		SetUseZBufferFlag(FALSE);
+
 		// 明るいところだけを残して小さい面へ写す
 		GraphFilterBlt(m_sceneScreen, m_bloomScreen, DX_GRAPH_FILTER_BRIGHT_CLIP, DX_CMP_LESS,
 		               BLOOM_THRESHOLD, TRUE, GetColor(0, 0, 0), 0);

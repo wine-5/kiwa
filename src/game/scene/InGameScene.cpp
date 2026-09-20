@@ -17,7 +17,7 @@ namespace game::scene
 		m_presenter.update(deltaTime);
 
 		// Presenter が渡したあとに View の動き（液面の揺れなど）を進める
-		m_view.advance(deltaTime);
+		m_view.update(deltaTime);
 	}
 
 	void InGameScene::draw()

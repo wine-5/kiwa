@@ -4,9 +4,11 @@
 namespace core::iface
 {
 	/**
-	 * @brief 画像・音の読み込みを担うインターフェース
+	 * @brief 資源（画像・音・モデル・フォント）の読み込みを担うインターフェース
 	 *
-	 * 同じパスを何度読み込んでも実体は1つに保たれる（2回目以降はキャッシュを返す）
+	 * 資源をハンドルに変える窓口はここ一つに集める。描く側は「描く」ことだけを受け持つ。
+	 * 同じものを何度頼んでも実体は1つに保たれる（2回目以降はキャッシュを返す）ので、
+	 * 呼ぶ側が読み込み済みかどうかを気にする必要はない
 	 */
 	class IResourceManager
 	{
@@ -26,6 +28,23 @@ namespace core::iface
 		 * @return 音ハンドル（失敗した場合は -1）
 		 */
 		virtual int loadSound(const std::string& path) = 0;
+
+		/**
+		 * @brief 3D モデルを読み込む
+		 * @param path モデルファイルのパス（実行ファイルからの相対パス）
+		 * @return モデルハンドル（失敗した場合は -1）
+		 */
+		virtual int loadModel(const std::string& path) = 0;
+
+		/**
+		 * @brief フォントを用意する
+		 * @details 同じ組み合わせを何度頼んでも作り直さない
+		 * @param family フォント名（あらかじめ使える状態になっていること）
+		 * @param size 文字の大きさ
+		 * @param thickness 太さ（-1で既定）
+		 * @return フォントハンドル（失敗した場合は -1）
+		 */
+		virtual int loadFont(const std::string& family, int size, int thickness = -1) = 0;
 
 		/**
 		 * @brief 効果音を鳴らす（重ねて鳴らせる）

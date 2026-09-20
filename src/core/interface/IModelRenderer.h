@@ -1,26 +1,18 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
-#include <string>
 
 namespace core::iface
 {
 	/**
-	 * @brief 3D モデルの読み込みと描画のインターフェース
+	 * @brief 3D モデルの描画のインターフェース
 	 *
 	 * 器や急須のように、形が決まっていて動かないものはモデルとして持つ。
-	 * 自前で頂点を組むより形を作り込める
+	 * 読み込みは IResourceManager の受け持ちで、ここは描くことだけを行う
 	 */
 	class IModelRenderer
 	{
 	  public:
 		virtual ~IModelRenderer() = default;
-
-		/**
-		 * @brief モデルを読み込む
-		 * @param path モデルファイルのパス（実行ファイルからの相対パス）
-		 * @return モデルハンドル（失敗した場合は -1）
-		 */
-		virtual int load(const std::string& path) = 0;
 
 		/**
 		 * @brief モデルを描く

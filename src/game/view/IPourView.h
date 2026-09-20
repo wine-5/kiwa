@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "game/view/VesselLook.h"
 #include <string>
 
 namespace game::view
@@ -15,17 +16,16 @@ namespace game::view
 		virtual ~IPourView() = default;
 
 		/**
-		 * @brief 枡に入っている嵩を伝える
-		 * @param ratio 嵩（0.0〜1.0）
+		 * @brief 器に入っている嵩を伝える
+		 * @param ratio 嵩（0.0〜1.0。1.0 で口いっぱい）
 		 */
 		virtual void showAmount(float ratio) = 0;
 
 		/**
-		 * @brief こぼれる際の位置を伝える
-		 * @param ratio 際の嵩（0.0〜1.0）
-		 * @param isVisible 見せるならtrue（隠す勝負では false にする）
+		 * @brief この局で使う器を伝える
+		 * @param look 器の見た目
 		 */
-		virtual void showLimit(float ratio, bool isVisible) = 0;
+		virtual void showVessel(VesselLook look) = 0;
 
 		/**
 		 * @brief いま注いでいるかを伝える
@@ -38,6 +38,37 @@ namespace game::view
 		 * @param isOverflowed こぼしているならtrue
 		 */
 		virtual void showOverflowed(bool isOverflowed) = 0;
+
+		/**
+		 * @brief 札を引く場面の表示を伝える
+		 * @param isActive いま札を引く場面かどうか
+		 * @param isRevealed 札を返したか
+		 * @param isFirstCard 引いた札が「先攻」か
+		 * @param leftLabel 左に出す役（一の手のぶん）
+		 * @param rightLabel 右に出す役（二の手のぶん）
+		 */
+		virtual void showCardDraw(bool isActive, bool isRevealed, bool isFirstCard,
+		                          const std::string& leftLabel, const std::string& rightLabel) = 0;
+
+		/**
+		 * @brief 手番が移ったことを伝える
+		 * @param serial 手番の通し番号（変わったときだけ告げる）
+		 * @param name 手番の側の呼び名
+		 * @param isFromLeft 左の側の手番か
+		 */
+		virtual void showTurnCall(int serial, const std::string& name, bool isFromLeft) = 0;
+
+		/**
+		 * @brief いまの手番の表示を伝える
+		 * @param turnLabel 文言（「一の手 の番」など）
+		 */
+		virtual void showTurn(const std::string& turnLabel) = 0;
+
+		/**
+		 * @brief 勝敗の表示を伝える
+		 * @param scoreLabel 文言（「一の手 2 - 1 二の手」など）
+		 */
+		virtual void showScore(const std::string& scoreLabel) = 0;
 
 		/**
 		 * @brief 画面中央に出す文言を伝える
@@ -58,7 +89,7 @@ namespace game::view
 		 * Model も Presenter もこれらを知らず、進行の結果は何も変わらない
 		 * @param deltaTime 進める時間（秒）
 		 */
-		virtual void advance(float deltaTime) = 0;
+		virtual void update(float deltaTime) = 0;
 
 		/**
 		 * @brief 伝えられた内容を描く

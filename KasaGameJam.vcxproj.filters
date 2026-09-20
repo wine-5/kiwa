@@ -2,55 +2,64 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{b0e9f06e-68d3-45d7-84f2-58586d68051f}</UniqueIdentifier>
+      <UniqueIdentifier>{6df255e6-8445-4a39-862d-b67449b38462}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core">
-      <UniqueIdentifier>{f6ed94c0-a691-4346-8ff8-f345fca033e3}</UniqueIdentifier>
+      <UniqueIdentifier>{725bf151-db2b-492c-8311-33d376ea626c}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\base">
-      <UniqueIdentifier>{7bed3143-d0ca-4746-8b5a-0631b7d8b3ac}</UniqueIdentifier>
+      <UniqueIdentifier>{3af5dabf-9503-4f90-a12f-f9f8abe6cee3}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\constant">
-      <UniqueIdentifier>{e8498026-71cd-4968-95ad-b858ebb99b08}</UniqueIdentifier>
+      <UniqueIdentifier>{8ca91ea0-5aa4-4957-ad62-b13c023830d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\input">
-      <UniqueIdentifier>{f6fc9791-45f1-4d46-bb20-caf72ec6ed0d}</UniqueIdentifier>
+      <UniqueIdentifier>{2d5333ea-1181-4f4e-8a04-3a2b76114463}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\interface">
-      <UniqueIdentifier>{7897cb8b-a2f2-4ad8-a873-bf68a81fd018}</UniqueIdentifier>
+      <UniqueIdentifier>{57428f70-15e5-4b69-8de7-edb841a1fb07}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\utility">
-      <UniqueIdentifier>{e2e23777-5c15-4d5d-ac41-f63e36f1b6a5}</UniqueIdentifier>
+      <UniqueIdentifier>{d2f68c5f-3447-4d1c-af22-79705f8e138f}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game">
-      <UniqueIdentifier>{28409937-af21-41b0-b70f-ced94ed30087}</UniqueIdentifier>
+      <UniqueIdentifier>{1f0c16f5-d3f9-4b23-b408-978e8b713867}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\constant">
-      <UniqueIdentifier>{024e8581-d67b-4ae0-ba70-87457f4aa7be}</UniqueIdentifier>
+      <UniqueIdentifier>{6d48299f-804f-4524-9ea6-9bc8aa4da07f}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\model">
-      <UniqueIdentifier>{3cfcd3d6-2e7f-450a-9385-437b4e78ef48}</UniqueIdentifier>
+      <UniqueIdentifier>{fce21930-81cf-4c00-8843-54c185b30de1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\presenter">
-      <UniqueIdentifier>{80b23251-4081-45a9-9095-94534fadde8e}</UniqueIdentifier>
+      <UniqueIdentifier>{4e941a78-f25d-42d7-a12a-9b27f07f7903}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\scene">
-      <UniqueIdentifier>{8f25a501-504d-4d1e-8ca8-8e09be83fc9f}</UniqueIdentifier>
+      <UniqueIdentifier>{72aff019-e598-462d-93c1-27c1ebf07fa4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\view">
-      <UniqueIdentifier>{160df889-e332-4fb5-93bf-6472900d24b4}</UniqueIdentifier>
+      <UniqueIdentifier>{9bba03df-e360-47ed-bd5f-be0836bcfb35}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure">
-      <UniqueIdentifier>{a4bea702-a0c4-4ab8-8d81-12884e0126e5}</UniqueIdentifier>
+      <UniqueIdentifier>{287ef6cb-1f88-47ef-8db9-530ccd261cb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\infrastructure\debug">
+      <UniqueIdentifier>{d8210795-de65-489a-97f0-34ae2f8324e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\graphics">
-      <UniqueIdentifier>{7ca8511d-d41b-4a88-bdc2-d958e3892aaa}</UniqueIdentifier>
+      <UniqueIdentifier>{6a6c2e52-3218-4504-b010-6cc2285e476c}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\input">
-      <UniqueIdentifier>{725ccf64-4485-4b6f-8204-70ac6fa93a39}</UniqueIdentifier>
+      <UniqueIdentifier>{c7db892e-9c03-4269-90c0-0f6dfd64898e}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\resource">
-      <UniqueIdentifier>{25955c66-d702-492a-ad4d-e1dc654fa945}</UniqueIdentifier>
+      <UniqueIdentifier>{ceb3d76f-79c8-4e1b-8fd4-f6b68d671fa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform">
+      <UniqueIdentifier>{01c9ae1a-99ce-4a83-9310-df9ef0c8d40e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\font">
+      <UniqueIdentifier>{4d93f9dd-21d4-484b-9019-31b4aae14086}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,10 +69,13 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\model\Duel.cpp">
+      <Filter>src\game\model</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\model\PourMatch.cpp">
       <Filter>src\game\model</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\presenter\PourPresenter.cpp">
+    <ClCompile Include="src\game\presenter\DuelPresenter.cpp">
       <Filter>src\game\presenter</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\InGameScene.cpp">
@@ -81,6 +93,15 @@
     <ClCompile Include="src\game\scene\TitleScene.cpp">
       <Filter>src\game\scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\view\SpillStreaks.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\TurnCall.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\CardDraw.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\view\LiquidVisual.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
@@ -95,6 +116,15 @@
     </ClCompile>
     <ClCompile Include="src\game\view\WaterSurface.cpp">
       <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\debug\FrameCapture.cpp">
+      <Filter>src\infrastructure\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\debug\Scenario.cpp">
+      <Filter>src\infrastructure\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\infrastructure\debug\ScriptedInput.cpp">
+      <Filter>src\infrastructure\debug</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\graphics\Camera.cpp">
       <Filter>src\infrastructure\graphics</Filter>
@@ -120,6 +150,9 @@
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp">
       <Filter>src\infrastructure\resource</Filter>
     </ClCompile>
+    <ClCompile Include="src\platform\font\FontFile.cpp">
+      <Filter>src\platform\font</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.h">
@@ -128,6 +161,9 @@
     <ClInclude Include="src\core\base\NonCopyable.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\constant\GameConfig.h">
+      <Filter>src\core\constant</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\constant\ScreenConstants.h">
       <Filter>src\core\constant</Filter>
     </ClInclude>
@@ -164,6 +200,9 @@
     <ClInclude Include="src\core\utility\Color.h">
       <Filter>src\core\utility</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\utility\Easing.h">
+      <Filter>src\core\utility</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\utility\MathConstants.h">
       <Filter>src\core\utility</Filter>
     </ClInclude>
@@ -176,16 +215,28 @@
     <ClInclude Include="src\core\utility\Vertex3D.h">
       <Filter>src\core\utility</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\constant\Fonts.h">
+      <Filter>src\game\constant</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\constant\Palette.h">
       <Filter>src\game\constant</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\model\Duel.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\model\Judgement.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\model\Vessel.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\model\Player.h">
       <Filter>src\game\model</Filter>
     </ClInclude>
     <ClInclude Include="src\game\model\PourMatch.h">
       <Filter>src\game\model</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\presenter\PourPresenter.h">
+    <ClInclude Include="src\game\presenter\DuelPresenter.h">
       <Filter>src\game\presenter</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\IScene.h">
@@ -212,6 +263,18 @@
     <ClInclude Include="src\game\scene\TitleScene.h">
       <Filter>src\game\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\view\VesselLook.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\SpillStreaks.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\TurnCall.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\CardDraw.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\view\CupGeometry.h">
       <Filter>src\game\view</Filter>
     </ClInclude>
@@ -232,6 +295,15 @@
     </ClInclude>
     <ClInclude Include="src\game\view\WaterSurface.h">
       <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\debug\FrameCapture.h">
+      <Filter>src\infrastructure\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\debug\Scenario.h">
+      <Filter>src\infrastructure\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\debug\ScriptedInput.h">
+      <Filter>src\infrastructure\debug</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\graphics\Camera.h">
       <Filter>src\infrastructure\graphics</Filter>
@@ -256,6 +328,9 @@
     </ClInclude>
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h">
       <Filter>src\infrastructure\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\font\FontFile.h">
+      <Filter>src\platform\font</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 ﻿// 自前ヘッダを先に include する（DxLib のマクロと定数名が衝突するのを防ぐ）
 #include "Application.h"
+#include "core/constant/GameConfig.h"
 #include "core/constant/ScreenConstants.h"
+#include "infrastructure/debug/Scenario.h"
 #include "game/constant/Palette.h"
 #include "DxLib.h"
 
@@ -18,11 +20,24 @@ namespace
 
 Application::Application(int screenWidth, int screenHeight)
     : m_screen{ screenWidth, screenHeight }, m_postEffect{ screenWidth, screenHeight },
-      m_sceneManager{ m_renderer,     m_renderer3D, m_camera,  m_modelRenderer,
-	                  m_input,        m_resource,   m_screen }
+      m_sceneManager{ m_renderer,      m_renderer3D, m_camera,  m_modelRenderer,
+	                  m_scriptedInput, m_resource,   m_screen }
 {
 	// 画面を暗く落としておくと、枡と液体だけが浮かび上がる
 	m_screen.setBackgroundColor(game::constant::palette::BACKGROUND);
+	// 動作確認の段取りは Scenario に書く（ここには配線だけを置く）。
+	// 製品版では丸ごと消えるよう if constexpr で分ける
+	if constexpr (core::constant::GameConfig::USES_SCENARIO)
+	{
+		infrastructure::debug::Scenario::install(m_scriptedInput, m_frameCapture);
+
+		if (infrastructure::debug::Scenario::startsInGame())
+		{
+			m_sceneManager.start(game::scene::SceneType::InGame);
+			return;
+		}
+	}
+
 	m_sceneManager.start(game::scene::SceneType::Title);
 }
 
@@ -41,9 +56,9 @@ void Application::run()
 			deltaTime = MAX_DELTA_TIME;
 
 		// このフレームで使う入力をここで確定させる（以降は同じ状態を見続ける）
-		m_input.captureFrameInput();
+		m_scriptedInput.captureFrameInput();
 
-		if (m_input.isKeyPressed(core::input::KeyCode::Escape))
+		if (m_scriptedInput.isKeyPressed(core::input::KeyCode::Escape))
 			m_isRunning = false;
 
 		accumulatedTime += deltaTime;
@@ -60,8 +75,15 @@ void Application::run()
 		m_postEffect.end();
 		m_sceneManager.drawOverlay();
 
+		if constexpr (core::constant::GameConfig::ALLOWS_FRAME_CAPTURE)
+		{
+			m_frameCapture.endFrame(m_screen.getWidth(), m_screen.getHeight());
+			if (m_frameCapture.isFinished())
+				m_isRunning = false;
+		}
+
 		ScreenFlip();
 
-		m_input.updatePreviousState();
+		m_scriptedInput.updatePreviousState();
 	}
 }

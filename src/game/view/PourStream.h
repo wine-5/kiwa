@@ -30,7 +30,7 @@ namespace game::view
 		 * @param deltaTime 進める時間（秒）
 		 * @param isPouring いま注がれているか
 		 */
-		void advance(float deltaTime, bool isPouring);
+		void update(float deltaTime, bool isPouring);
 
 		/**
 		 * @brief 筋が見えているか

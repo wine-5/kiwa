@@ -12,6 +12,12 @@ namespace infrastructure::graphics
 	  public:
 		Renderer() = default;
 
+	  private:
+		/// @brief いま使っている書体（-1 なら既定）
+		int m_fontHandle{ -1 };
+
+	  public:
+
 		void drawRect(const core::utility::Vector2& position, const core::utility::Vector2& size,
 		              const core::utility::Color& color, bool isFilled = true) override;
 
@@ -20,6 +26,8 @@ namespace infrastructure::graphics
 
 		void drawLine(const core::utility::Vector2& from, const core::utility::Vector2& to,
 		              const core::utility::Color& color) override;
+
+		void setFont(int fontHandle) override;
 
 		void drawText(const core::utility::Vector2& position, const std::string& text,
 		              const core::utility::Color& color) override;

@@ -1,5 +1,6 @@
 ﻿// 自前ヘッダを先に include する（DxLib のマクロと定数名が衝突するのを防ぐ）
 #include "Application.h"
+#include "core/constant/GameConfig.h"
 #include "core/constant/ScreenConstants.h"
 #include "DxLib.h"
 
@@ -18,8 +19,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	SetGraphMode(core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT, core::constant::COLOR_BIT);
 	ChangeWindowMode(TRUE);
-	SetMainWindowText("KasaGameJam");
-	SetAlwaysRunFlag(TRUE); // 非アクティブでも描画を続ける（デバッグ中に止まらないように）
+	SetMainWindowText(core::constant::GameConfig::WINDOW_TITLE);
+
+	// 開発中は窓の外へ出ても止まらないようにする（製品版では裏で走らせない）
+	SetAlwaysRunFlag(core::constant::GameConfig::RUNS_WHILE_INACTIVE ? TRUE : FALSE);
 
 	if (DxLib_Init() == -1)
 		return -1;
@@ -39,9 +42,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetLightAmbColor(GetColorF(0.42f, 0.42f, 0.45f, 0.0f));
 	SetLightSpcColor(GetColorF(0.9f, 0.9f, 0.9f, 0.0f));
 
-	// 和風の見た目に寄せる。明朝体が無い環境では既定のフォントのままになる
-	ChangeFont("游明朝");
-	SetFontSize(26);
 
 	{
 		// リソースの解放を DxLib_End より先に済ませるため、スコープで囲む

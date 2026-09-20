@@ -1,7 +1,12 @@
 ﻿#pragma once
 #include "game/view/IPourView.h"
 #include "core/utility/Vertex3D.h"
+#include "game/view/CardDraw.h"
+#include "game/view/CupGeometry.h"
 #include "game/view/LiquidVisual.h"
+#include "game/view/SpillStreaks.h"
+#include "game/view/TurnCall.h"
+#include <array>
 #include <vector>
 
 namespace core::iface
@@ -30,7 +35,7 @@ namespace game::view
 		 * @param renderer 2D 描画（文字に使う）
 		 * @param camera カメラ
 		 * @param modelRenderer 急須のモデルの描画
-		 * @param resource 木目のテクスチャの読み込み
+		 * @param resource テクスチャ・モデル・書体の読み込み
 		 * @param screen 画面サイズの取得
 		 */
 		PourView3D(core::iface::IRenderer3D& renderer3D, core::iface::IRenderer& renderer,
@@ -42,10 +47,15 @@ namespace game::view
 			m_amountRatio = ratio;
 		}
 
-		void showLimit(float ratio, bool isVisible) override
+		void showVessel(VesselLook look) override
 		{
-			m_limitRatio = ratio;
-			m_isLimitVisible = isVisible;
+			if (look == m_vesselLook)
+				return;
+
+			// 器が変われば内側の形も変わる。液体はこの形に沿って描かれる
+			m_vesselLook = look;
+			m_liquid.setShape(cup::shapeOf(look));
+			m_spill.setShape(cup::shapeOf(look));
 		}
 
 		void showPouring(bool isPouring) override
@@ -58,6 +68,33 @@ namespace game::view
 			m_isOverflowed = isOverflowed;
 		}
 
+		void showCardDraw(bool isActive, bool isRevealed, bool isFirstCard,
+		                  const std::string& leftLabel, const std::string& rightLabel) override
+		{
+			m_cardContent.isActive = isActive;
+			m_cardContent.isRevealed = isRevealed;
+			m_cardContent.isFirstCard = isFirstCard;
+			m_cardContent.leftLabel = leftLabel;
+			m_cardContent.rightLabel = rightLabel;
+		}
+
+		void showTurnCall(int serial, const std::string& name, bool isFromLeft) override
+		{
+			m_turnCallContent.serial = serial;
+			m_turnCallContent.name = name;
+			m_turnCallContent.isFromLeft = isFromLeft;
+		}
+
+		void showTurn(const std::string& turnLabel) override
+		{
+			m_turnLabel = turnLabel;
+		}
+
+		void showScore(const std::string& scoreLabel) override
+		{
+			m_scoreLabel = scoreLabel;
+		}
+
 		void showMessage(const std::string& message) override
 		{
 			m_message = message;
@@ -68,7 +105,7 @@ namespace game::view
 			m_prompt = prompt;
 		}
 
-		void advance(float deltaTime) override;
+		void update(float deltaTime) override;
 
 		void draw() override;
 
@@ -81,14 +118,17 @@ namespace game::view
 		void drawScenery() const;
 
 		/**
+		 * @brief こぼれて台に広がったぶんの形を組む
+		 */
+		void buildPuddle();
+
+		/**
 		 * @brief こぼれて台に広がったぶんを描く
 		 */
 		void drawPuddle() const;
 
-		/**
-		 * @brief こぼれる際を示す線を描く
-		 */
-		void drawLimitLine() const;
+
+
 
 		/**
 		 * @brief 画面全体へ被せる仕上げ（周辺減光と粒状感）を描く
@@ -106,16 +146,20 @@ namespace game::view
 		core::iface::IModelRenderer& m_modelRenderer;
 		core::iface::IScreen& m_screen;
 
-		/// @brief 台の形
-		std::vector<core::utility::Vertex3D> m_tableVertices{};
-		std::vector<unsigned short> m_tableIndices{};
+		/// @brief 床（畳）の形
+		std::vector<core::utility::Vertex3D> m_floorVertices{};
+		std::vector<unsigned short> m_floorIndices{};
 
-		/// @brief 枡が落とす影の形
+		/// @brief こぼれて広がった液体の形
+		std::vector<core::utility::Vertex3D> m_puddleVertices{};
+		std::vector<unsigned short> m_puddleIndices{};
+
+		/// @brief 器が落とす影の形
 		std::vector<core::utility::Vertex3D> m_shadowVertices{};
 		std::vector<unsigned short> m_shadowIndices{};
 
-		/// @brief 台の木目
-		int m_tableTexture{ -1 };
+		/// @brief 畳表
+		int m_floorTexture{ -1 };
 
 		/// @brief 周辺減光
 		int m_vignetteTexture{ -1 };
@@ -123,8 +167,26 @@ namespace game::view
 		/// @brief 粒状感
 		int m_grainTexture{ -1 };
 
-		/// @brief 湯呑のモデル
-		int m_cupModel{ -1 };
+		/// @brief 札の裏
+		int m_cardBackTexture{ -1 };
+
+		/// @brief 先攻の札
+		int m_cardFirstTexture{ -1 };
+
+		/// @brief 後攻の札
+		int m_cardSecondTexture{ -1 };
+
+		/// @brief 見出しの書体（毛筆）
+		int m_headingFont{ -1 };
+
+		/// @brief 本文の書体
+		int m_bodyFont{ -1 };
+
+		/// @brief 手番を告げる大きな書体
+		int m_callFont{ -1 };
+
+		/// @brief 器のモデル（VesselLook の順に並べる）
+		std::array<int, 4> m_cupModels{ -1, -1, -1, -1 };
 
 		/// @brief 土瓶のモデル
 		int m_potModel{ -1 };
@@ -138,11 +200,36 @@ namespace game::view
 		/// @brief 液体の見せ方（揺れ・波紋・しぶき・照り）
 		LiquidVisual m_liquid{};
 
+		/// @brief こぼれて外壁を伝う筋
+		SpillStreaks m_spill{};
+
+		/// @brief 広がる途中の染み（毎フレーム作り直す）
+		mutable std::vector<core::utility::Vertex3D> m_puddleFrame{};
+
+		/// @brief 染みの広がり具合（0.0〜1.0）
+		float m_puddleGrowth{ 0.0f };
+
+		/// @brief 手番が移ったことの告げ方
+		TurnCall m_turnCall{};
+
+		/// @brief 先攻を決める札の見せ方
+		CardDraw m_cardDraw{};
+
 		float m_amountRatio{ 0.0f };
-		float m_limitRatio{ 1.0f };
-		bool m_isLimitVisible{ true };
+
+		/// @brief いま出ている器
+		VesselLook m_vesselLook{ VesselLook::Yunomi };
+
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };
+		/// @brief 札の表示に必要な内容
+		CardDraw::Content m_cardContent{};
+
+		/// @brief 手番の告知に必要な内容
+		TurnCall::Content m_turnCallContent{};
+
+		std::string m_turnLabel{};
+		std::string m_scoreLabel{};
 		std::string m_message{};
 		std::string m_prompt{};
 	};

@@ -68,41 +68,6 @@ def stretched_noise(size, cells_x, cells_y, rng):
     return row[iy0, :] * (1.0 - wy)[:, None] + row[iy1, :] * wy[:, None]
 
 
-def make_wood(size, seed, light, dark, ring_count, pore_strength, roughness, warp_amount, pore_cells):
-    """木目を作る。
-
-    年輪をうねらせ、導管の筋と木肌のざらつきを重ねる。
-    """
-    rng = np.random.default_rng(seed)
-
-    v = np.linspace(0.0, 1.0, size, endpoint=False)[:, None] * np.ones((1, size))
-
-    # 年輪はまっすぐ走らない。雑音で座標をゆがめてから縞にする
-    warp = fractal_noise(size, 3, 4, rng) - 0.5
-    rings = 0.5 + 0.5 * np.sin((v * ring_count + warp * warp_amount) * 2.0 * np.pi)
-    rings = rings ** 0.5
-
-    # 導管は木目と同じ向き（横）に走る。縦に走らせると布地のように見えてしまう
-    pores = stretched_noise(size, 8, pore_cells, rng)
-    pores = np.clip((pores - 0.52) * 3.2, 0.0, 1.0)
-
-    # 木肌のざらつき
-    grit = fractal_noise(size, 64, 3, rng) - 0.5
-
-    shade = rings - pores * pore_strength + grit * roughness
-    shade = np.clip(shade, 0.0, 1.0)[:, :, None]
-
-    light = np.array(light, dtype=np.float64)
-    dark = np.array(dark, dtype=np.float64)
-    color = dark + (light - dark) * shade
-
-    # 場所ごとの色味のばらつき（一枚板に見えないように）
-    tint = (fractal_noise(size, 2, 3, rng) - 0.5)[:, :, None]
-    color = color * (1.0 + tint * 0.10)
-
-    return np.clip(color, 0, 255).astype(np.uint8)
-
-
 def make_water_normal(size, seed):
     """水面の細かな凹凸を、法線マップとして作る。
 
@@ -123,6 +88,108 @@ def make_water_normal(size, seed):
     normal /= np.linalg.norm(normal, axis=-1, keepdims=True)
 
     return ((normal * 0.5 + 0.5) * 255.0).astype(np.uint8)
+
+
+def make_card(text, size, rng_seed):
+    """花月の札。和紙色の地に、太い明朝で縦に字を刷る。"""
+    from PIL import ImageDraw, ImageFont
+
+    width, height = size
+    paper = Image.new("RGB", (width, height), (232, 224, 203))
+    draw = ImageDraw.Draw(paper)
+
+    # 和紙の繊維らしさ（ごく薄い斑）
+    rng = np.random.default_rng(rng_seed)
+    grain = fractal_noise(max(width, height), 24, 3, rng)[:height, :width]
+    speckle = (grain - 0.5) * 16.0
+    base = np.asarray(paper, dtype=np.float64) + speckle[:, :, None]
+
+    paper = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    draw = ImageDraw.Draw(paper)
+
+    # 縁の罫
+    margin = int(width * 0.10)
+    draw.rectangle([margin, margin, width - margin, height - margin],
+                   outline=(120, 96, 74), width=max(2, width // 90))
+
+    # 字は縦に一字ずつ置く
+    # 同梱した毛筆のフォントを使う（画面の見出しと同じ書体で揃える）
+    font_path = os.path.join(os.path.dirname(OUTPUT_DIR), "fonts", "KouzanMouhitu.ttf")
+    font_size = int(width * 0.50)
+    font = ImageFont.truetype(font_path, font_size)
+
+    total = len(text) * font_size + (len(text) - 1) * int(font_size * 0.12)
+    y = (height - total) // 2
+    for character in text:
+        box = draw.textbbox((0, 0), character, font=font)
+        x = (width - (box[2] - box[0])) // 2 - box[0]
+        draw.text((x, y - box[1]), character, font=font, fill=(38, 32, 28))
+        y += font_size + int(font_size * 0.12)
+
+    return np.asarray(paper)
+
+
+def make_card_back(size, rng_seed):
+    """札の裏。無地に近い和紙に、小さな丸紋をひとつ。"""
+    from PIL import ImageDraw
+
+    width, height = size
+    rng = np.random.default_rng(rng_seed)
+    grain = fractal_noise(max(width, height), 24, 3, rng)[:height, :width]
+
+    base = np.zeros((height, width, 3), dtype=np.float64)
+    base[..., 0] = 214
+    base[..., 1] = 203
+    base[..., 2] = 180
+    base += ((grain - 0.5) * 18.0)[:, :, None]
+
+    paper = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    draw = ImageDraw.Draw(paper)
+
+    radius = int(width * 0.16)
+    center = (width // 2, height // 2)
+    draw.ellipse([center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius],
+                 outline=(150, 124, 98), width=max(2, width // 80))
+
+    return np.asarray(paper)
+
+
+def make_tatami(size, seed):
+    """畳表（い草の織り目）。細い横筋が詰んで走り、ところどころ色が振れる。"""
+    rng = np.random.default_rng(seed)
+
+    # 織り目は等間隔の横筋。細かいので、筋の山と谷で明暗を作る
+    v = np.linspace(0.0, 1.0, size, endpoint=False)[:, None] * np.ones((1, size))
+    lines = 0.5 + 0.5 * np.sin(v * 44.0 * 2.0 * np.pi)
+    weave = lines ** 1.6
+
+    # い草は一本ずつ色が違う。筋の番号ごとに明るさを振る
+    strand_index = np.floor(v * 44.0).astype(int)
+    strand_shade = rng.random(44 + 1)[strand_index % 44]
+
+    # 縦方向の繊維の流れ
+    fiber = stretched_noise(size, 220, 6, rng)
+
+    # 経糸（たていと）で締めた筋が、一定間隔で縦に入る
+    u = np.linspace(0.0, 1.0, size, endpoint=False)[None, :] * np.ones((size, 1))
+    warp = 0.5 + 0.5 * np.sin(u * 6.0 * 2.0 * np.pi)
+    warp = np.clip((warp - 0.86) * 6.0, 0.0, 1.0)
+
+    shade = (0.74 + 0.26 * weave) * (0.88 + 0.24 * strand_shade)
+    shade -= fiber * 0.10
+    shade -= warp * 0.10
+    shade = np.clip(shade, 0.0, 1.2)[:, :, None]
+
+    light = np.array((206, 196, 142), dtype=np.float64)
+    dark = np.array((150, 142, 96), dtype=np.float64)
+    color = dark + (light - dark) * np.clip(shade, 0.0, 1.0)
+
+    # 日に焼けた斑（新しい畳ほど緑が強く、焼けると黄色くなる）
+    tint = (fractal_noise(size, 3, 3, rng) - 0.5)[:, :, None]
+    color = color * (1.0 + tint * 0.12)
+    color[..., 1] *= 1.0 + 0.04 * tint[..., 0]
+
+    return np.clip(color, 0, 255).astype(np.uint8)
 
 
 def save(image, name):
@@ -168,20 +235,18 @@ def make_grain(size, seed):
 
 
 def main():
-    # 枡は白木。明るく、年輪は細かい
-    save(make_wood(SIZE, seed=20260918, light=(228, 201, 160), dark=(176, 140, 96),
-                   ring_count=12.0, pore_strength=0.24, roughness=0.09,
-                   warp_amount=0.8, pore_cells=220), "wood_masu.png")
-
-    # 台は写真でいうピントの外れた背景。あらかじめぼかしておけば実行時の負荷はゼロ
-    table = make_wood(SIZE, seed=771, light=(126, 104, 84), dark=(72, 56, 42),
-                      ring_count=11.0, pore_strength=0.34, roughness=0.14,
-                      warp_amount=1.8, pore_cells=180)
-    save(blur(table, 9), "wood_table.png")
+    # 床は茶室に合わせて畳表にする。器の近くは焦点が合うので、ぼかしはごく軽く
+    save(blur(make_tatami(SIZE, seed=404), 1), "tatami.png")
 
     save(make_water_normal(SIZE, seed=31415), "water_normal.png")
     save(make_vignette(512), "vignette.png")
     save(make_grain(512, seed=99), "grain.png")
+
+    # 花月の札
+    card_size = (256, 384)
+    save(make_card("先攻", card_size, rng_seed=11), "card_first.png")
+    save(make_card("後攻", card_size, rng_seed=12), "card_second.png")
+    save(make_card_back(card_size, rng_seed=13), "card_back.png")
 
 
 main()

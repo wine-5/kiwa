@@ -82,7 +82,7 @@ namespace
 
 namespace game::view
 {
-	void PourStream::advance(float deltaTime, bool isPouring)
+	void PourStream::update(float deltaTime, bool isPouring)
 	{
 		m_time += deltaTime;
 		m_isPouring = isPouring;

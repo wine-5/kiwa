@@ -35,10 +35,10 @@ namespace
 
 namespace game::view
 {
-	void LiquidVisual::advance(float deltaTime, bool isPouring, float amountRatio)
+	void LiquidVisual::update(float deltaTime, bool isPouring, float amountRatio)
 	{
 		m_surface.setLevel(amountRatio);
-		m_stream.advance(deltaTime, isPouring);
+		m_stream.update(deltaTime, isPouring);
 
 		// 筋が当たる場所。液面は波打っているので、まず平らだとしたときの高さで当てる
 		const float levelHeight{ m_surface.getLevelHeight() };
@@ -70,7 +70,7 @@ namespace game::view
 			m_surface.disturb(impactX, impactZ, FINAL_WAVE_STRENGTH);
 		m_wasPouring = isPouring;
 
-		m_surface.advance(deltaTime);
+		m_surface.update(deltaTime);
 
 		const float surfaceHeight{ m_surface.heightAt(impactX, impactZ) };
 		for (Droplet& droplet : m_droplets)

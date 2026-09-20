@@ -25,6 +25,9 @@ namespace game::constant
 		/// @brief こぼれて台に広がったぶん（器の中より沈んだ色）
 		inline constexpr core::utility::Color LIQUID_SPILLED{ 112, 126, 58 };
 
+		/// @brief 畳に吸われた茶（染みの外側。ほとんど畳の色に近づく）
+		inline constexpr core::utility::Color LIQUID_SOAKED{ 74, 74, 44 };
+
 		/// @brief 水面のひとかわ（本体より明るくして面を見せる）
 		inline constexpr core::utility::Color LIQUID_SURFACE{ 186, 206, 96 };
 

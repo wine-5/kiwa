@@ -9,7 +9,8 @@ namespace infrastructure::resource
 	/**
 	 * @brief DxLib を使った IResourceManager の実装
 	 *
-	 * 読み込んだハンドルをパスをキーに覚えておき、同じ画像・音を二重に抱えないようにする
+	 * 読み込んだハンドルを鍵（パスやフォントの組み合わせ）で覚えておき、
+	 * 同じものを二重に抱えないようにする。解放もここが一括で面倒を見る
 	 */
 	class ResourceManager final : public core::iface::IResourceManager, private core::base::NonCopyable
 	{
@@ -25,6 +26,10 @@ namespace infrastructure::resource
 
 		int loadSound(const std::string& path) override;
 
+		int loadModel(const std::string& path) override;
+
+		int loadFont(const std::string& family, int size, int thickness = -1) override;
+
 		void playSe(int handle) override;
 
 		void playBgm(int handle) override;
@@ -39,5 +44,11 @@ namespace infrastructure::resource
 
 		/// @brief パス → 音ハンドル
 		std::unordered_map<std::string, int> m_sounds{};
+
+		/// @brief パス → モデルハンドル
+		std::unordered_map<std::string, int> m_models{};
+
+		/// @brief フォントの組み合わせ → フォントハンドル
+		std::unordered_map<std::string, int> m_fonts{};
 	};
 } // namespace infrastructure::resource
