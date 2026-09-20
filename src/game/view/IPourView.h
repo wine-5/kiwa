@@ -51,6 +51,14 @@ namespace game::view
 		                          const std::string& leftLabel, const std::string& rightLabel) = 0;
 
 		/**
+		 * @brief 手番が移ったことを伝える
+		 * @param serial 手番の通し番号（変わったときだけ告げる）
+		 * @param name 手番の側の呼び名
+		 * @param isFromLeft 左の側の手番か
+		 */
+		virtual void showTurnCall(int serial, const std::string& name, bool isFromLeft) = 0;
+
+		/**
 		 * @brief いまの手番の表示を伝える
 		 * @param turnLabel 文言（「一の手 の番」など）
 		 */

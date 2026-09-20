@@ -5,6 +5,7 @@
 #include "game/view/CupGeometry.h"
 #include "game/view/LiquidVisual.h"
 #include "game/view/SpillStreaks.h"
+#include "game/view/TurnCall.h"
 #include <array>
 #include <vector>
 
@@ -75,6 +76,13 @@ namespace game::view
 			m_cardContent.isFirstCard = isFirstCard;
 			m_cardContent.leftLabel = leftLabel;
 			m_cardContent.rightLabel = rightLabel;
+		}
+
+		void showTurnCall(int serial, const std::string& name, bool isFromLeft) override
+		{
+			m_turnCallContent.serial = serial;
+			m_turnCallContent.name = name;
+			m_turnCallContent.isFromLeft = isFromLeft;
 		}
 
 		void showTurn(const std::string& turnLabel) override
@@ -174,6 +182,9 @@ namespace game::view
 		/// @brief 本文の書体
 		int m_bodyFont{ -1 };
 
+		/// @brief 手番を告げる大きな書体
+		int m_callFont{ -1 };
+
 		/// @brief 器のモデル（VesselLook の順に並べる）
 		std::array<int, 4> m_cupModels{ -1, -1, -1, -1 };
 
@@ -198,6 +209,9 @@ namespace game::view
 		/// @brief 染みの広がり具合（0.0〜1.0）
 		float m_puddleGrowth{ 0.0f };
 
+		/// @brief 手番が移ったことの告げ方
+		TurnCall m_turnCall{};
+
 		/// @brief 先攻を決める札の見せ方
 		CardDraw m_cardDraw{};
 
@@ -210,6 +224,9 @@ namespace game::view
 		bool m_isOverflowed{ false };
 		/// @brief 札の表示に必要な内容
 		CardDraw::Content m_cardContent{};
+
+		/// @brief 手番の告知に必要な内容
+		TurnCall::Content m_turnCallContent{};
 
 		std::string m_turnLabel{};
 		std::string m_scoreLabel{};

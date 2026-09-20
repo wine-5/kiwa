@@ -66,7 +66,13 @@ namespace game::presenter
 			if (!m_input.isKeyDown(key))
 			{
 				// 最低量に届いていなければ手番は渡らない。もう一度押せば続きから注げる
+				const model::Player previous{ m_duel.getCurrentPlayer() };
 				m_duel.endTurn();
+
+				// 渡ったときだけ告げる（届かず押し直すときに出しては紛らわしい）
+				if (m_duel.getCurrentPlayer() != previous)
+					++m_turnSerial;
+
 				m_phase = Phase::Ready;
 				break;
 			}
@@ -122,6 +128,9 @@ namespace game::presenter
 		// 難しさは「その器がどれだけ入るか」で変わる
 		std::uniform_int_distribution<std::size_t> pick{ 0, model::VESSELS.size() - 1 };
 		m_duel.startRound(model::VESSELS[pick(m_random)].type);
+
+		// 局の初手も、誰から始まるのかを告げる
+		++m_turnSerial;
 		m_phase = Phase::Ready;
 	}
 
@@ -194,6 +203,9 @@ namespace game::presenter
 		m_view.showPouring(m_phase == Phase::Pouring);
 		m_view.showOverflowed(!isDrawing && m_duel.isOverflowed());
 		m_view.showTurn(buildTurnLabel());
+		// 一の手は左、二の手は右。告知もその側から出すと、どちらの番か動きで分かる
+		m_view.showTurnCall(m_turnSerial, nameOf(m_duel.getCurrentPlayer()) + " の番",
+		                    m_duel.getCurrentPlayer() == model::Player::One);
 		m_view.showScore(buildScoreLabel());
 		// 札を引くのは一の手。引いた札が「先攻」なら一の手が先、「後攻」なら二の手が先
 		const bool isFirstCard{ m_firstPlayer == model::Player::One };

@@ -27,6 +27,9 @@ namespace
 	/// @brief 染みの広さ（器の口の半径に対する倍率）
 	constexpr float PUDDLE_EXTENT{ 1.7f };
 
+	/// @brief 手番を告げる文字の大きさ
+	constexpr int CALL_FONT_SIZE{ 76 };
+
 	/// @brief 染みの濃さ（畳の目が透けるくらいに抑える）
 	constexpr float PUDDLE_ALPHA{ 0.6f };
 
@@ -190,6 +193,7 @@ namespace game::view
 		m_potModel = resource.loadModel(POT_MODEL_PATH);
 
 		m_headingFont = resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
+		m_callFont = resource.loadFont(font::HEADING_FAMILY, CALL_FONT_SIZE);
 		m_bodyFont = resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);
 	}
 
@@ -211,6 +215,7 @@ namespace game::view
 		                     ? core::utility::Easing::approach(m_puddleGrowth, 1.0f, PUDDLE_SOAK_RATE,
 		                                                       deltaTime)
 		                     : 0.0f;
+		m_turnCall.update(deltaTime, m_turnCallContent);
 		m_cardDraw.update(deltaTime, m_cardContent);
 		m_grainTime += deltaTime;
 	}
@@ -237,6 +242,9 @@ namespace game::view
 	{
 		drawFilmLook();
 		drawTexts();
+
+		// 手番の告知は、器の上の空いたところで一度だけ大きく見せる
+		m_turnCall.draw(m_renderer, m_screen, m_callFont, CALL_FONT_SIZE);
 
 		// 札は画面に重ねて大きく見せる。3D の中に置くと小さすぎて読み取れない
 		m_cardDraw.draw(m_renderer, m_screen,

@@ -122,6 +122,9 @@ namespace game::presenter
 		/// @brief 札を返してから経った時間（秒）
 		float m_revealedTime{ 0.0f };
 
+		/// @brief 手番の通し番号（渡るたびに増やし、View はこれを見て告げ直す）
+		int m_turnSerial{ 0 };
+
 		/// @brief 先攻と器を決める乱数
 		std::mt19937 m_random;
 	};
