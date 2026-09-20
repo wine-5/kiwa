@@ -170,6 +170,7 @@
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\infrastructure\graphics\Screen.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
+    <ClInclude Include="src\core\constant\GameConfig.h" />
     <ClInclude Include="src\core\constant\ScreenConstants.h" />
     <ClInclude Include="src\core\utility\Color.h" />
     <ClInclude Include="src\core\utility\Vector2.h" />

@@ -1,5 +1,6 @@
 ﻿// 自前ヘッダを先に include する（DxLib のマクロと定数名が衝突するのを防ぐ）
 #include "Application.h"
+#include "core/constant/GameConfig.h"
 #include "core/constant/ScreenConstants.h"
 #include "infrastructure/debug/Scenario.h"
 #include "game/constant/Palette.h"
@@ -24,12 +25,20 @@ Application::Application(int screenWidth, int screenHeight)
 {
 	// 画面を暗く落としておくと、枡と液体だけが浮かび上がる
 	m_screen.setBackgroundColor(game::constant::palette::BACKGROUND);
-	// 動作確認の段取りは Scenario に書く（ここには配線だけを置く）
-	infrastructure::debug::Scenario::install(m_scriptedInput, m_frameCapture);
+	// 動作確認の段取りは Scenario に書く（ここには配線だけを置く）。
+	// 製品版では丸ごと消えるよう if constexpr で分ける
+	if constexpr (core::constant::GameConfig::USES_SCENARIO)
+	{
+		infrastructure::debug::Scenario::install(m_scriptedInput, m_frameCapture);
 
-	m_sceneManager.start(infrastructure::debug::Scenario::startsInGame()
-	                         ? game::scene::SceneType::InGame
-	                         : game::scene::SceneType::Title);
+		if (infrastructure::debug::Scenario::startsInGame())
+		{
+			m_sceneManager.start(game::scene::SceneType::InGame);
+			return;
+		}
+	}
+
+	m_sceneManager.start(game::scene::SceneType::Title);
 }
 
 void Application::run()
@@ -66,9 +75,12 @@ void Application::run()
 		m_postEffect.end();
 		m_sceneManager.drawOverlay();
 
-		m_frameCapture.endFrame(m_screen.getWidth(), m_screen.getHeight());
-		if (m_frameCapture.isFinished())
-			m_isRunning = false;
+		if constexpr (core::constant::GameConfig::ALLOWS_FRAME_CAPTURE)
+		{
+			m_frameCapture.endFrame(m_screen.getWidth(), m_screen.getHeight());
+			if (m_frameCapture.isFinished())
+				m_isRunning = false;
+		}
 
 		ScreenFlip();
 

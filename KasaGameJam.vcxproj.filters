@@ -155,6 +155,9 @@
     <ClInclude Include="src\core\base\NonCopyable.h">
       <Filter>src\core\base</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\constant\GameConfig.h">
+      <Filter>src\core\constant</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\constant\ScreenConstants.h">
       <Filter>src\core\constant</Filter>
     </ClInclude>
