@@ -45,6 +45,29 @@ namespace
 	/// @brief 粒状感
 	constexpr const char* GRAIN_TEXTURE_PATH{ "assets/textures/grain.png" };
 
+	/// @brief 札の裏
+	constexpr const char* CARD_BACK_TEXTURE_PATH{ "assets/textures/card_back.png" };
+
+	/// @brief 先攻の札
+	constexpr const char* CARD_FIRST_TEXTURE_PATH{ "assets/textures/card_first.png" };
+
+	/// @brief 後攻の札
+	constexpr const char* CARD_SECOND_TEXTURE_PATH{ "assets/textures/card_second.png" };
+
+	// ---- 書体 ----
+
+	/// @brief 見出しに使う毛筆の書体（assets/fonts に同梱したもの）
+	constexpr const char* HEADING_FONT_FAMILY{ "KouzanBrushFont" };
+
+	/// @brief 本文に使う書体（細かい字は明朝のほうが読みやすい）
+	constexpr const char* BODY_FONT_FAMILY{ "Noto Serif JP" };
+
+	/// @brief 見出しの大きさ
+	constexpr int HEADING_FONT_SIZE{ 48 };
+
+	/// @brief 本文の大きさ
+	constexpr int BODY_FONT_SIZE{ 26 };
+
 	/// @brief 周辺減光の濃さ
 	constexpr float VIGNETTE_STRENGTH{ 0.55f };
 
@@ -143,11 +166,17 @@ namespace game::view
 		m_tableTexture = resource.loadTexture(TABLE_TEXTURE_PATH);
 		m_vignetteTexture = resource.loadTexture(VIGNETTE_TEXTURE_PATH);
 		m_grainTexture = resource.loadTexture(GRAIN_TEXTURE_PATH);
-		m_cupModel = m_modelRenderer.load(CUP_MODEL_PATH);
-		m_potModel = m_modelRenderer.load(POT_MODEL_PATH);
+		m_cardBackTexture = resource.loadTexture(CARD_BACK_TEXTURE_PATH);
+		m_cardFirstTexture = resource.loadTexture(CARD_FIRST_TEXTURE_PATH);
+		m_cardSecondTexture = resource.loadTexture(CARD_SECOND_TEXTURE_PATH);
+		m_cupModel = resource.loadModel(CUP_MODEL_PATH);
+		m_potModel = resource.loadModel(POT_MODEL_PATH);
+
+		m_headingFont = resource.loadFont(HEADING_FONT_FAMILY, HEADING_FONT_SIZE);
+		m_bodyFont = resource.loadFont(BODY_FONT_FAMILY, BODY_FONT_SIZE);
 	}
 
-	void PourView3D::advance(float deltaTime)
+	void PourView3D::update(float deltaTime)
 	{
 		// 注ぐときは土瓶を前へ倒す。急に切り替わらないよう追いかけさせる
 		const float target{ m_isPouring ? POT_POUR_TILT : POT_REST_TILT };
@@ -156,7 +185,8 @@ namespace game::view
 		// 液体は傾いた注ぎ口の先から出る
 		m_liquid.setPourOrigin(spoutTip(m_potTilt));
 
-		m_liquid.advance(deltaTime, m_isPouring, m_amountRatio);
+		m_liquid.update(deltaTime, m_isPouring, m_amountRatio);
+		m_cardDraw.update(deltaTime, m_cardContent);
 		m_grainTime += deltaTime;
 	}
 
@@ -181,6 +211,11 @@ namespace game::view
 	{
 		drawFilmLook();
 		drawTexts();
+
+		// 札は画面に重ねて大きく見せる。3D の中に置くと小さすぎて読み取れない
+		m_cardDraw.draw(m_renderer, m_screen,
+		                CardDraw::Resources{ m_cardBackTexture, m_cardFirstTexture,
+			                                 m_cardSecondTexture, m_headingFont, m_bodyFont });
 	}
 
 	void PourView3D::drawScenery() const
@@ -296,9 +331,14 @@ namespace game::view
 		const float centerX{ m_screen.getWidth() * 0.5f };
 		const float height{ static_cast<float>(m_screen.getHeight()) };
 
+		// 見出しは毛筆、本文は明朝と使い分ける
+		m_renderer.setFont(m_headingFont);
+
 		if (!m_turnLabel.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, 58.0f }, m_turnLabel,
+			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, 52.0f }, m_turnLabel,
 			                            palette::TEXT_PRIMARY);
+
+		m_renderer.setFont(m_bodyFont);
 
 		// 勝敗は隅に小さく置く。手番の表示と重ねると読みにくい
 		if (!m_scoreLabel.empty())

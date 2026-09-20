@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "game/view/IPourView.h"
 #include "core/utility/Vertex3D.h"
+#include "game/view/CardDraw.h"
 #include "game/view/LiquidVisual.h"
 #include <vector>
 
@@ -58,6 +59,16 @@ namespace game::view
 			m_isOverflowed = isOverflowed;
 		}
 
+		void showCardDraw(bool isActive, bool isRevealed, bool isFirstCard,
+		                  const std::string& leftLabel, const std::string& rightLabel) override
+		{
+			m_cardContent.isActive = isActive;
+			m_cardContent.isRevealed = isRevealed;
+			m_cardContent.isFirstCard = isFirstCard;
+			m_cardContent.leftLabel = leftLabel;
+			m_cardContent.rightLabel = rightLabel;
+		}
+
 		void showTurn(const std::string& turnLabel) override
 		{
 			m_turnLabel = turnLabel;
@@ -78,7 +89,7 @@ namespace game::view
 			m_prompt = prompt;
 		}
 
-		void advance(float deltaTime) override;
+		void update(float deltaTime) override;
 
 		void draw() override;
 
@@ -99,6 +110,8 @@ namespace game::view
 		 * @brief こぼれて台に広がったぶんを描く
 		 */
 		void drawPuddle() const;
+
+
 
 		/**
 		 * @brief こぼれる際を示す線を描く
@@ -142,6 +155,21 @@ namespace game::view
 		/// @brief 粒状感
 		int m_grainTexture{ -1 };
 
+		/// @brief 札の裏
+		int m_cardBackTexture{ -1 };
+
+		/// @brief 先攻の札
+		int m_cardFirstTexture{ -1 };
+
+		/// @brief 後攻の札
+		int m_cardSecondTexture{ -1 };
+
+		/// @brief 見出しの書体（毛筆）
+		int m_headingFont{ -1 };
+
+		/// @brief 本文の書体
+		int m_bodyFont{ -1 };
+
 		/// @brief 湯呑のモデル
 		int m_cupModel{ -1 };
 
@@ -157,11 +185,17 @@ namespace game::view
 		/// @brief 液体の見せ方（揺れ・波紋・しぶき・照り）
 		LiquidVisual m_liquid{};
 
+		/// @brief 先攻を決める札の見せ方
+		CardDraw m_cardDraw{};
+
 		float m_amountRatio{ 0.0f };
 		float m_limitRatio{ 1.0f };
 		bool m_isLimitVisible{ true };
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };
+		/// @brief 札の表示に必要な内容
+		CardDraw::Content m_cardContent{};
+
 		std::string m_turnLabel{};
 		std::string m_scoreLabel{};
 		std::string m_message{};
