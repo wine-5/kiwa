@@ -1,6 +1,7 @@
 ﻿#include "game/view/CardDraw.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "game/constant/Palette.h"
 #include <algorithm>
@@ -8,6 +9,7 @@
 
 namespace
 {
+	using core::utility::Easing;
 	using core::utility::Vector2;
 	namespace palette = game::constant::palette;
 
@@ -37,22 +39,11 @@ namespace
 
 	/// @brief 役を出す左右の位置（画面幅に対する割合）
 	constexpr float SIDE_X{ 0.23f };
-
-	/**
-	 * @brief 0〜1 を行き過ぎてから落ち着く動きに直す
-	 * @param t 進み具合（0.0〜1.0）
-	 * @return なめらかにした進み具合
-	 */
-	float easeOut(float t) noexcept
-	{
-		const float inverted{ 1.0f - std::clamp(t, 0.0f, 1.0f) };
-		return 1.0f - inverted * inverted * inverted;
-	}
 } // namespace
 
 namespace game::view
 {
-	void CardDraw::advance(float deltaTime, const Content& content)
+	void CardDraw::update(float deltaTime, const Content& content)
 	{
 		m_content = content;
 		m_time += deltaTime;
@@ -65,14 +56,14 @@ namespace game::view
 			return;
 		}
 
-		m_appear += (1.0f - m_appear) * std::min(1.0f, APPEAR_RATE * deltaTime);
+		m_appear = Easing::approach(m_appear, 1.0f, APPEAR_RATE, deltaTime);
 
 		const float flipTarget{ content.isRevealed ? 1.0f : 0.0f };
-		m_flip += (flipTarget - m_flip) * std::min(1.0f, FLIP_RATE * deltaTime);
+		m_flip = Easing::approach(m_flip, flipTarget, FLIP_RATE, deltaTime);
 
 		// 役の振り分けは、札が返り切ってから始める
 		if (m_flip > 0.92f)
-			m_announce += (1.0f - m_announce) * std::min(1.0f, ANNOUNCE_RATE * deltaTime);
+			m_announce = Easing::approach(m_announce, 1.0f, ANNOUNCE_RATE, deltaTime);
 	}
 
 	bool CardDraw::isVisible() const noexcept
@@ -90,8 +81,8 @@ namespace game::view
 		const float height{ static_cast<float>(screen.getHeight()) };
 
 		// 下から現れ、役を告げたら上へ退く
-		const float appear{ easeOut(m_appear) };
-		const float announce{ easeOut(m_announce) };
+		const float appear{ Easing::easeOut(m_appear) };
+		const float announce{ Easing::easeOut(m_announce) };
 		const float sway{ m_flip < 0.05f ? std::sin(m_time * 2.2f) * IDLE_SWAY : 0.0f };
 		const float centerY{ height * 0.46f + (1.0f - appear) * 180.0f - announce * ANNOUNCE_RISE +
 			                 sway };

@@ -51,7 +51,7 @@ namespace game::view
 		 * @brief 波を進める
 		 * @param deltaTime 進める時間（秒）
 		 */
-		void advance(float deltaTime);
+		void update(float deltaTime);
 
 		/**
 		 * @brief その場所の液面の高さを返す

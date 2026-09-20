@@ -59,7 +59,7 @@ namespace game::view
 		 * @param deltaTime 進める時間（秒）
 		 * @param content 表示する内容
 		 */
-		void advance(float deltaTime, const Content& content);
+		void update(float deltaTime, const Content& content);
 
 		/**
 		 * @brief 札と役の振り分けを描く

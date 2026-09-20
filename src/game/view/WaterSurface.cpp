@@ -184,7 +184,7 @@ namespace game::view
 		m_waves.push_back(Wave{ x, z, 0.0f, strength });
 	}
 
-	void WaterSurface::advance(float deltaTime)
+	void WaterSurface::update(float deltaTime)
 	{
 		m_time += deltaTime;
 
