@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "game/model/Player.h"
 #include "game/model/PourMatch.h"
+#include "game/model/Vessel.h"
 
 namespace game::model
 {
@@ -9,7 +10,11 @@ namespace game::model
 	 *
 	 * 交互に注ぎ、こぼした方が負け。手番を渡すには最低量を注がなければならない
 	 * （注がずに渡せてしまうと勝負にならないため）。
-	 * PourMatch と同じく、時間も乱数も描画も知らない。際は外から渡される
+	 *
+	 * 際は器の口そのもの（常に満杯）で、隠された数字ではない。代わりに毎局
+	 * 器が変わり、口まで満たすのに要る量が変わる。どれだけ注げるかの見当は
+	 * 器の大きさから立てることになる。
+	 * PourMatch と同じく、時間も乱数も描画も知らない。器は外から渡される
 	 */
 	class Duel
 	{
@@ -23,11 +28,11 @@ namespace game::model
 		void startMatch(Player firstPlayer) noexcept;
 
 		/**
-		 * @brief 新しい際で一局始める
+		 * @brief 新しい器で一局始める
 		 * @details 先攻の側から注ぎ始める
-		 * @param limit こぼれ始める嵩（0.0〜1.0）
+		 * @param vessel この局で使う器
 		 */
-		void startRound(float limit) noexcept;
+		void startRound(VesselType vessel) noexcept;
 
 		/**
 		 * @brief いまの手番が注ぐ
@@ -125,12 +130,12 @@ namespace game::model
 		}
 
 		/**
-		 * @brief こぼれ始める嵩を返す
-		 * @return 際の嵩（0.0〜1.0）
+		 * @brief この局で使っている器を返す
+		 * @return 器の種類
 		 */
-		[[nodiscard]] float getLimit() const noexcept
+		[[nodiscard]] VesselType getVessel() const noexcept
 		{
-			return m_match.getLimit();
+			return m_vessel;
 		}
 
 		/**
@@ -154,6 +159,9 @@ namespace game::model
 	  private:
 		/// @brief 注がれた嵩と際
 		PourMatch m_match{ 1.0f };
+
+		/// @brief この局で使っている器
+		VesselType m_vessel{ VesselType::Yunomi };
 
 		/// @brief いまの手番
 		Player m_currentPlayer{ Player::One };

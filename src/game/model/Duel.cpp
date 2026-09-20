@@ -3,10 +3,19 @@
 namespace
 {
 	/// @brief 手番を渡すために注がなければならない最低の嵩
-	constexpr float MINIMUM_TURN_AMOUNT{ 0.04f };
+	///
+	/// 「注がずに渡す」を防ぐためだけのもので、我慢を強いるためのものではない。
+	/// 一瞬だけ押した（更新1回ぶん注いだ）なら渡せる大きさにしてある。
+	/// いちばん大きい茶碗でも更新1回で 0.0027 ほど進むので、それを下回る値を置く
+	constexpr float MINIMUM_TURN_AMOUNT{ 0.0025f };
 
 	/// @brief 試合に必要な勝ち数
 	constexpr int TARGET_WINS{ 3 };
+
+	/// @brief こぼれ始める嵩
+	///
+	/// 際は器の口そのもの。隠された数字ではなく、常に「縁いっぱい」が限界になる
+	constexpr float RIM_LIMIT{ 1.0f };
 } // namespace
 
 namespace game::model
@@ -19,9 +28,10 @@ namespace game::model
 		m_isRoundOver = false;
 	}
 
-	void Duel::startRound(float limit) noexcept
+	void Duel::startRound(VesselType vessel) noexcept
 	{
-		m_match.reset(limit);
+		m_vessel = vessel;
+		m_match.reset(RIM_LIMIT);
 		m_turnAmount = 0.0f;
 		m_currentPlayer = m_firstPlayer;
 		m_isRoundOver = false;
