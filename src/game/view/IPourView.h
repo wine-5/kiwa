@@ -40,6 +40,17 @@ namespace game::view
 		virtual void showOverflowed(bool isOverflowed) = 0;
 
 		/**
+		 * @brief 札を引く場面の表示を伝える
+		 * @param isActive いま札を引く場面かどうか
+		 * @param isRevealed 札を返したか
+		 * @param isFirstCard 引いた札が「先攻」か
+		 * @param leftLabel 左に出す役（一の手のぶん）
+		 * @param rightLabel 右に出す役（二の手のぶん）
+		 */
+		virtual void showCardDraw(bool isActive, bool isRevealed, bool isFirstCard,
+		                          const std::string& leftLabel, const std::string& rightLabel) = 0;
+
+		/**
 		 * @brief いまの手番の表示を伝える
 		 * @param turnLabel 文言（「一の手 の番」など）
 		 */
@@ -70,7 +81,7 @@ namespace game::view
 		 * Model も Presenter もこれらを知らず、進行の結果は何も変わらない
 		 * @param deltaTime 進める時間（秒）
 		 */
-		virtual void advance(float deltaTime) = 0;
+		virtual void update(float deltaTime) = 0;
 
 		/**
 		 * @brief 伝えられた内容を描く

@@ -17,8 +17,14 @@ namespace game::model
 		Duel() = default;
 
 		/**
+		 * @brief 試合を始める（勝敗を0に戻し、先攻を決める）
+		 * @param firstPlayer 先攻の側
+		 */
+		void startMatch(Player firstPlayer) noexcept;
+
+		/**
 		 * @brief 新しい際で一局始める
-		 * @details 前の局で負けた側が先手になる（先に注ぐほうが安全なので、その分を渡す）
+		 * @details 先攻の側から注ぎ始める
 		 * @param limit こぼれ始める嵩（0.0〜1.0）
 		 */
 		void startRound(float limit) noexcept;
@@ -81,6 +87,25 @@ namespace game::model
 		}
 
 		/**
+		 * @brief 試合の決着がついたかを返す
+		 * @return どちらかが先取数に届いていればtrue
+		 */
+		[[nodiscard]] bool isMatchOver() const noexcept;
+
+		/**
+		 * @brief 試合に勝った側を返す
+		 * @details 決着がついていない間の値に意味はない
+		 * @return 勝った側
+		 */
+		[[nodiscard]] Player getMatchWinner() const noexcept;
+
+		/**
+		 * @brief 試合に必要な勝ち数を返す
+		 * @return 先取する本数
+		 */
+		[[nodiscard]] static int getTargetWins() noexcept;
+
+		/**
 		 * @brief 勝った回数を返す
 		 * @param player 数える側
 		 * @return 勝った回数
@@ -132,6 +157,9 @@ namespace game::model
 
 		/// @brief いまの手番
 		Player m_currentPlayer{ Player::One };
+
+		/// @brief 先攻の側（毎局この側から注ぎ始める）
+		Player m_firstPlayer{ Player::One };
 
 		/// @brief この手番で注いだ嵩
 		float m_turnAmount{ 0.0f };

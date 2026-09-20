@@ -10,14 +10,14 @@ namespace
 	using core::utility::Vector3;
 	using core::utility::Vertex3D;
 
-	/// @brief 台の木目の貼り具合
-	constexpr float TABLE_UV_SCALE{ 0.32f };
+	/// @brief 畳表の貼り具合（い草の織り目が実寸に近い細かさになる値）
+	constexpr float FLOOR_UV_SCALE{ 0.42f };
 
-	/// @brief 台の半分の幅
-	constexpr float TABLE_HALF{ 7.0f };
+	/// @brief 床の半分の幅
+	constexpr float FLOOR_HALF{ 7.0f };
 
-	/// @brief 台を何分割するか（明暗をなめらかに乗せるため）
-	constexpr int TABLE_DIVISIONS{ 28 };
+	/// @brief 床を何分割するか（明暗をなめらかに乗せるため）
+	constexpr int FLOOR_DIVISIONS{ 28 };
 
 	/// @brief 光だまりの広さ
 	constexpr float LIGHT_POOL_RADIUS{ 1.15f };
@@ -244,10 +244,10 @@ namespace game::view
 		}
 	}
 
-	void SceneryMesh::buildTable(std::vector<core::utility::Vertex3D>& vertices,
+	void SceneryMesh::buildFloor(std::vector<core::utility::Vertex3D>& vertices,
 	                             std::vector<unsigned short>& indices)
 	{
-		appendGrid(vertices, indices, TABLE_HALF, TABLE_DIVISIONS, 0.0f,
+		appendGrid(vertices, indices, FLOOR_HALF, FLOOR_DIVISIONS, 0.0f,
 		           [](Vertex3D& vertex, float x, float z) {
 			           // 明かりからの距離で落とし、遠くは闇へ沈める
 			           const Color lit{ shadePoint(vertex.position, vertex.normal) };
@@ -256,8 +256,8 @@ namespace game::view
 				                         (1.0f - LIGHT_POOL_FLOOR) * std::exp(-distance * distance) };
 
 			           vertex.color = core::utility::scaled(lit, pool);
-			           vertex.u = x * TABLE_UV_SCALE;
-			           vertex.v = z * TABLE_UV_SCALE;
+			           vertex.u = x * FLOOR_UV_SCALE;
+			           vertex.v = z * FLOOR_UV_SCALE;
 		           });
 	}
 

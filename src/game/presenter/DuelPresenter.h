@@ -45,15 +45,28 @@ namespace game::presenter
 		 */
 		enum class Phase
 		{
+			Draw,      // 花月の札で先攻を決めている
 			Ready,     // 手番の側が注ぎ始めるのを待っている
 			Pouring,   // 注いでいる
-			RoundOver, // 決着がついている
+			RoundOver, // その局の決着がついている
+			MatchOver, // 試合の決着がついている
 		};
+
+		/**
+		 * @brief 札を引く場面から始める（先攻を引き直す）
+		 */
+		void beginDraw();
 
 		/**
 		 * @brief 新しい際を引いて次の局を始める
 		 */
 		void beginRound();
+
+		/**
+		 * @brief どちらかのキーが押されたかを返す
+		 * @return 押されたならtrue
+		 */
+		[[nodiscard]] bool isAnyKeyPressed();
 
 		/**
 		 * @brief いまの状態を View へ渡す
@@ -90,7 +103,16 @@ namespace game::presenter
 		core::iface::IInputProvider& m_input;
 
 		model::Duel m_duel{};
-		Phase m_phase{ Phase::Ready };
+		Phase m_phase{ Phase::Draw };
+
+		/// @brief 札が示した先攻の側
+		model::Player m_firstPlayer{ model::Player::One };
+
+		/// @brief 札を返したか
+		bool m_isCardRevealed{ false };
+
+		/// @brief 札を返してから経った時間（秒）
+		float m_revealedTime{ 0.0f };
 
 		/// @brief 際を決める乱数
 		std::mt19937 m_random;

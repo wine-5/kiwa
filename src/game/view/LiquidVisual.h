@@ -30,7 +30,7 @@ namespace game::view
 		 * @param isPouring いま注がれているか
 		 * @param amountRatio 溜まっている嵩（0.0〜1.0）
 		 */
-		void advance(float deltaTime, bool isPouring, float amountRatio);
+		void update(float deltaTime, bool isPouring, float amountRatio);
 
 		/**
 		 * @brief 注ぎ口の位置を伝える

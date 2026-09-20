@@ -13,6 +13,11 @@ namespace
 	/// @brief 際が現れうる上限
 	constexpr float LIMIT_MAX{ 0.95f };
 
+	/// @brief 札を返してから対局へ移るまでの間（秒）
+	///
+	/// 返す動き・役の振り分け・読む間を合わせた長さ
+	constexpr float REVEAL_HOLD{ 3.0f };
+
 	/**
 	 * @brief 割合を百分率の文字列にする
 	 * @param ratio 割合（0.0〜1.0）
@@ -30,7 +35,7 @@ namespace game::presenter
 	                             unsigned int seed)
 	    : m_view{ view }, m_input{ input }, m_random{ seed }
 	{
-		beginRound();
+		beginDraw();
 	}
 
 	void DuelPresenter::update(float deltaTime)
@@ -39,6 +44,23 @@ namespace game::presenter
 
 		switch (m_phase)
 		{
+		case Phase::Draw:
+			if (!m_isCardRevealed)
+			{
+				if (isAnyKeyPressed())
+					m_isCardRevealed = true;
+				break;
+			}
+
+			// 札を返したあとは少し置いてから対局へ移る（読む間を作る）
+			m_revealedTime += deltaTime;
+			if (m_revealedTime >= REVEAL_HOLD)
+			{
+				m_duel.startMatch(m_firstPlayer);
+				beginRound();
+			}
+			break;
+
 		case Phase::Ready:
 			if (m_input.isKeyDown(key))
 				m_phase = Phase::Pouring;
@@ -55,24 +77,61 @@ namespace game::presenter
 
 			m_duel.pour(POUR_RATE * deltaTime);
 			if (m_duel.isRoundOver())
+			{
+				// 注ぎながら押していたぶんを持ち越すと、決着がすぐ飛ばされてしまう
+				m_input.clearPendingPresses();
 				m_phase = Phase::RoundOver;
+			}
 			break;
 
 		case Phase::RoundOver:
-			if (m_input.isKeyPressed(core::input::KeyCode::Space) ||
-			    m_input.isKeyPressed(core::input::KeyCode::Enter))
+			if (isAnyKeyPressed())
 				beginRound();
+			break;
+
+		case Phase::MatchOver:
+			if (isAnyKeyPressed())
+				beginDraw();
 			break;
 		}
 
 		pushToView();
 	}
 
+	void DuelPresenter::beginDraw()
+	{
+		m_input.clearPendingPresses();
+
+		// 折据から引いた札で先攻を決める。引き当てるまで結果は伏せておく
+		std::uniform_int_distribution<int> coin{ 0, 1 };
+		m_firstPlayer = coin(m_random) == 0 ? model::Player::One : model::Player::Two;
+
+		m_isCardRevealed = false;
+		m_revealedTime = 0.0f;
+		m_phase = Phase::Draw;
+	}
+
 	void DuelPresenter::beginRound()
 	{
+		if (m_duel.isMatchOver())
+		{
+			m_input.clearPendingPresses();
+			m_phase = Phase::MatchOver;
+			return;
+		}
+
 		std::uniform_real_distribution<float> distribution{ LIMIT_MIN, LIMIT_MAX };
 		m_duel.startRound(distribution(m_random));
 		m_phase = Phase::Ready;
+	}
+
+	bool DuelPresenter::isAnyKeyPressed()
+	{
+		// どちらか一方でも消費されれば成立とする（両方消費しておかないと、
+		// もう片方の押下が次の場面へ持ち越されてしまう）
+		const bool space{ m_input.consumeKeyPress(core::input::KeyCode::Space) };
+		const bool enter{ m_input.consumeKeyPress(core::input::KeyCode::Enter) };
+		return space || enter;
 	}
 
 	core::input::KeyCode DuelPresenter::keyFor(model::Player player) noexcept
@@ -87,34 +146,69 @@ namespace game::presenter
 
 	std::string DuelPresenter::buildTurnLabel() const
 	{
-		if (m_phase == Phase::RoundOver)
+		switch (m_phase)
+		{
+		case Phase::Draw:
+			return m_isCardRevealed ? nameOf(m_firstPlayer) + " の先攻" : "先攻を決める";
+		case Phase::RoundOver:
 			return nameOf(m_duel.getWinner()) + " の勝ち";
-
-		return nameOf(m_duel.getCurrentPlayer()) + " の番";
+		case Phase::MatchOver:
+			return nameOf(m_duel.getMatchWinner()) + " の勝ち";
+		default:
+			return nameOf(m_duel.getCurrentPlayer()) + " の番";
+		}
 	}
 
 	std::string DuelPresenter::buildScoreLabel() const
 	{
-		return "一の手 " + std::to_string(m_duel.getScore(model::Player::One)) + " - " +
-		       std::to_string(m_duel.getScore(model::Player::Two)) + " 二の手";
+		// 見出しとぶつからないよう短く保つ。先取数は決着の場面で伝える
+		return "一 " + std::to_string(m_duel.getScore(model::Player::One)) + " - " +
+		       std::to_string(m_duel.getScore(model::Player::Two)) + " 二";
 	}
 
 	void DuelPresenter::pushToView()
 	{
-		// こぼした場面では器は縁まで満ちて見えるべきなので、絵の上では満杯にする。
-		// 際の値は勝負の都合で低いこともあるが、それは数字の話で見た目とは別
-		m_view.showAmount(m_duel.isOverflowed() ? 1.0f : m_duel.getAmount());
+		// 札を引く場面では、前の勝負の残りが見えないよう器を空にしておく。
+		// こぼした場面では逆に、縁まで満ちて見えるべきなので絵の上だけ満杯にする
+		// （際の値は勝負の都合で低いこともあるが、それは数字の話で見た目とは別）
+		const bool isDrawing{ m_phase == Phase::Draw };
+		m_view.showAmount(isDrawing            ? 0.0f
+		                  : m_duel.isOverflowed() ? 1.0f
+		                                          : m_duel.getAmount());
 		m_view.showLimit(m_duel.getLimit(), false); // 際は見せない。それがこの勝負の要
 		m_view.showPouring(m_phase == Phase::Pouring);
-		m_view.showOverflowed(m_duel.isOverflowed());
+		m_view.showOverflowed(!isDrawing && m_duel.isOverflowed());
 		m_view.showTurn(buildTurnLabel());
 		m_view.showScore(buildScoreLabel());
+		// 札を引くのは一の手。引いた札が「先攻」なら一の手が先、「後攻」なら二の手が先
+		const bool isFirstCard{ m_firstPlayer == model::Player::One };
+		m_view.showCardDraw(m_phase == Phase::Draw, m_isCardRevealed, isFirstCard,
+		                    nameOf(model::Player::One) + "  " + (isFirstCard ? "先攻" : "後攻"),
+		                    nameOf(model::Player::Two) + "  " + (isFirstCard ? "後攻" : "先攻"));
 
 		const std::string keyName{ m_duel.getCurrentPlayer() == model::Player::One ? "スペース"
 			                                                                      : "Enter" };
 
 		switch (m_phase)
 		{
+		case Phase::Draw:
+			if (!m_isCardRevealed)
+			{
+				m_view.showMessage("折据（おりすえ）から札を引く");
+				m_view.showPrompt("どちらかのキーで引く");
+				break;
+			}
+
+			m_view.showMessage(nameOf(m_firstPlayer) + " が先に注ぐ");
+			m_view.showPrompt("");
+			break;
+
+		case Phase::MatchOver:
+			m_view.showMessage(std::to_string(model::Duel::getTargetWins()) + "本先取  " +
+			                   nameOf(m_duel.getMatchWinner()) + " の勝ち");
+			m_view.showPrompt("どちらかのキーでもう一番");
+			break;
+
 		case Phase::Ready:
 			if (m_duel.getTurnAmount() > 0.0f && !m_duel.canEndTurn())
 			{
@@ -135,7 +229,8 @@ namespace game::presenter
 		case Phase::RoundOver:
 			m_view.showMessage(nameOf(m_duel.getLoser()) + " がこぼした  際 " +
 			                   toPercent(m_duel.getLimit()));
-			m_view.showPrompt("どちらかのキーで次の勝負へ");
+			m_view.showPrompt(m_duel.isMatchOver() ? "どちらかのキーで結果へ"
+			                                       : "どちらかのキーで次の勝負へ");
 			break;
 		}
 	}

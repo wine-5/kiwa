@@ -2,10 +2,12 @@
 #include "core/interface/ICamera.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IModelRenderer.h"
+#include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "core/interface/IRenderer3D.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
+#include "game/constant/Fonts.h"
 #include "game/constant/Palette.h"
 #include "game/view/CupGeometry.h"
 #include "game/view/SceneryMesh.h"
@@ -15,6 +17,7 @@
 namespace
 {
 	using core::utility::Vector3;
+	namespace font = game::constant::font;
 	namespace palette = game::constant::palette;
 	namespace cup = game::view::cup;
 
@@ -36,8 +39,8 @@ namespace
 	/// @brief こぼれの中心から縁までの分割数
 	constexpr int PUDDLE_RINGS{ 6 };
 
-	/// @brief 台の木目（ピントが外れている想定で、あらかじめぼかしてある）
-	constexpr const char* TABLE_TEXTURE_PATH{ "assets/textures/wood_table.png" };
+	/// @brief 床の畳表
+	constexpr const char* FLOOR_TEXTURE_PATH{ "assets/textures/tatami.png" };
 
 	/// @brief 周辺減光
 	constexpr const char* VIGNETTE_TEXTURE_PATH{ "assets/textures/vignette.png" };
@@ -54,19 +57,6 @@ namespace
 	/// @brief 後攻の札
 	constexpr const char* CARD_SECOND_TEXTURE_PATH{ "assets/textures/card_second.png" };
 
-	// ---- 書体 ----
-
-	/// @brief 見出しに使う毛筆の書体（assets/fonts に同梱したもの）
-	constexpr const char* HEADING_FONT_FAMILY{ "KouzanBrushFont" };
-
-	/// @brief 本文に使う書体（細かい字は明朝のほうが読みやすい）
-	constexpr const char* BODY_FONT_FAMILY{ "Noto Serif JP" };
-
-	/// @brief 見出しの大きさ
-	constexpr int HEADING_FONT_SIZE{ 48 };
-
-	/// @brief 本文の大きさ
-	constexpr int BODY_FONT_SIZE{ 26 };
 
 	/// @brief 周辺減光の濃さ
 	constexpr float VIGNETTE_STRENGTH{ 0.55f };
@@ -159,11 +149,11 @@ namespace game::view
 	      m_modelRenderer{ modelRenderer }, m_screen{ screen }
 	{
 		// 枡も台も動かないので、形は最初に一度だけ組んで使い回す
-		SceneryMesh::buildTable(m_tableVertices, m_tableIndices);
+		SceneryMesh::buildFloor(m_floorVertices, m_floorIndices);
 		SceneryMesh::buildShadow(m_shadowVertices, m_shadowIndices);
 		buildPuddle();
 
-		m_tableTexture = resource.loadTexture(TABLE_TEXTURE_PATH);
+		m_floorTexture = resource.loadTexture(FLOOR_TEXTURE_PATH);
 		m_vignetteTexture = resource.loadTexture(VIGNETTE_TEXTURE_PATH);
 		m_grainTexture = resource.loadTexture(GRAIN_TEXTURE_PATH);
 		m_cardBackTexture = resource.loadTexture(CARD_BACK_TEXTURE_PATH);
@@ -172,15 +162,15 @@ namespace game::view
 		m_cupModel = resource.loadModel(CUP_MODEL_PATH);
 		m_potModel = resource.loadModel(POT_MODEL_PATH);
 
-		m_headingFont = resource.loadFont(HEADING_FONT_FAMILY, HEADING_FONT_SIZE);
-		m_bodyFont = resource.loadFont(BODY_FONT_FAMILY, BODY_FONT_SIZE);
+		m_headingFont = resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
+		m_bodyFont = resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);
 	}
 
 	void PourView3D::update(float deltaTime)
 	{
 		// 注ぐときは土瓶を前へ倒す。急に切り替わらないよう追いかけさせる
 		const float target{ m_isPouring ? POT_POUR_TILT : POT_REST_TILT };
-		m_potTilt += (target - m_potTilt) * std::min(1.0f, POT_TILT_RATE * deltaTime);
+		m_potTilt = core::utility::Easing::approach(m_potTilt, target, POT_TILT_RATE, deltaTime);
 
 		// 液体は傾いた注ぎ口の先から出る
 		m_liquid.setPourOrigin(spoutTip(m_potTilt));
@@ -220,8 +210,8 @@ namespace game::view
 
 	void PourView3D::drawScenery() const
 	{
-		m_renderer3D.setTexture(m_tableTexture);
-		m_renderer3D.drawTriangles(m_tableVertices, m_tableIndices);
+		m_renderer3D.setTexture(m_floorTexture);
+		m_renderer3D.drawTriangles(m_floorVertices, m_floorIndices);
 
 		// 影は台の上、器より先に置く
 		m_renderer3D.setTexture(-1);

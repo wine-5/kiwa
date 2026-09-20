@@ -31,7 +31,7 @@ namespace game::view
 		 * @param renderer 2D 描画（文字に使う）
 		 * @param camera カメラ
 		 * @param modelRenderer 急須のモデルの描画
-		 * @param resource 木目のテクスチャの読み込み
+		 * @param resource テクスチャ・モデル・書体の読み込み
 		 * @param screen 画面サイズの取得
 		 */
 		PourView3D(core::iface::IRenderer3D& renderer3D, core::iface::IRenderer& renderer,
@@ -134,9 +134,9 @@ namespace game::view
 		core::iface::IModelRenderer& m_modelRenderer;
 		core::iface::IScreen& m_screen;
 
-		/// @brief 台の形
-		std::vector<core::utility::Vertex3D> m_tableVertices{};
-		std::vector<unsigned short> m_tableIndices{};
+		/// @brief 床（畳）の形
+		std::vector<core::utility::Vertex3D> m_floorVertices{};
+		std::vector<unsigned short> m_floorIndices{};
 
 		/// @brief こぼれて広がった液体の形
 		std::vector<core::utility::Vertex3D> m_puddleVertices{};
@@ -146,8 +146,8 @@ namespace game::view
 		std::vector<core::utility::Vertex3D> m_shadowVertices{};
 		std::vector<unsigned short> m_shadowIndices{};
 
-		/// @brief 台の木目
-		int m_tableTexture{ -1 };
+		/// @brief 畳表
+		int m_floorTexture{ -1 };
 
 		/// @brief 周辺減光
 		int m_vignetteTexture{ -1 };

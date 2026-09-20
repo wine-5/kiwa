@@ -4,20 +4,42 @@ namespace
 {
 	/// @brief 手番を渡すために注がなければならない最低の嵩
 	constexpr float MINIMUM_TURN_AMOUNT{ 0.04f };
+
+	/// @brief 試合に必要な勝ち数
+	constexpr int TARGET_WINS{ 3 };
 } // namespace
 
 namespace game::model
 {
+	void Duel::startMatch(Player firstPlayer) noexcept
+	{
+		m_firstPlayer = firstPlayer;
+		m_scoreOne = 0;
+		m_scoreTwo = 0;
+		m_isRoundOver = false;
+	}
+
 	void Duel::startRound(float limit) noexcept
 	{
 		m_match.reset(limit);
 		m_turnAmount = 0.0f;
-
-		// 負けた側から始める。先に注ぐほうが空の器に注げて安全なので、その一手を渡す
-		if (m_isRoundOver)
-			m_currentPlayer = m_loser;
-
+		m_currentPlayer = m_firstPlayer;
 		m_isRoundOver = false;
+	}
+
+	bool Duel::isMatchOver() const noexcept
+	{
+		return m_scoreOne >= TARGET_WINS || m_scoreTwo >= TARGET_WINS;
+	}
+
+	Player Duel::getMatchWinner() const noexcept
+	{
+		return m_scoreOne >= m_scoreTwo ? Player::One : Player::Two;
+	}
+
+	int Duel::getTargetWins() noexcept
+	{
+		return TARGET_WINS;
 	}
 
 	void Duel::pour(float amount) noexcept
