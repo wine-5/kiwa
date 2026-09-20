@@ -68,41 +68,6 @@ def stretched_noise(size, cells_x, cells_y, rng):
     return row[iy0, :] * (1.0 - wy)[:, None] + row[iy1, :] * wy[:, None]
 
 
-def make_wood(size, seed, light, dark, ring_count, pore_strength, roughness, warp_amount, pore_cells):
-    """木目を作る。
-
-    年輪をうねらせ、導管の筋と木肌のざらつきを重ねる。
-    """
-    rng = np.random.default_rng(seed)
-
-    v = np.linspace(0.0, 1.0, size, endpoint=False)[:, None] * np.ones((1, size))
-
-    # 年輪はまっすぐ走らない。雑音で座標をゆがめてから縞にする
-    warp = fractal_noise(size, 3, 4, rng) - 0.5
-    rings = 0.5 + 0.5 * np.sin((v * ring_count + warp * warp_amount) * 2.0 * np.pi)
-    rings = rings ** 0.5
-
-    # 導管は木目と同じ向き（横）に走る。縦に走らせると布地のように見えてしまう
-    pores = stretched_noise(size, 8, pore_cells, rng)
-    pores = np.clip((pores - 0.52) * 3.2, 0.0, 1.0)
-
-    # 木肌のざらつき
-    grit = fractal_noise(size, 64, 3, rng) - 0.5
-
-    shade = rings - pores * pore_strength + grit * roughness
-    shade = np.clip(shade, 0.0, 1.0)[:, :, None]
-
-    light = np.array(light, dtype=np.float64)
-    dark = np.array(dark, dtype=np.float64)
-    color = dark + (light - dark) * shade
-
-    # 場所ごとの色味のばらつき（一枚板に見えないように）
-    tint = (fractal_noise(size, 2, 3, rng) - 0.5)[:, :, None]
-    color = color * (1.0 + tint * 0.10)
-
-    return np.clip(color, 0, 255).astype(np.uint8)
-
-
 def make_water_normal(size, seed):
     """水面の細かな凹凸を、法線マップとして作る。
 
@@ -270,11 +235,6 @@ def make_grain(size, seed):
 
 
 def main():
-    # 枡は白木。明るく、年輪は細かい
-    save(make_wood(SIZE, seed=20260918, light=(228, 201, 160), dark=(176, 140, 96),
-                   ring_count=12.0, pore_strength=0.24, roughness=0.09,
-                   warp_amount=0.8, pore_cells=220), "wood_masu.png")
-
     # 床は茶室に合わせて畳表にする。器の近くは焦点が合うので、ぼかしはごく軽く
     save(blur(make_tatami(SIZE, seed=404), 1), "tatami.png")
 
