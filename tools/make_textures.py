@@ -125,6 +125,68 @@ def make_water_normal(size, seed):
     return ((normal * 0.5 + 0.5) * 255.0).astype(np.uint8)
 
 
+def make_card(text, size, rng_seed):
+    """花月の札。和紙色の地に、太い明朝で縦に字を刷る。"""
+    from PIL import ImageDraw, ImageFont
+
+    width, height = size
+    paper = Image.new("RGB", (width, height), (232, 224, 203))
+    draw = ImageDraw.Draw(paper)
+
+    # 和紙の繊維らしさ（ごく薄い斑）
+    rng = np.random.default_rng(rng_seed)
+    grain = fractal_noise(max(width, height), 24, 3, rng)[:height, :width]
+    speckle = (grain - 0.5) * 16.0
+    base = np.asarray(paper, dtype=np.float64) + speckle[:, :, None]
+
+    paper = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    draw = ImageDraw.Draw(paper)
+
+    # 縁の罫
+    margin = int(width * 0.10)
+    draw.rectangle([margin, margin, width - margin, height - margin],
+                   outline=(120, 96, 74), width=max(2, width // 90))
+
+    # 字は縦に一字ずつ置く
+    font_size = int(width * 0.46)
+    font = ImageFont.truetype("C:/Windows/Fonts/HGRME.TTC", font_size)
+
+    total = len(text) * font_size + (len(text) - 1) * int(font_size * 0.12)
+    y = (height - total) // 2
+    for character in text:
+        box = draw.textbbox((0, 0), character, font=font)
+        x = (width - (box[2] - box[0])) // 2 - box[0]
+        draw.text((x, y - box[1]), character, font=font, fill=(38, 32, 28))
+        y += font_size + int(font_size * 0.12)
+
+    return np.asarray(paper)
+
+
+def make_card_back(size, rng_seed):
+    """札の裏。無地に近い和紙に、小さな丸紋をひとつ。"""
+    from PIL import ImageDraw
+
+    width, height = size
+    rng = np.random.default_rng(rng_seed)
+    grain = fractal_noise(max(width, height), 24, 3, rng)[:height, :width]
+
+    base = np.zeros((height, width, 3), dtype=np.float64)
+    base[..., 0] = 214
+    base[..., 1] = 203
+    base[..., 2] = 180
+    base += ((grain - 0.5) * 18.0)[:, :, None]
+
+    paper = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    draw = ImageDraw.Draw(paper)
+
+    radius = int(width * 0.16)
+    center = (width // 2, height // 2)
+    draw.ellipse([center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius],
+                 outline=(150, 124, 98), width=max(2, width // 80))
+
+    return np.asarray(paper)
+
+
 def save(image, name):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = os.path.join(OUTPUT_DIR, name)
@@ -182,6 +244,12 @@ def main():
     save(make_water_normal(SIZE, seed=31415), "water_normal.png")
     save(make_vignette(512), "vignette.png")
     save(make_grain(512, seed=99), "grain.png")
+
+    # 花月の札
+    card_size = (256, 384)
+    save(make_card("先攻", card_size, rng_seed=11), "card_first.png")
+    save(make_card("後攻", card_size, rng_seed=12), "card_second.png")
+    save(make_card_back(card_size, rng_seed=13), "card_back.png")
 
 
 main()
