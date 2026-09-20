@@ -63,6 +63,10 @@ namespace infrastructure::input
 		{
 			const int dxKeyCode{ toDxKeyCode(static_cast<core::input::KeyCode>(i)) };
 			m_currentKeys[i] = dxKeyCode >= 0 && keyStates[dxKeyCode] != 0;
+
+			// 押された瞬間は、誰かが受け取るまで覚えておく
+			if (m_currentKeys[i] && !m_previousKeys[i])
+				m_pendingPresses[i] = true;
 		}
 
 		m_currentMouseLeft = (GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
@@ -89,6 +93,21 @@ namespace infrastructure::input
 	{
 		const std::size_t index{ static_cast<std::size_t>(keyCode) };
 		return !m_currentKeys[index] && m_previousKeys[index];
+	}
+
+	bool InputProvider::consumeKeyPress(core::input::KeyCode keyCode)
+	{
+		const std::size_t index{ static_cast<std::size_t>(keyCode) };
+		if (!m_pendingPresses[index])
+			return false;
+
+		m_pendingPresses[index] = false;
+		return true;
+	}
+
+	void InputProvider::clearPendingPresses()
+	{
+		m_pendingPresses.fill(false);
 	}
 
 	core::utility::Vector2 InputProvider::getMousePosition() const

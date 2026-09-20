@@ -42,6 +42,25 @@ namespace core::iface
 		[[nodiscard]] virtual bool isKeyPressed(core::input::KeyCode keyCode) const = 0;
 
 		/**
+		 * @brief 押された瞬間かを判定し、そのぶんを消費する（1回の押下で1回だけ成立）
+		 *
+		 * 更新は固定の刻みで回るため、フレームによっては1度も呼ばれないことがある。
+		 * isKeyPressed だけでは、その隙に押された瞬間が誰にも見られず消えてしまう。
+		 * 「押すたびに一度だけ起こしたい」操作はこちらを使う
+		 * @param keyCode キーコード
+		 * @return まだ消費されていない押下があればtrue
+		 */
+		virtual bool consumeKeyPress(core::input::KeyCode keyCode) = 0;
+
+		/**
+		 * @brief 溜まっている「押された瞬間」を捨てる
+		 *
+		 * 場面が変わるときに呼ぶ。前の場面で押していたぶんが持ち越されると、
+		 * 出たばかりの画面が一瞬で飛ばされてしまう
+		 */
+		virtual void clearPendingPresses() = 0;
+
+		/**
 		 * @brief キーが離された瞬間か判定する
 		 * @param keyCode キーコード
 		 * @return 離された瞬間ならtrue
