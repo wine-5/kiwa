@@ -148,8 +148,10 @@ def make_card(text, size, rng_seed):
                    outline=(120, 96, 74), width=max(2, width // 90))
 
     # 字は縦に一字ずつ置く
-    font_size = int(width * 0.46)
-    font = ImageFont.truetype("C:/Windows/Fonts/HGRME.TTC", font_size)
+    # 同梱した毛筆のフォントを使う（画面の見出しと同じ書体で揃える）
+    font_path = os.path.join(os.path.dirname(OUTPUT_DIR), "fonts", "KouzanMouhitu.ttf")
+    font_size = int(width * 0.50)
+    font = ImageFont.truetype(font_path, font_size)
 
     total = len(text) * font_size + (len(text) - 1) * int(font_size * 0.12)
     y = (height - total) // 2
@@ -185,6 +187,44 @@ def make_card_back(size, rng_seed):
                  outline=(150, 124, 98), width=max(2, width // 80))
 
     return np.asarray(paper)
+
+
+def make_tatami(size, seed):
+    """畳表（い草の織り目）。細い横筋が詰んで走り、ところどころ色が振れる。"""
+    rng = np.random.default_rng(seed)
+
+    # 織り目は等間隔の横筋。細かいので、筋の山と谷で明暗を作る
+    v = np.linspace(0.0, 1.0, size, endpoint=False)[:, None] * np.ones((1, size))
+    lines = 0.5 + 0.5 * np.sin(v * 44.0 * 2.0 * np.pi)
+    weave = lines ** 1.6
+
+    # い草は一本ずつ色が違う。筋の番号ごとに明るさを振る
+    strand_index = np.floor(v * 44.0).astype(int)
+    strand_shade = rng.random(44 + 1)[strand_index % 44]
+
+    # 縦方向の繊維の流れ
+    fiber = stretched_noise(size, 220, 6, rng)
+
+    # 経糸（たていと）で締めた筋が、一定間隔で縦に入る
+    u = np.linspace(0.0, 1.0, size, endpoint=False)[None, :] * np.ones((size, 1))
+    warp = 0.5 + 0.5 * np.sin(u * 6.0 * 2.0 * np.pi)
+    warp = np.clip((warp - 0.86) * 6.0, 0.0, 1.0)
+
+    shade = (0.74 + 0.26 * weave) * (0.88 + 0.24 * strand_shade)
+    shade -= fiber * 0.10
+    shade -= warp * 0.10
+    shade = np.clip(shade, 0.0, 1.2)[:, :, None]
+
+    light = np.array((206, 196, 142), dtype=np.float64)
+    dark = np.array((150, 142, 96), dtype=np.float64)
+    color = dark + (light - dark) * np.clip(shade, 0.0, 1.0)
+
+    # 日に焼けた斑（新しい畳ほど緑が強く、焼けると黄色くなる）
+    tint = (fractal_noise(size, 3, 3, rng) - 0.5)[:, :, None]
+    color = color * (1.0 + tint * 0.12)
+    color[..., 1] *= 1.0 + 0.04 * tint[..., 0]
+
+    return np.clip(color, 0, 255).astype(np.uint8)
 
 
 def save(image, name):
@@ -235,11 +275,8 @@ def main():
                    ring_count=12.0, pore_strength=0.24, roughness=0.09,
                    warp_amount=0.8, pore_cells=220), "wood_masu.png")
 
-    # 台は写真でいうピントの外れた背景。あらかじめぼかしておけば実行時の負荷はゼロ
-    table = make_wood(SIZE, seed=771, light=(126, 104, 84), dark=(72, 56, 42),
-                      ring_count=11.0, pore_strength=0.34, roughness=0.14,
-                      warp_amount=1.8, pore_cells=180)
-    save(blur(table, 9), "wood_table.png")
+    # 床は茶室に合わせて畳表にする。器の近くは焦点が合うので、ぼかしはごく軽く
+    save(blur(make_tatami(SIZE, seed=404), 1), "tatami.png")
 
     save(make_water_normal(SIZE, seed=31415), "water_normal.png")
     save(make_vignette(512), "vignette.png")
