@@ -1,4 +1,4 @@
-"""assets/model/ の 3D モデルを生成する。
+﻿"""assets/model/ の 3D モデルを生成する。
 
 DxLib が読める MQO 形式（テキスト）で書き出す。回転体・掃引・トーラスを
 組み合わせて、急須・湯呑・茶托を作る。
@@ -254,6 +254,62 @@ def make_yunomi():
     return mesh
 
 
+def make_vessel(floor_top, rim_height, floor_radius, rim_radius, wall=0.022, segments=56):
+    """茶を注ぐ器を、内側の寸法から組む。
+
+    内側の断面は src/game/view/CupGeometry.h の radiusAt と同じ式で作る。
+
+        r(h) = floor_radius + (rim_radius - floor_radius) * sqrt(t)
+
+    液体はこの式で描かれるので、モデルの内壁も同じ式から起こしておかないと、
+    液面が内壁から浮いたり、壁を突き抜けたりする。寸法を変えるときは
+    CupGeometry.h の shapeOf も一緒に直すこと。
+
+    引数はすべて内側の寸法（器の外形は、そこから壁の厚みぶん外へ出して作る）。
+    """
+    inner_height = rim_height - floor_top
+
+    def radius_at(t):
+        return floor_radius + (rim_radius - floor_radius) * math.sqrt(t)
+
+    steps = 12
+    # 口から底へ向かう断面（内側は法線を内へ向けたいので、この向きで回す）
+    inner = [(radius_at(i / steps), floor_top + inner_height * (i / steps))
+             for i in range(steps, -1, -1)]
+    inner.append((0.0, floor_top))
+
+    # 外形は内側を壁の厚みぶん外へ出したもの。底は平らに切る
+    outer = [(0.0, 0.0), (floor_radius, 0.0)]
+    outer += [(radius_at(i / steps) + wall, floor_top + inner_height * (i / steps))
+              for i in range(0, steps + 1)]
+
+    mesh = Mesh()
+    mesh.extend(revolve(smooth_profile(outer, 2), segments, 0, closed_bottom=True))
+
+    # 口縁だけ土の色を出す（焼き物は縁の釉が薄い）
+    lip = [(rim_radius + wall, rim_height), (rim_radius + wall * 0.4, rim_height + wall * 0.3),
+           (rim_radius, rim_height)]
+    mesh.extend(revolve(lip, segments, 2))
+
+    mesh.extend(revolve(smooth_profile(inner, 2), segments, 0))
+    return mesh
+
+
+def make_guinomi():
+    """ぐい呑。小さく浅い。一手で満ちてしまう。"""
+    return make_vessel(0.050, 0.30, 0.120, 0.300, wall=0.018)
+
+
+def make_sobachoko():
+    """そば猪口。細く深い。嵩の上がり方が速く見える。"""
+    return make_vessel(0.060, 0.62, 0.240, 0.300, wall=0.020)
+
+
+def make_chawan():
+    """茶碗。広く大きい。なかなか満ちない。"""
+    return make_vessel(0.080, 0.50, 0.260, 0.620, wall=0.026)
+
+
 def make_saucer():
     """茶托。縁が立ち上がった浅い皿。"""
     mesh = Mesh()
@@ -337,6 +393,11 @@ def main():
     write_mqo("dobin.mqo", "dobin", make_dobin(), ["celadon", "cord"])
     write_mqo("yunomi.mqo", "yunomi", make_yunomi(), ["celadon", "cord", "clay"])
     write_mqo("saucer.mqo", "saucer", make_saucer(), ["lacquer"])
+
+    # 毎局そのうちの一つが出る器。内側の寸法は CupGeometry.h の shapeOf と揃えてある
+    write_mqo("guinomi.mqo", "guinomi", make_guinomi(), ["celadon", "cord", "clay"])
+    write_mqo("sobachoko.mqo", "sobachoko", make_sobachoko(), ["celadon", "cord", "clay"])
+    write_mqo("chawan.mqo", "chawan", make_chawan(), ["celadon", "cord", "clay"])
 
 
 main()
