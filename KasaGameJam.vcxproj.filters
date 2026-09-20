@@ -93,6 +93,9 @@
     <ClCompile Include="src\game\scene\TitleScene.cpp">
       <Filter>src\game\scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\view\SpillStreaks.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\view\CardDraw.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
@@ -258,6 +261,9 @@
       <Filter>src\game\scene</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\VesselLook.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\SpillStreaks.h">
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\CardDraw.h">

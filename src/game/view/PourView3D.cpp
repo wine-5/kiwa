@@ -21,8 +21,20 @@ namespace
 	namespace palette = game::constant::palette;
 	namespace cup = game::view::cup;
 
-	/// @brief こぼれが広がる範囲の半径
+	/// @brief こぼれが広がる範囲の半径（組むときの大きさ。描くときに器へ合わせる）
 	constexpr float PUDDLE_RADIUS{ 0.68f };
+
+	/// @brief 染みの広さ（器の口の半径に対する倍率）
+	constexpr float PUDDLE_EXTENT{ 1.7f };
+
+	/// @brief 染みの濃さ（畳の目が透けるくらいに抑える）
+	constexpr float PUDDLE_ALPHA{ 0.6f };
+
+	/// @brief 筋が台に届いたとみなす進み具合
+	constexpr float PUDDLE_LANDED{ 0.92f };
+
+	/// @brief 染みが滲み広がる速さ（1秒あたりの割合）
+	constexpr float PUDDLE_SOAK_RATE{ 0.55f };
 
 	/// @brief こぼれの厚み
 	constexpr float PUDDLE_THICKNESS{ 0.012f };
@@ -191,6 +203,14 @@ namespace game::view
 		m_liquid.setPourOrigin(spoutTip(m_potTilt));
 
 		m_liquid.update(deltaTime, m_isPouring, m_amountRatio);
+		m_spill.update(deltaTime, m_isOverflowed);
+
+		// 筋が台に届いてから、染みがじわじわ広がる
+		const bool hasLanded{ m_isOverflowed && m_spill.getReach() > PUDDLE_LANDED };
+		m_puddleGrowth = hasLanded
+		                     ? core::utility::Easing::approach(m_puddleGrowth, 1.0f, PUDDLE_SOAK_RATE,
+		                                                       deltaTime)
+		                     : 0.0f;
 		m_cardDraw.update(deltaTime, m_cardContent);
 		m_grainTime += deltaTime;
 	}
@@ -205,6 +225,7 @@ namespace game::view
 		                     Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{}, 1.0f);
 		m_modelRenderer.draw(m_potModel, potPosition(m_potTilt), Vector3{ 0.0f, 0.0f, m_potTilt },
 		                     POT_SCALE);
+		m_spill.draw(m_renderer3D);
 		drawPuddle();
 		m_liquid.draw(m_renderer3D, CAMERA_POSITION);
 
@@ -265,13 +286,18 @@ namespace game::view
 			{
 				const float angle{ core::utility::math::TWO_PI * segment / PUDDLE_SEGMENTS };
 
+				// 真円だと水たまりに見えない。畳の目に沿って不均一に広がるので、
+				// 向きによって伸び方を変えていびつな染みにする
+				const float wobble{ 1.0f + 0.16f * std::sin(angle * 3.0f + 0.7f) +
+					                0.09f * std::sin(angle * 5.0f + 2.1f) };
+
 				core::utility::Vertex3D vertex{};
-				vertex.position = Vector3{ std::cos(angle) * radius, PUDDLE_THICKNESS,
-					                       std::sin(angle) * radius };
+				vertex.position = Vector3{ std::cos(angle) * radius * wobble, PUDDLE_THICKNESS,
+					                       std::sin(angle) * radius * wobble };
 				vertex.normal = Vector3{ 0.0f, 1.0f, 0.0f };
-				// 濡れた面は光を返すので、器の中の色より明るく置く
-				vertex.color = core::utility::mixed(palette::LIQUID, palette::LIQUID_SPILLED, t);
-				vertex.alpha = 0.92f * (1.0f - t * t * t);
+				// 畳に吸われた茶は沈んだ色になる。外へ行くほど薄く、滲んで消える
+				vertex.color = core::utility::mixed(palette::LIQUID_SPILLED, palette::LIQUID_SOAKED, t);
+				vertex.alpha = 0.78f * (1.0f - t * t) * (1.0f - t * 0.35f);
 				m_puddleVertices.push_back(vertex);
 			}
 		}
@@ -302,11 +328,29 @@ namespace game::view
 		if (!m_isOverflowed || m_puddleIndices.empty())
 			return;
 
+		// 染みは筋が下りきってから、時間をかけて滲み広がる。
+		// 一気に広げると、いきなり床が緑になったように見えてしまう
+		const float spread{ m_puddleGrowth };
+		if (spread <= 0.01f)
+			return;
+
+		// 染みの広さは器の口に合わせる。小さい器から湖ができては嘘になる
+		const float extent{ cup::shapeOf(m_vesselLook).rimRadius * PUDDLE_EXTENT / PUDDLE_RADIUS };
+		const float scale{ extent * spread };
+
+		m_puddleFrame = m_puddleVertices;
+		for (core::utility::Vertex3D& vertex : m_puddleFrame)
+		{
+			vertex.position.x *= scale;
+			vertex.position.z *= scale;
+			vertex.alpha *= spread * PUDDLE_ALPHA;
+		}
+
 		// こぼれたぶんは器の外へ広がる。
 		// 自前で組んだメッシュは裏表を取り違えやすいので、面の省略は切っておく
 		m_renderer3D.setBackCulling(false);
 		m_renderer3D.setBlend(core::utility::BlendMode::Alpha, 1.0f);
-		m_renderer3D.drawTriangles(m_puddleVertices, m_puddleIndices);
+		m_renderer3D.drawTriangles(m_puddleFrame, m_puddleIndices);
 		m_renderer3D.setBlend(core::utility::BlendMode::None, 1.0f);
 		m_renderer3D.setBackCulling(true);
 	}

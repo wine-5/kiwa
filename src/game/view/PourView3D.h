@@ -4,6 +4,7 @@
 #include "game/view/CardDraw.h"
 #include "game/view/CupGeometry.h"
 #include "game/view/LiquidVisual.h"
+#include "game/view/SpillStreaks.h"
 #include <array>
 #include <vector>
 
@@ -53,6 +54,7 @@ namespace game::view
 			// 器が変われば内側の形も変わる。液体はこの形に沿って描かれる
 			m_vesselLook = look;
 			m_liquid.setShape(cup::shapeOf(look));
+			m_spill.setShape(cup::shapeOf(look));
 		}
 
 		void showPouring(bool isPouring) override
@@ -186,6 +188,15 @@ namespace game::view
 
 		/// @brief 液体の見せ方（揺れ・波紋・しぶき・照り）
 		LiquidVisual m_liquid{};
+
+		/// @brief こぼれて外壁を伝う筋
+		SpillStreaks m_spill{};
+
+		/// @brief 広がる途中の染み（毎フレーム作り直す）
+		mutable std::vector<core::utility::Vertex3D> m_puddleFrame{};
+
+		/// @brief 染みの広がり具合（0.0〜1.0）
+		float m_puddleGrowth{ 0.0f };
 
 		/// @brief 先攻を決める札の見せ方
 		CardDraw m_cardDraw{};
