@@ -4,14 +4,10 @@
 
 namespace
 {
-	/// @brief 1秒間に注がれる嵩
-	constexpr float POUR_RATE{ 0.30f };
-
-	/// @brief 際が現れうる下限
-	constexpr float LIMIT_MIN{ 0.55f };
-
-	/// @brief 際が現れうる上限
-	constexpr float LIMIT_MAX{ 0.95f };
+	/// @brief 1秒間に注がれる量（湯呑一杯を 1.0 とした量）
+	///
+	/// 注ぐ速さは器によらず一定。大きい器ほど満ちるまでに時間がかかる
+	constexpr float POUR_VOLUME_RATE{ 0.30f };
 
 	/// @brief 札を返してから対局へ移るまでの間（秒）
 	///
@@ -75,7 +71,9 @@ namespace game::presenter
 				break;
 			}
 
-			m_duel.pour(POUR_RATE * deltaTime);
+			// 注ぐ速さは一定なので、器が大きいほど嵩の上がり方は緩やかになる
+			m_duel.pour(POUR_VOLUME_RATE * deltaTime /
+			            model::vesselOf(m_duel.getVessel()).capacity);
 			if (m_duel.isRoundOver())
 			{
 				// 注ぎながら押していたぶんを持ち越すと、決着がすぐ飛ばされてしまう
@@ -120,8 +118,10 @@ namespace game::presenter
 			return;
 		}
 
-		std::uniform_real_distribution<float> distribution{ LIMIT_MIN, LIMIT_MAX };
-		m_duel.startRound(distribution(m_random));
+		// 器は毎局引き直す。際は常に口いっぱいなので、
+		// 難しさは「その器がどれだけ入るか」で変わる
+		std::uniform_int_distribution<std::size_t> pick{ 0, model::VESSELS.size() - 1 };
+		m_duel.startRound(model::VESSELS[pick(m_random)].type);
 		m_phase = Phase::Ready;
 	}
 
@@ -137,6 +137,22 @@ namespace game::presenter
 	core::input::KeyCode DuelPresenter::keyFor(model::Player player) noexcept
 	{
 		return player == model::Player::One ? core::input::KeyCode::Space : core::input::KeyCode::Enter;
+	}
+
+	game::view::VesselLook DuelPresenter::lookOf(model::VesselType vessel) noexcept
+	{
+		switch (vessel)
+		{
+		case model::VesselType::Guinomi:
+			return game::view::VesselLook::Guinomi;
+		case model::VesselType::Sobachoko:
+			return game::view::VesselLook::Sobachoko;
+		case model::VesselType::Chawan:
+			return game::view::VesselLook::Chawan;
+		case model::VesselType::Yunomi:
+		default:
+			return game::view::VesselLook::Yunomi;
+		}
 	}
 
 	std::string DuelPresenter::nameOf(model::Player player)
@@ -169,13 +185,12 @@ namespace game::presenter
 	void DuelPresenter::pushToView()
 	{
 		// 札を引く場面では、前の勝負の残りが見えないよう器を空にしておく。
-		// こぼした場面では逆に、縁まで満ちて見えるべきなので絵の上だけ満杯にする
-		// （際の値は勝負の都合で低いこともあるが、それは数字の話で見た目とは別）
+		// こぼした場面では縁を越えた状態を見せる
 		const bool isDrawing{ m_phase == Phase::Draw };
-		m_view.showAmount(isDrawing            ? 0.0f
+		m_view.showAmount(isDrawing               ? 0.0f
 		                  : m_duel.isOverflowed() ? 1.0f
 		                                          : m_duel.getAmount());
-		m_view.showLimit(m_duel.getLimit(), false); // 際は見せない。それがこの勝負の要
+		m_view.showVessel(lookOf(m_duel.getVessel()));
 		m_view.showPouring(m_phase == Phase::Pouring);
 		m_view.showOverflowed(!isDrawing && m_duel.isOverflowed());
 		m_view.showTurn(buildTurnLabel());
@@ -217,18 +232,20 @@ namespace game::presenter
 				break;
 			}
 
-			m_view.showMessage("嵩 " + toPercent(m_duel.getAmount()));
+			m_view.showMessage(std::string{ model::vesselOf(m_duel.getVessel()).name } + "　嵩 " +
+			                   toPercent(m_duel.getAmount()));
 			m_view.showPrompt(keyName + " を押している間だけ注がれる");
 			break;
 
 		case Phase::Pouring:
-			m_view.showMessage("嵩 " + toPercent(m_duel.getAmount()));
+			m_view.showMessage(std::string{ model::vesselOf(m_duel.getVessel()).name } + "　嵩 " +
+			                   toPercent(m_duel.getAmount()));
 			m_view.showPrompt("離せば手番を渡す");
 			break;
 
 		case Phase::RoundOver:
-			m_view.showMessage(nameOf(m_duel.getLoser()) + " がこぼした  際 " +
-			                   toPercent(m_duel.getLimit()));
+			m_view.showMessage(nameOf(m_duel.getLoser()) + " がこぼした  " +
+			                   model::vesselOf(m_duel.getVessel()).name + " は縁まで満ちた");
 			m_view.showPrompt(m_duel.isMatchOver() ? "どちらかのキーで結果へ"
 			                                       : "どちらかのキーで次の勝負へ");
 			break;

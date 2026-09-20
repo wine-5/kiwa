@@ -2,7 +2,9 @@
 #include "game/view/IPourView.h"
 #include "core/utility/Vertex3D.h"
 #include "game/view/CardDraw.h"
+#include "game/view/CupGeometry.h"
 #include "game/view/LiquidVisual.h"
+#include <array>
 #include <vector>
 
 namespace core::iface
@@ -43,10 +45,14 @@ namespace game::view
 			m_amountRatio = ratio;
 		}
 
-		void showLimit(float ratio, bool isVisible) override
+		void showVessel(VesselLook look) override
 		{
-			m_limitRatio = ratio;
-			m_isLimitVisible = isVisible;
+			if (look == m_vesselLook)
+				return;
+
+			// 器が変われば内側の形も変わる。液体はこの形に沿って描かれる
+			m_vesselLook = look;
+			m_liquid.setShape(cup::shapeOf(look));
 		}
 
 		void showPouring(bool isPouring) override
@@ -113,10 +119,6 @@ namespace game::view
 
 
 
-		/**
-		 * @brief こぼれる際を示す線を描く
-		 */
-		void drawLimitLine() const;
 
 		/**
 		 * @brief 画面全体へ被せる仕上げ（周辺減光と粒状感）を描く
@@ -170,8 +172,8 @@ namespace game::view
 		/// @brief 本文の書体
 		int m_bodyFont{ -1 };
 
-		/// @brief 湯呑のモデル
-		int m_cupModel{ -1 };
+		/// @brief 器のモデル（VesselLook の順に並べる）
+		std::array<int, 4> m_cupModels{ -1, -1, -1, -1 };
 
 		/// @brief 土瓶のモデル
 		int m_potModel{ -1 };
@@ -189,8 +191,10 @@ namespace game::view
 		CardDraw m_cardDraw{};
 
 		float m_amountRatio{ 0.0f };
-		float m_limitRatio{ 1.0f };
-		bool m_isLimitVisible{ true };
+
+		/// @brief いま出ている器
+		VesselLook m_vesselLook{ VesselLook::Yunomi };
+
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };
 		/// @brief 札の表示に必要な内容

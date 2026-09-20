@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "game/model/Duel.h"
+#include "game/view/VesselLook.h"
 #include "core/input/KeyCode.h"
 #include <random>
 #include <string>
@@ -20,7 +21,7 @@ namespace game::presenter
 	 * @brief 二人で注ぎ合う勝負の進行役
 	 *
 	 * 手番の側の入力だけを読んで Model へ伝え、Model の状態を View へ渡す。
-	 * 際は毎局ここで引く（Model に乱数を持ち込まないため）
+	 * 器は毎局ここで引く（Model に乱数を持ち込まないため）
 	 */
 	class DuelPresenter
 	{
@@ -29,7 +30,7 @@ namespace game::presenter
 		 * @brief DuelPresenter のコンストラクタ
 		 * @param view 映す先
 		 * @param input 入力の取得
-		 * @param seed 際を決める乱数の種
+		 * @param seed 先攻と器を決める乱数の種
 		 */
 		DuelPresenter(game::view::IPourView& view, core::iface::IInputProvider& input, unsigned int seed);
 
@@ -58,9 +59,16 @@ namespace game::presenter
 		void beginDraw();
 
 		/**
-		 * @brief 新しい際を引いて次の局を始める
+		 * @brief 新しい器を引いて次の局を始める
 		 */
 		void beginRound();
+
+		/**
+		 * @brief 器の種類を見た目の種類へ読み替える
+		 * @param vessel 器の種類
+		 * @return 見た目の種類
+		 */
+		[[nodiscard]] static game::view::VesselLook lookOf(model::VesselType vessel) noexcept;
 
 		/**
 		 * @brief どちらかのキーが押されたかを返す
@@ -114,7 +122,7 @@ namespace game::presenter
 		/// @brief 札を返してから経った時間（秒）
 		float m_revealedTime{ 0.0f };
 
-		/// @brief 際を決める乱数
+		/// @brief 先攻と器を決める乱数
 		std::mt19937 m_random;
 	};
 } // namespace game::presenter

@@ -221,6 +221,9 @@
     <ClInclude Include="src\game\model\Judgement.h">
       <Filter>src\game\model</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\model\Vessel.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\model\Player.h">
       <Filter>src\game\model</Filter>
     </ClInclude>
@@ -254,6 +257,9 @@
     <ClInclude Include="src\game\scene\TitleScene.h">
       <Filter>src\game\scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\view\VesselLook.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\view\CardDraw.h">
       <Filter>src\game\view</Filter>
     </ClInclude>

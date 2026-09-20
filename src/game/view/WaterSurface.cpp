@@ -196,7 +196,7 @@ namespace game::view
 
 	float WaterSurface::getLevelHeight() const noexcept
 	{
-		return cup::surfaceHeight(m_levelRatio);
+		return m_shape.surfaceHeight(m_levelRatio);
 	}
 
 	float WaterSurface::heightAt(float x, float z) const
@@ -226,7 +226,7 @@ namespace game::view
 
 		// 縁に接したところは表面張力で持ち上がる
 		const float radius{ std::sqrt(x * x + z * z) };
-		const float edgeDistance{ std::max(0.0f, cup::radiusAt(getLevelHeight()) - radius) };
+		const float edgeDistance{ std::max(0.0f, m_shape.radiusAt(getLevelHeight()) - radius) };
 		height += MENISCUS_HEIGHT * std::exp(-edgeDistance / MENISCUS_WIDTH);
 
 		// 注がれているところは押されてへこむ
@@ -285,7 +285,7 @@ namespace game::view
 			return;
 
 		const float level{ getLevelHeight() };
-		const float outerRadius{ cup::radiusAt(level) };
+		const float outerRadius{ m_shape.radiusAt(level) };
 		const auto baseIndex{ static_cast<unsigned short>(vertices.size()) };
 
 		// 円い器なので、中心から輪を広げて面を張る
@@ -303,7 +303,7 @@ namespace game::view
 				vertex.position = Vector3{ x, heightAt(x, z), z };
 				vertex.normal = normalAt(x, z);
 
-				const float depth{ std::max(0.0f, vertex.position.y - cup::FLOOR_TOP) };
+				const float depth{ std::max(0.0f, vertex.position.y - m_shape.floorTop) };
 				vertex.color = shadeSurface(vertex.position, vertex.normal, cameraPosition,
 				                            foamAt(x, z), depth, vertex.alpha);
 				vertices.push_back(vertex);
@@ -348,8 +348,8 @@ namespace game::view
 		for (int ring{ 0 }; ring <= WALL_RINGS; ++ring)
 		{
 			const float t{ static_cast<float>(ring) / WALL_RINGS };
-			const float y{ cup::FLOOR_TOP + (level - cup::FLOOR_TOP) * t };
-			const float radius{ cup::radiusAt(y) * HUG };
+			const float y{ m_shape.floorTop + (level - m_shape.floorTop) * t };
+			const float radius{ m_shape.radiusAt(y) * HUG };
 
 			// 深いところほど暗い。上へ行くほど液体そのものの色に近づく
 			const Color color{ core::utility::scaled(palette::LIQUID, 0.42f + 0.38f * t) };
@@ -394,8 +394,8 @@ namespace game::view
 		if (m_levelRatio <= 0.0f)
 			return;
 
-		const float floorY{ cup::FLOOR_TOP + CAUSTIC_LIFT };
-		const float outerRadius{ cup::FLOOR_RADIUS };
+		const float floorY{ m_shape.floorTop + CAUSTIC_LIFT };
+		const float outerRadius{ m_shape.floorRadius };
 		const auto baseIndex{ static_cast<unsigned short>(vertices.size()) };
 
 		for (int ring{ 0 }; ring <= RING_COUNT; ++ring)

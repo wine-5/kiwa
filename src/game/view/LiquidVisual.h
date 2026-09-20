@@ -33,6 +33,15 @@ namespace game::view
 		void update(float deltaTime, bool isPouring, float amountRatio);
 
 		/**
+		 * @brief 器の内側の寸法を伝える
+		 * @param shape 器の寸法
+		 */
+		void setShape(const cup::Shape& shape) noexcept
+		{
+			m_surface.setShape(shape);
+		}
+
+		/**
 		 * @brief 注ぎ口の位置を伝える
 		 * @param origin 液体が出てくる位置
 		 */

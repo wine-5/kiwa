@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "game/view/CupGeometry.h"
 #include "core/utility/Vector3.h"
 #include "core/utility/Vertex3D.h"
 #include <vector>
@@ -16,6 +17,15 @@ namespace game::view
 	{
 	  public:
 		WaterSurface() = default;
+
+		/**
+		 * @brief 器の内側の寸法を伝える
+		 * @param shape 器の寸法
+		 */
+		void setShape(const cup::Shape& shape) noexcept
+		{
+			m_shape = shape;
+		}
 
 		/**
 		 * @brief 溜まっている嵩を伝える
@@ -138,6 +148,9 @@ namespace game::view
 
 		/// @brief 経過時間（秒）
 		float m_time{ 0.0f };
+
+		/// @brief いま使っている器の内側の寸法
+		cup::Shape m_shape{};
 
 		/// @brief 溜まっている嵩（0.0〜1.0）
 		float m_levelRatio{ 0.0f };

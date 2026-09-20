@@ -21,12 +21,6 @@ namespace
 	namespace palette = game::constant::palette;
 	namespace cup = game::view::cup;
 
-	/// @brief 際を示す線の太さ
-	constexpr float LINE_THICKNESS{ 0.006f };
-
-	/// @brief 際の線を描く輪の分割数
-	constexpr int LINE_SEGMENTS{ 56 };
-
 	/// @brief こぼれが広がる範囲の半径
 	constexpr float PUDDLE_RADIUS{ 0.68f };
 
@@ -66,8 +60,26 @@ namespace
 
 	// ---- 器と土瓶 ----
 
-	/// @brief 湯呑のモデル
-	constexpr const char* CUP_MODEL_PATH{ "assets/model/yunomi.mqo" };
+	/**
+	 * @brief 器のモデルの在処を返す
+	 * @param look 器の見た目
+	 * @return モデルのファイルの場所
+	 */
+	constexpr const char* cupModelPath(game::view::VesselLook look) noexcept
+	{
+		switch (look)
+		{
+		case game::view::VesselLook::Guinomi:
+			return "assets/model/guinomi.mqo";
+		case game::view::VesselLook::Sobachoko:
+			return "assets/model/sobachoko.mqo";
+		case game::view::VesselLook::Chawan:
+			return "assets/model/chawan.mqo";
+		case game::view::VesselLook::Yunomi:
+		default:
+			return "assets/model/yunomi.mqo";
+		}
+	}
 
 	/// @brief 土瓶のモデル
 	constexpr const char* POT_MODEL_PATH{ "assets/model/dobin.mqo" };
@@ -159,7 +171,10 @@ namespace game::view
 		m_cardBackTexture = resource.loadTexture(CARD_BACK_TEXTURE_PATH);
 		m_cardFirstTexture = resource.loadTexture(CARD_FIRST_TEXTURE_PATH);
 		m_cardSecondTexture = resource.loadTexture(CARD_SECOND_TEXTURE_PATH);
-		m_cupModel = resource.loadModel(CUP_MODEL_PATH);
+		// 器はどれが出ても待たせないよう、はじめに全部読んでおく
+		for (std::size_t i{ 0 }; i < m_cupModels.size(); ++i)
+			m_cupModels[i] = resource.loadModel(cupModelPath(static_cast<VesselLook>(i)));
+
 		m_potModel = resource.loadModel(POT_MODEL_PATH);
 
 		m_headingFont = resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
@@ -186,11 +201,11 @@ namespace game::view
 		m_camera.lookAt(CAMERA_POSITION, CAMERA_TARGET);
 
 		drawScenery();
-		m_modelRenderer.draw(m_cupModel, Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{}, 1.0f);
+		m_modelRenderer.draw(m_cupModels[static_cast<std::size_t>(m_vesselLook)],
+		                     Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{}, 1.0f);
 		m_modelRenderer.draw(m_potModel, potPosition(m_potTilt), Vector3{ 0.0f, 0.0f, m_potTilt },
 		                     POT_SCALE);
 		drawPuddle();
-		drawLimitLine();
 		m_liquid.draw(m_renderer3D, CAMERA_POSITION);
 
 		// 溜まっている 3D を吐き出しておく
@@ -294,26 +309,6 @@ namespace game::view
 		m_renderer3D.drawTriangles(m_puddleVertices, m_puddleIndices);
 		m_renderer3D.setBlend(core::utility::BlendMode::None, 1.0f);
 		m_renderer3D.setBackCulling(true);
-	}
-
-	void PourView3D::drawLimitLine() const
-	{
-		if (!m_isLimitVisible)
-			return;
-
-		const float y{ cup::surfaceHeight(m_limitRatio) };
-		const float radius{ cup::radiusAt(y) };
-
-		// 器の内側に沿って細い線を一周させる
-		for (int i{ 0 }; i < LINE_SEGMENTS; ++i)
-		{
-			const float angle{ core::utility::math::TWO_PI * i / LINE_SEGMENTS };
-			const float nextAngle{ core::utility::math::TWO_PI * (i + 1) / LINE_SEGMENTS };
-
-			const Vector3 from{ std::cos(angle) * radius, y, std::sin(angle) * radius };
-			const Vector3 to{ std::cos(nextAngle) * radius, y, std::sin(nextAngle) * radius };
-			m_renderer3D.drawCapsule(from, to, LINE_THICKNESS, palette::LIMIT_LINE);
-		}
 	}
 
 	void PourView3D::drawTexts() const

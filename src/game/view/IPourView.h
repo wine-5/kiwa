@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "game/view/VesselLook.h"
 #include <string>
 
 namespace game::view
@@ -15,17 +16,16 @@ namespace game::view
 		virtual ~IPourView() = default;
 
 		/**
-		 * @brief 枡に入っている嵩を伝える
-		 * @param ratio 嵩（0.0〜1.0）
+		 * @brief 器に入っている嵩を伝える
+		 * @param ratio 嵩（0.0〜1.0。1.0 で口いっぱい）
 		 */
 		virtual void showAmount(float ratio) = 0;
 
 		/**
-		 * @brief こぼれる際の位置を伝える
-		 * @param ratio 際の嵩（0.0〜1.0）
-		 * @param isVisible 見せるならtrue（隠す勝負では false にする）
+		 * @brief この局で使う器を伝える
+		 * @param look 器の見た目
 		 */
-		virtual void showLimit(float ratio, bool isVisible) = 0;
+		virtual void showVessel(VesselLook look) = 0;
 
 		/**
 		 * @brief いま注いでいるかを伝える
