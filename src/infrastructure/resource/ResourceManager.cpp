@@ -34,6 +34,36 @@ namespace infrastructure::resource
 		return handle;
 	}
 
+	int ResourceManager::loadModel(const std::string& path)
+	{
+		if (const auto found{ m_models.find(path) }; found != m_models.end())
+			return found->second;
+
+		const int handle{ MV1LoadModel(path.c_str()) };
+		if (handle < 0)
+			return -1;
+
+		m_models.emplace(path, handle);
+		return handle;
+	}
+
+	int ResourceManager::loadFont(const std::string& family, int size, int thickness)
+	{
+		// 同じ書体でも大きさが違えば別のハンドルが要るので、鍵に混ぜる
+		const std::string key{ family + "|" + std::to_string(size) + "|" +
+			                   std::to_string(thickness) };
+
+		if (const auto found{ m_fonts.find(key) }; found != m_fonts.end())
+			return found->second;
+
+		const int handle{ CreateFontToHandle(family.c_str(), size, thickness) };
+		if (handle < 0)
+			return -1;
+
+		m_fonts.emplace(key, handle);
+		return handle;
+	}
+
 	void ResourceManager::playSe(int handle)
 	{
 		if (handle < 0)
@@ -67,5 +97,13 @@ namespace infrastructure::resource
 		for (const auto& [path, handle] : m_sounds)
 			DeleteSoundMem(handle);
 		m_sounds.clear();
+
+		for (const auto& [path, handle] : m_models)
+			MV1DeleteModel(handle);
+		m_models.clear();
+
+		for (const auto& [key, handle] : m_fonts)
+			DeleteFontToHandle(handle);
+		m_fonts.clear();
 	}
 } // namespace infrastructure::resource

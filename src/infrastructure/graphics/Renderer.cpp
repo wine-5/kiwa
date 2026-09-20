@@ -38,19 +38,44 @@ namespace infrastructure::graphics
 		         static_cast<int>(to.y), toDxColor(color));
 	}
 
+	void Renderer::setFont(int fontHandle)
+	{
+		m_fontHandle = fontHandle;
+	}
+
 	void Renderer::drawText(const core::utility::Vector2& position, const std::string& text,
 	                        const core::utility::Color& color)
 	{
-		DrawString(static_cast<int>(position.x), static_cast<int>(position.y), text.c_str(), toDxColor(color));
+		if (m_fontHandle < 0)
+		{
+			DrawString(static_cast<int>(position.x), static_cast<int>(position.y), text.c_str(),
+			           toDxColor(color));
+			return;
+		}
+
+		DrawStringToHandle(static_cast<int>(position.x), static_cast<int>(position.y), text.c_str(),
+		                   toDxColor(color), m_fontHandle);
 	}
 
 	void Renderer::drawTextCentered(const core::utility::Vector2& center, const std::string& text,
 	                                const core::utility::Color& color)
 	{
-		const int width{ GetDrawStringWidth(text.c_str(), static_cast<int>(text.length())) };
-		const int height{ GetFontSize() };
-		DrawString(static_cast<int>(center.x) - width / 2, static_cast<int>(center.y) - height / 2,
-		           text.c_str(), toDxColor(color));
+		const int length{ static_cast<int>(text.length()) };
+
+		if (m_fontHandle < 0)
+		{
+			const int width{ GetDrawStringWidth(text.c_str(), length) };
+			const int height{ GetFontSize() };
+			DrawString(static_cast<int>(center.x) - width / 2, static_cast<int>(center.y) - height / 2,
+			           text.c_str(), toDxColor(color));
+			return;
+		}
+
+		const int width{ GetDrawStringWidthToHandle(text.c_str(), length, m_fontHandle) };
+		const int height{ GetFontSizeToHandle(m_fontHandle) };
+		DrawStringToHandle(static_cast<int>(center.x) - width / 2,
+		                   static_cast<int>(center.y) - height / 2, text.c_str(), toDxColor(color),
+		                   m_fontHandle);
 	}
 
 	void Renderer::drawTexture(int handle, const core::utility::Vector2& position)

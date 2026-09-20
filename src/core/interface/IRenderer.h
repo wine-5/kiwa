@@ -46,6 +46,12 @@ namespace core::iface
 		                      const core::utility::Color& color) = 0;
 
 		/**
+		 * @brief 以降の文字描画に使う書体を指定する
+		 * @param fontHandle フォントハンドル（-1 で既定の書体）
+		 */
+		virtual void setFont(int fontHandle) = 0;
+
+		/**
 		 * @brief 文字列を描く
 		 * @param position 左上の座標
 		 * @param text 描く文字列（UTF-8）
