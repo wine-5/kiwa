@@ -2,55 +2,55 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{b0e9f06e-68d3-45d7-84f2-58586d68051f}</UniqueIdentifier>
+      <UniqueIdentifier>{bff7fd7e-3ed7-492f-9c04-050121029b9c}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core">
-      <UniqueIdentifier>{f6ed94c0-a691-4346-8ff8-f345fca033e3}</UniqueIdentifier>
+      <UniqueIdentifier>{cde689ee-bbce-4930-b241-73cdfacd7096}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\base">
-      <UniqueIdentifier>{7bed3143-d0ca-4746-8b5a-0631b7d8b3ac}</UniqueIdentifier>
+      <UniqueIdentifier>{6efd87fc-9863-4457-ac56-6f186c77ce36}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\constant">
-      <UniqueIdentifier>{e8498026-71cd-4968-95ad-b858ebb99b08}</UniqueIdentifier>
+      <UniqueIdentifier>{705b8dc8-21fe-4bf7-9c38-b0dca0b9d8e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\input">
-      <UniqueIdentifier>{f6fc9791-45f1-4d46-bb20-caf72ec6ed0d}</UniqueIdentifier>
+      <UniqueIdentifier>{82ff9511-e0d1-4099-bd56-879395a704e5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\interface">
-      <UniqueIdentifier>{7897cb8b-a2f2-4ad8-a873-bf68a81fd018}</UniqueIdentifier>
+      <UniqueIdentifier>{2c86646f-30fb-490e-9005-7b8f2cf462b9}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\core\utility">
-      <UniqueIdentifier>{e2e23777-5c15-4d5d-ac41-f63e36f1b6a5}</UniqueIdentifier>
+      <UniqueIdentifier>{f741433e-403e-4a5d-8430-85c8a422e366}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game">
-      <UniqueIdentifier>{28409937-af21-41b0-b70f-ced94ed30087}</UniqueIdentifier>
+      <UniqueIdentifier>{253871e9-8ecf-4ed1-8e0d-1fe68147c621}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\constant">
-      <UniqueIdentifier>{024e8581-d67b-4ae0-ba70-87457f4aa7be}</UniqueIdentifier>
+      <UniqueIdentifier>{e436b857-cf64-436c-9173-1d6a7f2eb178}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\model">
-      <UniqueIdentifier>{3cfcd3d6-2e7f-450a-9385-437b4e78ef48}</UniqueIdentifier>
+      <UniqueIdentifier>{6312c6d2-be6d-487b-9f0b-b62ef1b498b1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\presenter">
-      <UniqueIdentifier>{80b23251-4081-45a9-9095-94534fadde8e}</UniqueIdentifier>
+      <UniqueIdentifier>{086fb2bf-3fd1-44fd-ab32-f02ba49ac5a6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\scene">
-      <UniqueIdentifier>{8f25a501-504d-4d1e-8ca8-8e09be83fc9f}</UniqueIdentifier>
+      <UniqueIdentifier>{ad68202a-ad08-4e1a-89f4-c0556ffc82c0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\game\view">
-      <UniqueIdentifier>{160df889-e332-4fb5-93bf-6472900d24b4}</UniqueIdentifier>
+      <UniqueIdentifier>{ce0a14a1-8178-461a-961e-fae4d8fb0c19}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure">
-      <UniqueIdentifier>{a4bea702-a0c4-4ab8-8d81-12884e0126e5}</UniqueIdentifier>
+      <UniqueIdentifier>{e406993d-8569-4b56-a558-14f2c2053e8d}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\graphics">
-      <UniqueIdentifier>{7ca8511d-d41b-4a88-bdc2-d958e3892aaa}</UniqueIdentifier>
+      <UniqueIdentifier>{1a849fc9-7842-4ce4-a69c-724bb6f3b7d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\input">
-      <UniqueIdentifier>{725ccf64-4485-4b6f-8204-70ac6fa93a39}</UniqueIdentifier>
+      <UniqueIdentifier>{536e833b-d954-417e-924d-4a7a0ae329c7}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\infrastructure\resource">
-      <UniqueIdentifier>{25955c66-d702-492a-ad4d-e1dc654fa945}</UniqueIdentifier>
+      <UniqueIdentifier>{d05f7f61-4578-48c4-a861-c820ed61309c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,10 +60,13 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\model\Duel.cpp">
+      <Filter>src\game\model</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\model\PourMatch.cpp">
       <Filter>src\game\model</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\presenter\PourPresenter.cpp">
+    <ClCompile Include="src\game\presenter\DuelPresenter.cpp">
       <Filter>src\game\presenter</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\InGameScene.cpp">
@@ -179,13 +182,19 @@
     <ClInclude Include="src\game\constant\Palette.h">
       <Filter>src\game\constant</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\model\Duel.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\model\Judgement.h">
+      <Filter>src\game\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\model\Player.h">
       <Filter>src\game\model</Filter>
     </ClInclude>
     <ClInclude Include="src\game\model\PourMatch.h">
       <Filter>src\game\model</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\presenter\PourPresenter.h">
+    <ClInclude Include="src\game\presenter\DuelPresenter.h">
       <Filter>src\game\presenter</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\IScene.h">

@@ -37,17 +37,9 @@ namespace infrastructure::graphics
 		MV1SetRotationXYZ(handle, VGet(rotationRadian.x, rotationRadian.y, rotationRadian.z));
 		MV1SetPosition(handle, VGet(position.x, position.y, position.z));
 
-		// モデルは自前で陰影を焼いていないので、描く間だけ光を当てる。
-		// 奥行きの判定も既定では切れているため、ここで入れる（切れていると
-		// 後から描いたものが器の手前に出てしまう）
+		// モデルは自前で陰影を焼いていないので、描く間だけ光を当てる
 		SetUseLighting(TRUE);
-		SetUseZBufferFlag(TRUE);
-		SetWriteZBufferFlag(TRUE);
-
 		MV1DrawModel(handle);
-
-		SetWriteZBufferFlag(FALSE);
-		SetUseZBufferFlag(FALSE);
 		SetUseLighting(FALSE);
 	}
 } // namespace infrastructure::graphics

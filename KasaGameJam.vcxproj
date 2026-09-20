@@ -104,16 +104,20 @@
     <ClCompile Include="src\infrastructure\graphics\Renderer3D.cpp" />
     <ClCompile Include="src\game\model\PourMatch.cpp" />
     <ClCompile Include="src\game\view\PourView3D.cpp" />
-    <ClCompile Include="src\game\presenter\PourPresenter.cpp" />
     <ClCompile Include="src\game\view\LiquidVisual.cpp" />
     <ClCompile Include="src\game\view\WaterSurface.cpp" />
     <ClCompile Include="src\game\view\PourStream.cpp" />
     <ClCompile Include="src\game\view\SceneryMesh.cpp" />
     <ClCompile Include="src\infrastructure\graphics\ModelRenderer.cpp" />
     <ClCompile Include="src\infrastructure\graphics\PostEffect.cpp" />
+    <ClCompile Include="src\game\model\Duel.cpp" />
+    <ClCompile Include="src\game\presenter\DuelPresenter.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
+    <ClInclude Include="src\game\presenter\DuelPresenter.h" />
+    <ClInclude Include="src\game\model\Duel.h" />
+    <ClInclude Include="src\game\model\Player.h" />
     <ClInclude Include="src\game\view\CupGeometry.h" />
     <ClInclude Include="src\infrastructure\graphics\PostEffect.h" />
     <ClInclude Include="src\core\interface\IPostEffect.h" />
@@ -127,7 +131,6 @@
     <ClInclude Include="src\game\view\LiquidVisual.h" />
     <ClInclude Include="src\core\utility\BlendMode.h" />
     <ClInclude Include="src\game\constant\Palette.h" />
-    <ClInclude Include="src\game\presenter\PourPresenter.h" />
     <ClInclude Include="src\game\view\PourView3D.h" />
     <ClInclude Include="src\game\view\IPourView.h" />
     <ClInclude Include="src\game\model\PourMatch.h" />

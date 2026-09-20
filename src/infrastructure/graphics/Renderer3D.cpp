@@ -109,18 +109,22 @@ namespace infrastructure::graphics
 		{
 		case core::utility::BlendMode::Alpha:
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, clamped);
-			SetWriteZBuffer3D(FALSE); // 透けているものが奥行きを埋めてしまわないように
+			// 透けているものが奥行きを埋めてしまわないように、書き込みだけ止める
+			SetWriteZBuffer3D(FALSE);
+			SetWriteZBufferFlag(FALSE);
 			break;
 
 		case core::utility::BlendMode::Add:
 			SetDrawBlendMode(DX_BLENDMODE_ADD, clamped);
 			SetWriteZBuffer3D(FALSE);
+			SetWriteZBufferFlag(FALSE);
 			break;
 
 		case core::utility::BlendMode::None:
 		default:
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			SetWriteZBuffer3D(TRUE);
+			SetWriteZBufferFlag(TRUE);
 			break;
 		}
 	}
