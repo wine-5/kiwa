@@ -53,6 +53,9 @@ namespace game::constant
 		/// @brief 主となる文言
 		inline constexpr core::utility::Color TEXT_PRIMARY{ 244, 236, 216 };
 
+		/// @brief 墨（明るい紙の上に書く字。白い字では読めないため）
+		inline constexpr core::utility::Color INK{ 28, 26, 24 };
+
 		/// @brief 添えの文言（操作の案内など）
 		inline constexpr core::utility::Color TEXT_SUB{ 152, 142, 124 };
 	} // namespace palette
