@@ -6,6 +6,7 @@
 #include "core/utility/Easing.h"
 #include "game/constant/Fonts.h"
 #include "game/constant/Palette.h"
+#include "game/constant/Sounds.h"
 #include "game/constant/UiTextures.h"
 #include "game/model/Npc.h"
 #include <algorithm>
@@ -70,6 +71,8 @@ namespace game::scene
 	{
 		m_scrollTexture = m_context.resource.loadTexture(constant::ui::RESULT_SCROLL);
 		m_sealTexture = m_context.resource.loadTexture(constant::ui::SEAL_VICTORY);
+		m_winSound = m_context.resource.loadSound(game::constant::sound::SE_ROUND_WIN);
+
 		m_winnerFont = m_context.resource.loadFont(font::HEADING_FAMILY, WINNER_FONT_SIZE);
 		m_bodyFont = m_context.resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);
 	}
@@ -85,8 +88,13 @@ namespace game::scene
 
 	void ResultScene::update(float deltaTime)
 	{
+		const float previous{ m_elapsedTime };
 		m_elapsedTime += deltaTime;
 		m_backdrop.update(deltaTime);
+
+		// 掛軸が下り切って名が浮かぶところで、勝ちの音を一度だけ
+		if (previous < NAME_DELAY && m_elapsedTime >= NAME_DELAY)
+			m_context.resource.playSe(m_winSound);
 
 		// 押し切るまでは受け付けない。見せ切ってから次へ進ませる
 		if (m_elapsedTime < PROMPT_DELAY)

@@ -5,6 +5,7 @@
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
 #include "game/constant/Palette.h"
+#include "game/constant/Sounds.h"
 #include "game/model/Npc.h"
 #include <array>
 #include <cmath>
@@ -27,6 +28,9 @@ namespace
 
 	/// @brief 副題を置く高さ（画面の高さに対する割合）
 	constexpr float SUBTITLE_Y{ 0.33f };
+
+	/// @brief 茶室の間の大きさ
+	constexpr float AMBIENCE_VOLUME{ 0.35f };
 
 	/// @brief 選ばせる並びを置く高さ（画面の高さに対する割合）
 	///
@@ -67,6 +71,11 @@ namespace game::scene
 	    : m_context{ context }, m_backdrop{ context.renderer3D, context.renderer, context.camera,
 		                                    context.modelRenderer, context.resource, context.screen }
 	{
+		// 茶室の間は場面をまたいで鳴り続ける（切れると場が死ぬ）
+		const int ambience{ m_context.resource.loadSound(game::constant::sound::AMBIENCE_TEAROOM) };
+		m_context.resource.setVolume(ambience, AMBIENCE_VOLUME);
+		m_context.resource.playLoop(ambience);
+
 		m_titleFont = m_context.resource.loadFont(font::HEADING_FAMILY, TITLE_FONT_SIZE);
 		m_headingFont = m_context.resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
 		m_bodyFont = m_context.resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);

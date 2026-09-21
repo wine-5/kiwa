@@ -233,6 +233,9 @@
     <ClInclude Include="src\game\constant\Fonts.h">
       <Filter>src\game\constant</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\constant\Sounds.h">
+      <Filter>src\game\constant</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\constant\UiTextures.h">
       <Filter>src\game\constant</Filter>
     </ClInclude>

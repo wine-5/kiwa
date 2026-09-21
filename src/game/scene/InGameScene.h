@@ -20,6 +20,11 @@ namespace game::scene
 		 */
 		explicit InGameScene(const SceneContext& context);
 
+		/**
+		 * @brief InGameScene のデストラクタ（曲を止める）
+		 */
+		~InGameScene() override;
+
 		void update(float deltaTime) override;
 
 		void draw() override;
@@ -28,6 +33,12 @@ namespace game::scene
 
 	  private:
 		SceneContext m_context;
+
+		/// @brief 茶室の間（環境音）
+		int m_ambience{ -1 };
+
+		/// @brief 対局中の曲
+		int m_bgm{ -1 };
 
 		// View を先に作ってから Presenter へ渡すため、この順で宣言する
 		view::PourView3D m_view;

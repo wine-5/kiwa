@@ -10,6 +10,7 @@
 #include "game/constant/Fonts.h"
 #include "game/constant/UiTextures.h"
 #include "game/constant/Palette.h"
+#include "game/constant/Sounds.h"
 #include "game/view/CupGeometry.h"
 #include "game/view/SceneryMesh.h"
 #include <algorithm>
@@ -27,6 +28,17 @@ namespace
 
 	/// @brief 染みの広さ（器の口の半径に対する倍率）
 	constexpr float PUDDLE_EXTENT{ 1.7f };
+
+	// ---- 音 ----
+
+	/// @brief 器が空のときの注ぎ音の高さ
+	constexpr float POUR_PITCH_LOW{ 0.92f };
+
+	/// @brief 縁いっぱいのときの注ぎ音の高さ
+	constexpr float POUR_PITCH_HIGH{ 1.22f };
+
+	/// @brief 水面が縁に届いたとみなす嵩
+	constexpr float TREMBLE_AMOUNT{ 0.9f };
 
 	/// @brief 手番を告げる文字の大きさ
 	constexpr int CALL_FONT_SIZE{ 76 };
@@ -176,7 +188,7 @@ namespace game::view
 	                       core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
 	                       core::iface::IResourceManager& resource, core::iface::IScreen& screen)
 	    : m_renderer3D{ renderer3D }, m_renderer{ renderer }, m_modelRenderer{ modelRenderer },
-	      m_screen{ screen }, m_duelCamera{ camera }
+	      m_screen{ screen }, m_duelCamera{ camera }, m_resource{ resource }
 	{
 		// 枡も台も動かないので、形は最初に一度だけ組んで使い回す
 		SceneryMesh::buildFloor(m_floorVertices, m_floorIndices);
@@ -203,6 +215,16 @@ namespace game::view
 			m_cupModels[i] = resource.loadModel(cupModelPath(static_cast<VesselLook>(i)));
 
 		m_potModel = resource.loadModel(POT_MODEL_PATH);
+
+		namespace sound = game::constant::sound;
+		m_pourSound = resource.loadSound(sound::SE_POUR_LOOP);
+		m_trembleSound = resource.loadSound(sound::SE_SURFACE_TREMBLE);
+		m_spillSound = resource.loadSound(sound::SE_SPILL);
+		m_turnSound = resource.loadSound(sound::SE_TURN_CHANGE);
+		m_roundLoseSound = resource.loadSound(sound::SE_ROUND_LOSE);
+		m_cardAppearSound = resource.loadSound(sound::SE_CARD_APPEAR);
+		m_cardDrawSound = resource.loadSound(sound::SE_CARD_DRAW);
+		m_cardFlipSound = resource.loadSound(sound::SE_CARD_FLIP);
 
 		m_headingFont = resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
 		m_callFont = resource.loadFont(font::HEADING_FAMILY, CALL_FONT_SIZE);
@@ -235,6 +257,61 @@ namespace game::view
 		m_turnCall.update(deltaTime, m_turnCallContent);
 		m_cardDraw.update(deltaTime, m_cardContent);
 		m_grainTime += deltaTime;
+
+		updateSounds();
+	}
+
+	void PourView3D::updateSounds()
+	{
+		// 注いでいる間は鳴らし続け、嵩が上がるほど響きを高くする。
+		// 画面に数字を出していないので、ここが「そろそろ危ない」の手がかりになる
+		if (m_isPouring)
+		{
+			m_resource.playLoop(m_pourSound);
+			m_resource.setPitch(m_pourSound, POUR_PITCH_LOW +
+			                                     (POUR_PITCH_HIGH - POUR_PITCH_LOW) * m_amountRatio);
+		}
+		else if (m_wasPouringSound)
+		{
+			m_resource.stopSound(m_pourSound);
+		}
+
+		// 水面が縁に届いたら一度だけ。一番につき一度に抑える
+		if (!m_hasTrembled && m_amountRatio >= TREMBLE_AMOUNT)
+		{
+			m_resource.playSe(m_trembleSound);
+			m_hasTrembled = true;
+		}
+
+		if (m_amountRatio <= 0.05f)
+			m_hasTrembled = false;
+
+		// こぼれた瞬間。決定的な音と、一番を落とした音を続けて置く
+		if (m_isOverflowed && !m_wasOverflowed)
+		{
+			m_resource.playSe(m_spillSound);
+			m_resource.playSe(m_roundLoseSound);
+		}
+
+		// 手番が移ったことを告げる頭に合わせる
+		if (m_turnCallContent.serial != m_lastTurnSerial)
+			m_resource.playSe(m_turnSound);
+
+		// 札は、現れる・引く・返るの三つに音を当てる
+		if (m_cardContent.isActive && !m_wasCardActive)
+			m_resource.playSe(m_cardAppearSound);
+
+		if (m_cardContent.picked >= 0 && !m_wasCardPicked)
+			m_resource.playSe(m_cardDrawSound);
+
+		if (m_cardDraw.consumeFlipMoment())
+			m_resource.playSe(m_cardFlipSound);
+
+		m_wasPouringSound = m_isPouring;
+		m_wasOverflowed = m_isOverflowed;
+		m_wasCardActive = m_cardContent.isActive;
+		m_wasCardPicked = m_cardContent.picked >= 0;
+		m_lastTurnSerial = m_turnCallContent.serial;
 	}
 
 	void PourView3D::draw()

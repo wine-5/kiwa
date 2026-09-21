@@ -79,6 +79,13 @@ namespace game::view
 		          const Resources& resources) const;
 
 		/**
+		 * @brief 札が返った瞬間かどうかを、一度だけ返す
+		 * @details 音を合わせるために使う。返したあとは次に返るまで false になる
+		 * @return 返り切った瞬間なら true
+		 */
+		[[nodiscard]] bool consumeFlipMoment();
+
+		/**
 		 * @brief その座標にある札の番号を返す
 		 *
 		 * どこに並べているかは、並べた本人にしか分からない。
@@ -110,6 +117,9 @@ namespace game::view
 
 		/// @brief 引いた札が中央へ寄る進み具合（0.0〜1.0）
 		float m_gather{ 0.0f };
+
+		/// @brief 返る動きが半ばを越えたか（音を一度だけ鳴らすために持つ）
+		bool m_hasFlipped{ false };
 
 		/// @brief 伏せている間の揺れに使う経過時間（秒）
 		float m_time{ 0.0f };

@@ -51,6 +51,9 @@ namespace game::scene
 		/// @brief 本文の書体
 		int m_bodyFont{ -1 };
 
+		/// @brief 勝ちを告げる音
+		int m_winSound{ -1 };
+
 		/// @brief 場面が始まってから経った時間（秒）
 		float m_elapsedTime{ 0.0f };
 	};

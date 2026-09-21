@@ -155,6 +155,11 @@ namespace game::view
 
 
 		/**
+		 * @brief 場面の移り変わりに合わせて音を鳴らす
+		 */
+		void updateSounds();
+
+		/**
 		 * @brief 画面全体へ被せる仕上げ（周辺減光と粒状感）を描く
 		 */
 		void drawFilmLook() const;
@@ -202,6 +207,32 @@ namespace game::view
 
 		/// @brief 手番を告げる大きな書体
 		int m_callFont{ -1 };
+
+		// ---- 音 ----
+
+		/// @brief 注いでいる間ずっと鳴る音
+		int m_pourSound{ -1 };
+
+		/// @brief 水面が縁に届いたときの音
+		int m_trembleSound{ -1 };
+
+		/// @brief こぼれた瞬間の音
+		int m_spillSound{ -1 };
+
+		/// @brief 手番が移る音
+		int m_turnSound{ -1 };
+
+		/// @brief 一番を落とす音
+		int m_roundLoseSound{ -1 };
+
+		/// @brief 札が現れる音
+		int m_cardAppearSound{ -1 };
+
+		/// @brief 札を引く音
+		int m_cardDrawSound{ -1 };
+
+		/// @brief 札が返る音
+		int m_cardFlipSound{ -1 };
 
 		/// @brief 手番を載せる短冊
 		int m_turnPlateTexture{ -1 };
@@ -261,6 +292,29 @@ namespace game::view
 
 		/// @brief 何を写すかを決めるカメラ（寄り引きはここが持つ）
 		DuelCamera m_duelCamera;
+
+		/// @brief 資源の読み込みと音の再生
+		core::iface::IResourceManager& m_resource;
+
+		// ---- 音を鳴らす切り替わりを見つけるために持つ、1フレーム前の状態 ----
+
+		/// @brief 前のフレームで注いでいたか
+		bool m_wasPouringSound{ false };
+
+		/// @brief 前のフレームでこぼれていたか
+		bool m_wasOverflowed{ false };
+
+		/// @brief 前のフレームで札を引く場面だったか
+		bool m_wasCardActive{ false };
+
+		/// @brief 前のフレームで札を引いていたか
+		bool m_wasCardPicked{ false };
+
+		/// @brief 前のフレームの手番の通し番号
+		int m_lastTurnSerial{ 0 };
+
+		/// @brief 水面が縁に届いた音を鳴らしたか（一番に一度だけ）
+		bool m_hasTrembled{ false };
 
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };

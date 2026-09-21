@@ -160,6 +160,7 @@
     <ClInclude Include="src\game\view\LiquidVisual.h" />
     <ClInclude Include="src\core\utility\BlendMode.h" />
     <ClInclude Include="src\game\constant\Fonts.h" />
+    <ClInclude Include="src\game\constant\Sounds.h" />
     <ClInclude Include="src\game\constant\UiTextures.h" />
     <ClInclude Include="src\game\constant\Palette.h" />
     <ClInclude Include="src\game\view\PourView3D.h" />

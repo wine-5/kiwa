@@ -72,6 +72,7 @@ namespace game::view
 			m_flip = 0.0f;
 			m_announce = 0.0f;
 			m_gather = 0.0f;
+			m_hasFlipped = false;
 			return;
 		}
 
@@ -88,6 +89,16 @@ namespace game::view
 		// 役の振り分けは、札が返り切ってから始める
 		if (m_flip > 0.92f)
 			m_announce = Easing::approach(m_announce, 1.0f, ANNOUNCE_RATE, deltaTime);
+	}
+
+	bool CardDraw::consumeFlipMoment()
+	{
+		// 裏と表が入れ替わるのは、潰れ切った半ば。そこで一度だけ知らせる
+		if (m_hasFlipped || m_flip < 0.5f)
+			return false;
+
+		m_hasFlipped = true;
+		return true;
 	}
 
 	int CardDraw::hitTest(core::iface::IScreen& screen, const core::utility::Vector2& position) const

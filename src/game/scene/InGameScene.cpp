@@ -1,6 +1,17 @@
 ﻿#include "game/scene/InGameScene.h"
 #include "core/interface/IInputProvider.h"
+#include "core/interface/IResourceManager.h"
+#include "game/constant/Sounds.h"
 #include <random>
+
+namespace
+{
+	/// @brief 茶室の間の大きさ
+	constexpr float AMBIENCE_VOLUME{ 0.35f };
+
+	/// @brief 対局中の曲の大きさ
+	constexpr float BGM_VOLUME{ 0.5f };
+} // namespace
 
 namespace game::scene
 {
@@ -10,6 +21,21 @@ namespace game::scene
 		          context.modelRenderer, context.resource, context.screen },
 	      m_presenter{ m_view, context.input, context.setup, std::random_device{}() }
 	{
+		namespace sound = game::constant::sound;
+		m_ambience = m_context.resource.loadSound(sound::AMBIENCE_TEAROOM);
+		m_bgm = m_context.resource.loadSound(sound::BGM_DUEL_CALM);
+
+		// 間は薄く、曲はその下。注ぐ音の邪魔をしない大きさに置く
+		m_context.resource.setVolume(m_ambience, AMBIENCE_VOLUME);
+		m_context.resource.setVolume(m_bgm, BGM_VOLUME);
+		m_context.resource.playLoop(m_ambience);
+		m_context.resource.playLoop(m_bgm);
+	}
+
+	InGameScene::~InGameScene()
+	{
+		// 対局を離れたら曲は止める。間（環境音）はそのまま鳴らし続ける
+		m_context.resource.stopSound(m_bgm);
 	}
 
 	void InGameScene::update(float deltaTime)
