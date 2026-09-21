@@ -32,9 +32,13 @@ namespace infrastructure::resource
 
 		void playSe(int handle) override;
 
-		void playBgm(int handle) override;
+		void playLoop(int handle) override;
 
-		void stopBgm(int handle) override;
+		void stopSound(int handle) override;
+
+		void setPitch(int handle, float rate) override;
+
+		void setVolume(int handle, float volume) override;
 
 		void unloadAll() override;
 
@@ -44,6 +48,9 @@ namespace infrastructure::resource
 
 		/// @brief パス → 音ハンドル
 		std::unordered_map<std::string, int> m_sounds{};
+
+		/// @brief 音ごとのもとの周波数（音程を変えるときの基準）
+		std::unordered_map<int, int> m_baseFrequencies{};
 
 		/// @brief パス → モデルハンドル
 		std::unordered_map<std::string, int> m_models{};

@@ -1,5 +1,6 @@
 ﻿#include "infrastructure/resource/ResourceManager.h"
 #include "DxLib.h"
+#include <algorithm>
 
 namespace infrastructure::resource
 {
@@ -72,7 +73,7 @@ namespace infrastructure::resource
 		PlaySoundMem(handle, DX_PLAYTYPE_BACK, TRUE);
 	}
 
-	void ResourceManager::playBgm(int handle)
+	void ResourceManager::playLoop(int handle)
 	{
 		if (handle < 0 || CheckSoundMem(handle) == 1)
 			return;
@@ -80,12 +81,40 @@ namespace infrastructure::resource
 		PlaySoundMem(handle, DX_PLAYTYPE_LOOP, TRUE);
 	}
 
-	void ResourceManager::stopBgm(int handle)
+	void ResourceManager::stopSound(int handle)
 	{
 		if (handle < 0)
 			return;
 
 		StopSoundMem(handle);
+	}
+
+	void ResourceManager::setPitch(int handle, float rate)
+	{
+		if (handle < 0)
+			return;
+
+		// DxLib は周波数で指定する。いまの周波数へ掛け続けると倍率が積もっていくので、
+		// もとの周波数を最初に控えておき、毎回そこから計算する
+		const auto found{ m_baseFrequencies.find(handle) };
+		if (found == m_baseFrequencies.end())
+		{
+			const int base{ GetFrequencySoundMem(handle) };
+			if (base <= 0)
+				return;
+
+			m_baseFrequencies.emplace(handle, base);
+		}
+
+		SetFrequencySoundMem(static_cast<int>(m_baseFrequencies[handle] * rate), handle);
+	}
+
+	void ResourceManager::setVolume(int handle, float volume)
+	{
+		if (handle < 0)
+			return;
+
+		ChangeVolumeSoundMem(static_cast<int>(std::clamp(volume, 0.0f, 1.0f) * 255.0f), handle);
 	}
 
 	void ResourceManager::unloadAll()
