@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
+#include "game/view/RoomBackdrop.h"
 #include <string>
 
 namespace game::scene
@@ -34,6 +35,9 @@ namespace game::scene
 		[[nodiscard]] std::string buildWinnerName() const;
 
 		SceneContext m_context;
+
+		/// @brief 後ろに敷く茶室
+		view::RoomBackdrop m_backdrop;
 
 		/// @brief 掛軸
 		int m_scrollTexture{ -1 };

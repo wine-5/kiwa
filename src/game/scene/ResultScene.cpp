@@ -64,7 +64,9 @@ namespace
 
 namespace game::scene
 {
-	ResultScene::ResultScene(const SceneContext& context) : m_context{ context }
+	ResultScene::ResultScene(const SceneContext& context)
+	    : m_context{ context }, m_backdrop{ context.renderer3D, context.renderer, context.camera,
+		                                    context.modelRenderer, context.resource, context.screen }
 	{
 		m_scrollTexture = m_context.resource.loadTexture(constant::ui::RESULT_SCROLL);
 		m_sealTexture = m_context.resource.loadTexture(constant::ui::SEAL_VICTORY);
@@ -84,6 +86,7 @@ namespace game::scene
 	void ResultScene::update(float deltaTime)
 	{
 		m_elapsedTime += deltaTime;
+		m_backdrop.update(deltaTime);
 
 		// 押し切るまでは受け付けない。見せ切ってから次へ進ませる
 		if (m_elapsedTime < PROMPT_DELAY)
@@ -100,10 +103,13 @@ namespace game::scene
 
 	void ResultScene::draw()
 	{
+		m_backdrop.draw();
 	}
 
 	void ResultScene::drawOverlay()
 	{
+		m_backdrop.drawOverlay();
+
 		const float width{ static_cast<float>(m_context.screen.getWidth()) };
 		const float height{ static_cast<float>(m_context.screen.getHeight()) };
 		const float centerX{ width * 0.5f };

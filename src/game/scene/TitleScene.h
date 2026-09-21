@@ -2,6 +2,7 @@
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
 #include "game/view/ChoiceList.h"
+#include "game/view/RoomBackdrop.h"
 
 namespace game::scene
 {
@@ -48,6 +49,9 @@ namespace game::scene
 		void decide();
 
 		SceneContext m_context;
+
+		/// @brief 後ろに敷く茶室
+		view::RoomBackdrop m_backdrop;
 
 		/// @brief いま何を選ばせているか
 		Step m_step{ Step::Mode };

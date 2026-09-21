@@ -29,7 +29,9 @@ namespace
 	constexpr float SUBTITLE_Y{ 0.33f };
 
 	/// @brief 選ばせる並びを置く高さ（画面の高さに対する割合）
-	constexpr float LIST_Y{ 0.58f };
+	///
+	/// 後ろの茶室と重ならない、手前の畳が空いているところに置く
+	constexpr float LIST_Y{ 0.74f };
 
 	/// @brief 一人で打つときに選べる打ち手（弱い順に並べる）
 	constexpr std::array<game::model::NpcType, 3> STRENGTHS{
@@ -61,7 +63,9 @@ namespace
 
 namespace game::scene
 {
-	TitleScene::TitleScene(const SceneContext& context) : m_context{ context }
+	TitleScene::TitleScene(const SceneContext& context)
+	    : m_context{ context }, m_backdrop{ context.renderer3D, context.renderer, context.camera,
+		                                    context.modelRenderer, context.resource, context.screen }
 	{
 		m_titleFont = m_context.resource.loadFont(font::HEADING_FAMILY, TITLE_FONT_SIZE);
 		m_headingFont = m_context.resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
@@ -123,6 +127,8 @@ namespace game::scene
 
 	void TitleScene::update(float deltaTime)
 	{
+		m_backdrop.update(deltaTime);
+
 		const view::ChoiceList::Content content{ buildContent() };
 		const auto count{ static_cast<int>(content.items.size()) };
 
@@ -166,10 +172,13 @@ namespace game::scene
 
 	void TitleScene::draw()
 	{
+		m_backdrop.draw();
 	}
 
 	void TitleScene::drawOverlay()
 	{
+		m_backdrop.drawOverlay();
+
 		const float centerX{ m_context.screen.getWidth() * 0.5f };
 		const float height{ static_cast<float>(m_context.screen.getHeight()) };
 
