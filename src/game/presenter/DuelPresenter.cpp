@@ -218,7 +218,13 @@ namespace game::presenter
 		if (isSwapped)
 			m_cardHighlight = 1 - m_cardHighlight;
 
-		if (!isDecided)
+		// 札に触れているならそちらを指す。そのまま押せば引ける
+		const int hovered{ m_view.hitTestCard(m_input.getMousePosition()) };
+		if (hovered >= 0)
+			m_cardHighlight = hovered;
+
+		const bool isClicked{ m_input.isMouseLeftPressed() && hovered >= 0 };
+		if (!isClicked && !isDecided)
 			return;
 
 		// 引いた札が「先攻」なら、引いた一の手が先に注ぐ
@@ -352,7 +358,7 @@ namespace game::presenter
 			if (!m_isCardRevealed)
 			{
 				m_view.showMessage("折据（おりすえ）から札を引く");
-				m_view.showPrompt("←→ で選び、Enter で引く");
+				m_view.showPrompt("←→ で選び、Enter で引く　　札を押してもよい");
 				break;
 			}
 

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/utility/Vector2.h"
 #include <string>
 
 namespace core::iface
@@ -76,6 +77,18 @@ namespace game::view
 		 */
 		void draw(core::iface::IRenderer& renderer, core::iface::IScreen& screen,
 		          const Resources& resources) const;
+
+		/**
+		 * @brief その座標にある札の番号を返す
+		 *
+		 * どこに並べているかは、並べた本人にしか分からない。
+		 * 押されたかどうかを知りたい側は、ここへ座標を渡して尋ねる
+		 * @param screen 画面サイズの取得
+		 * @param position 調べる座標（マウスの位置）
+		 * @return 札の番号（0か1）。どちらにも当たらなければ -1
+		 */
+		[[nodiscard]] int hitTest(core::iface::IScreen& screen,
+		                          const core::utility::Vector2& position) const;
 
 		/**
 		 * @brief いま何か見せているかを返す

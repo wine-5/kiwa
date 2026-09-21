@@ -81,6 +81,11 @@ namespace game::view
 			m_cardContent.rightLabel = rightLabel;
 		}
 
+		[[nodiscard]] int hitTestCard(const core::utility::Vector2& position) const override
+		{
+			return m_cardDraw.hitTest(m_screen, position);
+		}
+
 		void showTurnCall(int serial, const std::string& name, bool isFromLeft) override
 		{
 			m_turnCallContent.serial = serial;

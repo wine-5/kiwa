@@ -90,6 +90,26 @@ namespace game::view
 			m_announce = Easing::approach(m_announce, 1.0f, ANNOUNCE_RATE, deltaTime);
 	}
 
+	int CardDraw::hitTest(core::iface::IScreen& screen, const core::utility::Vector2& position) const
+	{
+		// 引いたあとは押せない
+		if (!m_content.isActive || m_content.picked >= 0)
+			return -1;
+
+		const float centerX{ screen.getWidth() * 0.5f };
+		const float centerY{ screen.getHeight() * CARD_Y };
+
+		for (int i{ 0 }; i < 2; ++i)
+		{
+			const float x{ centerX + (i == 0 ? -SPREAD : SPREAD) };
+
+			if (std::abs(position.x - x) <= CARD_WIDTH * 0.5f &&
+			    std::abs(position.y - centerY) <= CARD_HEIGHT * 0.5f)
+				return i;
+		}
+		return -1;
+	}
+
 	bool CardDraw::isVisible() const noexcept
 	{
 		return m_content.isActive && m_appear > 0.01f;
