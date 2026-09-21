@@ -3,7 +3,7 @@
 namespace
 {
 	/// @brief 試合に必要な勝ち数
-	constexpr int TARGET_WINS{ 3 };
+	constexpr int TARGET_WINS{ 2 };
 
 	/// @brief こぼれ始める嵩
 	///

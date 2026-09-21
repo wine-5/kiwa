@@ -42,7 +42,7 @@ namespace game::scene
 	{
 		m_presenter.update(deltaTime);
 
-		// 三本先取で決着。結末は設定に書き戻されているので、あとはリザルトが読む
+		// 先取数に届いたら決着。結末は設定に書き戻されているので、あとはリザルトが読む
 		if (m_presenter.isMatchDecided())
 			m_context.changeScene(SceneType::Result);
 
