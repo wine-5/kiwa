@@ -121,6 +121,11 @@ namespace game::presenter
 		void beginTurnCall();
 
 		/**
+		 * @brief 札を引く場面の操作を読む
+		 */
+		void updateCardDraw();
+
+		/**
 		 * @brief どちらかのキーが押されたかを返す
 		 * @return 押されたならtrue
 		 */
@@ -168,6 +173,15 @@ namespace game::presenter
 
 		/// @brief 札を返したか
 		bool m_isCardRevealed{ false };
+
+		/// @brief いま指している札（0が左、1が右）
+		int m_cardHighlight{ 0 };
+
+		/// @brief 引いた札（まだ引いていなければ -1）
+		int m_cardPicked{ -1 };
+
+		/// @brief 「先攻」が伏せられている側（0が左、1が右）
+		int m_firstCardSide{ 0 };
 
 		/// @brief 札を返してから経った時間（秒）
 		float m_revealedTime{ 0.0f };

@@ -1,7 +1,6 @@
 ﻿#include "game/presenter/DuelPresenter.h"
 #include "core/interface/IInputProvider.h"
 #include "game/view/IPourView.h"
-#include <vector>
 
 namespace
 {
@@ -40,8 +39,7 @@ namespace game::presenter
 		case Phase::Draw:
 			if (!m_isCardRevealed)
 			{
-				if (isAnyKeyPressed())
-					m_isCardRevealed = true;
+				updateCardDraw();
 				break;
 			}
 
@@ -191,13 +189,43 @@ namespace game::presenter
 	{
 		m_input.clearPendingPresses();
 
-		// 折据から引いた札で先攻を決める。引き当てるまで結果は伏せておく
+		// 二枚のうち一枚が「先攻」。どちらに伏せるかは引く前に決めておく
 		std::uniform_int_distribution<int> coin{ 0, 1 };
-		m_firstPlayer = coin(m_random) == 0 ? model::Player::One : model::Player::Two;
+		m_firstCardSide = coin(m_random);
 
+		m_firstPlayer = model::Player::One;
+		m_cardHighlight = 0;
+		m_cardPicked = -1;
 		m_isCardRevealed = false;
 		m_revealedTime = 0.0f;
 		m_phase = Phase::Draw;
+	}
+
+	void DuelPresenter::updateCardDraw()
+	{
+		// 押された印は必ず全部消費する（残すと次の場面へ持ち越されてしまう）
+		const bool isLeft{ m_input.consumeKeyPress(core::input::KeyCode::Left) };
+		const bool isRight{ m_input.consumeKeyPress(core::input::KeyCode::Right) };
+		const bool isSwapped{ m_input.consumeKeyPress(core::input::KeyCode::Space) };
+		const bool isDecided{ m_input.consumeKeyPress(core::input::KeyCode::Enter) };
+
+		if (isLeft)
+			m_cardHighlight = 0;
+
+		if (isRight)
+			m_cardHighlight = 1;
+
+		if (isSwapped)
+			m_cardHighlight = 1 - m_cardHighlight;
+
+		if (!isDecided)
+			return;
+
+		// 引いた札が「先攻」なら、引いた一の手が先に注ぐ
+		m_cardPicked = m_cardHighlight;
+		m_firstPlayer = m_cardPicked == m_firstCardSide ? model::Player::One : model::Player::Two;
+		m_isCardRevealed = true;
+		m_revealedTime = 0.0f;
 	}
 
 	void DuelPresenter::beginRound()
@@ -305,7 +333,8 @@ namespace game::presenter
 		m_view.showScore(buildScoreLabel());
 		// 札を引くのは一の手。引いた札が「先攻」なら一の手が先、「後攻」なら二の手が先
 		const bool isFirstCard{ m_firstPlayer == model::Player::One };
-		m_view.showCardDraw(m_phase == Phase::Draw, m_isCardRevealed, isFirstCard,
+		m_view.showCardDraw(m_phase == Phase::Draw, m_cardHighlight, m_cardPicked, m_isCardRevealed,
+		                    isFirstCard,
 		                    nameOf(model::Player::One) + "  " + (isFirstCard ? "先攻" : "後攻"),
 		                    nameOf(model::Player::Two) + "  " + (isFirstCard ? "後攻" : "先攻"));
 
@@ -323,7 +352,7 @@ namespace game::presenter
 			if (!m_isCardRevealed)
 			{
 				m_view.showMessage("折据（おりすえ）から札を引く");
-				m_view.showPrompt("どちらかのキーで引く");
+				m_view.showPrompt("←→ で選び、Enter で引く");
 				break;
 			}
 
@@ -359,7 +388,7 @@ namespace game::presenter
 		case Phase::Pouring:
 			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
 			m_view.showPrompt(isNpcTurn() ? nameOf(model::Player::Two) + " が注いでいる"
-			                                   : "離せば手番を渡す");
+			                              : "離せば手番を渡す");
 			break;
 
 		case Phase::RoundOver:

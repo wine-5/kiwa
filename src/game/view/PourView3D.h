@@ -68,10 +68,13 @@ namespace game::view
 			m_isOverflowed = isOverflowed;
 		}
 
-		void showCardDraw(bool isActive, bool isRevealed, bool isFirstCard,
-		                  const std::string& leftLabel, const std::string& rightLabel) override
+		void showCardDraw(bool isActive, int highlighted, int picked, bool isRevealed,
+		                  bool isFirstCard, const std::string& leftLabel,
+		                  const std::string& rightLabel) override
 		{
 			m_cardContent.isActive = isActive;
+			m_cardContent.highlighted = highlighted;
+			m_cardContent.picked = picked;
 			m_cardContent.isRevealed = isRevealed;
 			m_cardContent.isFirstCard = isFirstCard;
 			m_cardContent.leftLabel = leftLabel;
