@@ -1,5 +1,6 @@
 ﻿#include "infrastructure/input/InputProvider.h"
 #include "DxLib.h"
+#include <cmath>
 
 namespace
 {
@@ -69,6 +70,12 @@ namespace infrastructure::input
 				m_pendingPresses[i] = true;
 		}
 
+		int mouseX{ 0 };
+		int mouseY{ 0 };
+		GetMousePoint(&mouseX, &mouseY);
+		m_currentMousePosition =
+		    core::utility::Vector2{ static_cast<float>(mouseX), static_cast<float>(mouseY) };
+
 		m_currentMouseLeft = (GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
 	}
 
@@ -76,6 +83,7 @@ namespace infrastructure::input
 	{
 		m_previousKeys = m_currentKeys;
 		m_previousMouseLeft = m_currentMouseLeft;
+		m_previousMousePosition = m_currentMousePosition;
 	}
 
 	bool InputProvider::isKeyDown(core::input::KeyCode keyCode) const
@@ -112,10 +120,15 @@ namespace infrastructure::input
 
 	core::utility::Vector2 InputProvider::getMousePosition() const
 	{
-		int x{ 0 };
-		int y{ 0 };
-		GetMousePoint(&x, &y);
-		return core::utility::Vector2{ static_cast<float>(x), static_cast<float>(y) };
+		return m_currentMousePosition;
+	}
+
+	bool InputProvider::isMouseMoved() const
+	{
+		// 手が触れていない微動を拾わないよう、わずかな差は動いていないものとして扱う
+		constexpr float THRESHOLD{ 1.5f };
+		return std::abs(m_currentMousePosition.x - m_previousMousePosition.x) > THRESHOLD ||
+		       std::abs(m_currentMousePosition.y - m_previousMousePosition.y) > THRESHOLD;
 	}
 
 	bool InputProvider::isMouseLeftDown() const

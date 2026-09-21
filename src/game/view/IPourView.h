@@ -79,16 +79,31 @@ namespace game::view
 		virtual void showTurn(const std::string& turnLabel) = 0;
 
 		/**
-		 * @brief 勝敗の表示を伝える
-		 * @param scoreLabel 文言（「一の手 2 - 1 二の手」など）
+		 * @brief 勝ち星を伝える
+		 * @param oneWins 一の手が取った数
+		 * @param twoWins 二の手が取った数
+		 * @param targetWins 先取する数
 		 */
-		virtual void showScore(const std::string& scoreLabel) = 0;
+		virtual void showScore(int oneWins, int twoWins, int targetWins) = 0;
+
+		/**
+		 * @brief いまの手番が誰かを伝える
+		 * @param isPlayerOne 一の手の番か
+		 * @param isNpcTurn その手番を NPC が打っているか
+		 */
+		virtual void showTurnOwner(bool isPlayerOne, bool isNpcTurn) = 0;
 
 		/**
 		 * @brief 画面中央に出す文言を伝える
 		 * @param message 文言（空なら何も出さない）
 		 */
 		virtual void showMessage(const std::string& message) = 0;
+
+		/**
+		 * @brief 押すキーの合図を出すかを伝える
+		 * @param isVisible 出すならtrue（相手の番や、見せる場面でないときは false）
+		 */
+		virtual void showKeyHint(bool isVisible) = 0;
 
 		/**
 		 * @brief 操作の案内を伝える

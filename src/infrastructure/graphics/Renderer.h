@@ -37,6 +37,13 @@ namespace infrastructure::graphics
 
 		void drawTexture(int handle, const core::utility::Vector2& position) override;
 
+		void drawTexturePart(int handle, const core::utility::Vector2& sourcePosition,
+		                     const core::utility::Vector2& sourceSize,
+		                     const core::utility::Vector2& position,
+		                     const core::utility::Vector2& size, float alpha = 1.0f) override;
+
+		[[nodiscard]] core::utility::Vector2 getTextureSize(int handle) const override;
+
 		void drawTextureRotated(int handle, const core::utility::Vector2& center, float scale,
 		                        float angleRadian) override;
 

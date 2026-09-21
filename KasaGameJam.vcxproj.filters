@@ -102,6 +102,21 @@
     <ClCompile Include="src\game\view\ChoiceList.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\view\GameHud.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\RoomBackdrop.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\DuelCamera.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\SceneTransition.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\view\Plate.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\view\CardDraw.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
@@ -221,6 +236,12 @@
     <ClInclude Include="src\game\constant\Fonts.h">
       <Filter>src\game\constant</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\constant\Sounds.h">
+      <Filter>src\game\constant</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\constant\UiTextures.h">
+      <Filter>src\game\constant</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\constant\Palette.h">
       <Filter>src\game\constant</Filter>
     </ClInclude>
@@ -282,6 +303,21 @@
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\ChoiceList.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\GameHud.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\RoomBackdrop.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\DuelCamera.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\SceneTransition.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\Plate.h">
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\CardDraw.h">

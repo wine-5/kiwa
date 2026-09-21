@@ -2,7 +2,9 @@
 #include "game/view/IPourView.h"
 #include "core/utility/Vertex3D.h"
 #include "game/view/CardDraw.h"
+#include "game/view/GameHud.h"
 #include "game/view/CupGeometry.h"
+#include "game/view/DuelCamera.h"
 #include "game/view/LiquidVisual.h"
 #include "game/view/SpillStreaks.h"
 #include "game/view/TurnCall.h"
@@ -61,6 +63,12 @@ namespace game::view
 		void showPouring(bool isPouring) override
 		{
 			m_isPouring = isPouring;
+			m_hudContent.isPouring = isPouring;
+		}
+
+		void showKeyHint(bool isVisible) override
+		{
+			m_hudContent.showsKeyHint = isVisible;
 		}
 
 		void showOverflowed(bool isOverflowed) override
@@ -95,22 +103,30 @@ namespace game::view
 
 		void showTurn(const std::string& turnLabel) override
 		{
-			m_turnLabel = turnLabel;
+			m_hudContent.turnLabel = turnLabel;
 		}
 
-		void showScore(const std::string& scoreLabel) override
+		void showScore(int oneWins, int twoWins, int targetWins) override
 		{
-			m_scoreLabel = scoreLabel;
+			m_hudContent.oneWins = oneWins;
+			m_hudContent.twoWins = twoWins;
+			m_hudContent.targetWins = targetWins;
+		}
+
+		void showTurnOwner(bool isPlayerOne, bool isNpcTurn) override
+		{
+			m_hudContent.isPlayerOneTurn = isPlayerOne;
+			m_hudContent.isNpcTurn = isNpcTurn;
 		}
 
 		void showMessage(const std::string& message) override
 		{
-			m_message = message;
+			m_hudContent.message = message;
 		}
 
 		void showPrompt(const std::string& prompt) override
 		{
-			m_prompt = prompt;
+			m_hudContent.prompt = prompt;
 		}
 
 		void update(float deltaTime) override;
@@ -139,18 +155,17 @@ namespace game::view
 
 
 		/**
+		 * @brief 場面の移り変わりに合わせて音を鳴らす
+		 */
+		void updateSounds();
+
+		/**
 		 * @brief 画面全体へ被せる仕上げ（周辺減光と粒状感）を描く
 		 */
 		void drawFilmLook() const;
 
-		/**
-		 * @brief 文字を描く
-		 */
-		void drawTexts() const;
-
 		core::iface::IRenderer3D& m_renderer3D;
 		core::iface::IRenderer& m_renderer;
-		core::iface::ICamera& m_camera;
 		core::iface::IModelRenderer& m_modelRenderer;
 		core::iface::IScreen& m_screen;
 
@@ -193,6 +208,59 @@ namespace game::view
 		/// @brief 手番を告げる大きな書体
 		int m_callFont{ -1 };
 
+		// ---- 音 ----
+
+		/// @brief 注いでいる間ずっと鳴る音
+		int m_pourSound{ -1 };
+
+		/// @brief 水面が縁に届いたときの音
+		int m_trembleSound{ -1 };
+
+		/// @brief こぼれた瞬間の音
+		int m_spillSound{ -1 };
+
+		/// @brief 茶が外壁を伝って落ちる音
+		int m_spillRunSound{ -1 };
+
+		/// @brief 土瓶を持ち上げる音
+		int m_potLiftSound{ -1 };
+
+		/// @brief 土瓶を置く音
+		int m_potPlaceSound{ -1 };
+
+		/// @brief 手番が移る音
+		int m_turnSound{ -1 };
+
+		/// @brief 一番を落とす音
+		int m_roundLoseSound{ -1 };
+
+		/// @brief 札が現れる音
+		int m_cardAppearSound{ -1 };
+
+		/// @brief 札を引く音
+		int m_cardDrawSound{ -1 };
+
+		/// @brief 札が返る音
+		int m_cardFlipSound{ -1 };
+
+		/// @brief 手番を載せる短冊
+		int m_turnPlateTexture{ -1 };
+
+		/// @brief 勝ち星を載せる短冊
+		int m_scorePlateTexture{ -1 };
+
+		/// @brief 一の手の紋
+		int m_emblemOneTexture{ -1 };
+
+		/// @brief 二の手の紋
+		int m_emblemTwoTexture{ -1 };
+
+		/// @brief スペースキーの絵
+		int m_keyCapSpaceTexture{ -1 };
+
+		/// @brief Enter キーの絵
+		int m_keyCapEnterTexture{ -1 };
+
 		/// @brief 器のモデル（VesselLook の順に並べる）
 		std::array<int, 4> m_cupModels{ -1, -1, -1, -1 };
 
@@ -217,6 +285,9 @@ namespace game::view
 		/// @brief 染みの広がり具合（0.0〜1.0）
 		float m_puddleGrowth{ 0.0f };
 
+		/// @brief 手番・勝ち星・案内の見せ方
+		GameHud m_hud{};
+
 		/// @brief 手番が移ったことの告げ方
 		TurnCall m_turnCall{};
 
@@ -228,6 +299,32 @@ namespace game::view
 		/// @brief いま出ている器
 		VesselLook m_vesselLook{ VesselLook::Yunomi };
 
+		/// @brief 何を写すかを決めるカメラ（寄り引きはここが持つ）
+		DuelCamera m_duelCamera;
+
+		/// @brief 資源の読み込みと音の再生
+		core::iface::IResourceManager& m_resource;
+
+		// ---- 音を鳴らす切り替わりを見つけるために持つ、1フレーム前の状態 ----
+
+		/// @brief 前のフレームで注いでいたか
+		bool m_wasPouringSound{ false };
+
+		/// @brief 前のフレームでこぼれていたか
+		bool m_wasOverflowed{ false };
+
+		/// @brief 前のフレームで札を引く場面だったか
+		bool m_wasCardActive{ false };
+
+		/// @brief 前のフレームで札を引いていたか
+		bool m_wasCardPicked{ false };
+
+		/// @brief 前のフレームの手番の通し番号
+		int m_lastTurnSerial{ 0 };
+
+		/// @brief 水面が縁に届いた音を鳴らしたか（一番に一度だけ）
+		bool m_hasTrembled{ false };
+
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };
 		/// @brief 札の表示に必要な内容
@@ -236,9 +333,7 @@ namespace game::view
 		/// @brief 手番の告知に必要な内容
 		TurnCall::Content m_turnCallContent{};
 
-		std::string m_turnLabel{};
-		std::string m_scoreLabel{};
-		std::string m_message{};
-		std::string m_prompt{};
+		/// @brief 画面に重ねる表示の内容
+		GameHud::Content m_hudContent{};
 	};
 } // namespace game::view

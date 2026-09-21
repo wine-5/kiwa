@@ -35,6 +35,9 @@ BACKGROUND_TOLERANCE = 8.0
 # 間は半透明にして、にじんだ縁や毛筆のかすれをそのまま写し取る
 SOLID_DISTANCE = 30.0
 
+# これを下回る薄さは透明に倒す
+HAZE_THRESHOLD = 0.16
+
 # 素材の行とみなす横幅の割合（いちばん広い行に対して）
 ART_WIDTH_RATIO = 0.7
 
@@ -91,6 +94,10 @@ def to_alpha(rgb, is_closed):
 	if is_closed:
 		outline = ndimage.binary_closing(distance > SOLID_DISTANCE, np.ones((5, 5)))
 		alpha = np.maximum(alpha, ndimage.binary_fill_holes(outline).astype(np.float32))
+
+	# ごく薄いところは透明に倒す。中途半端に残ると、地の色を戻す計算が効きすぎて
+	# 白っぽい靄になり、明るい紙の上へ重ねたときに四角い曇りとして見えてしまう
+	alpha[alpha < HAZE_THRESHOLD] = 0.0
 
 	# 地の色が混ざったぶんを戻す
 	safe = np.maximum(alpha, 1.0 / 255.0)[:, :, None]

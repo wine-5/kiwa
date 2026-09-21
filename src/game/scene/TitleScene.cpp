@@ -5,6 +5,7 @@
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
 #include "game/constant/Palette.h"
+#include "game/constant/Sounds.h"
 #include "game/model/Npc.h"
 #include <array>
 #include <cmath>
@@ -28,8 +29,16 @@ namespace
 	/// @brief 副題を置く高さ（画面の高さに対する割合）
 	constexpr float SUBTITLE_Y{ 0.33f };
 
+	/// @brief 茶室の間の大きさ
+	constexpr float AMBIENCE_VOLUME{ 0.35f };
+
+	/// @brief タイトルの曲の大きさ
+	constexpr float BGM_VOLUME{ 0.55f };
+
 	/// @brief 選ばせる並びを置く高さ（画面の高さに対する割合）
-	constexpr float LIST_Y{ 0.58f };
+	///
+	/// 後ろの茶室と重ならない、手前の畳が空いているところに置く
+	constexpr float LIST_Y{ 0.74f };
 
 	/// @brief 一人で打つときに選べる打ち手（弱い順に並べる）
 	constexpr std::array<game::model::NpcType, 3> STRENGTHS{
@@ -61,11 +70,32 @@ namespace
 
 namespace game::scene
 {
-	TitleScene::TitleScene(const SceneContext& context) : m_context{ context }
+	TitleScene::TitleScene(const SceneContext& context)
+	    : m_context{ context }, m_backdrop{ context.renderer3D, context.renderer, context.camera,
+		                                    context.modelRenderer, context.resource, context.screen }
 	{
+		// 茶室の間は場面をまたいで鳴り続ける（切れると場が死ぬ）
+		const int ambience{ m_context.resource.loadSound(game::constant::sound::AMBIENCE_TEAROOM) };
+		m_context.resource.setVolume(ambience, AMBIENCE_VOLUME);
+		m_context.resource.playLoop(ambience);
+
+		namespace sound = game::constant::sound;
+		m_bgm = m_context.resource.loadSound(sound::BGM_TITLE);
+		m_cursorSound = m_context.resource.loadSound(sound::SE_CURSOR);
+		m_decideSound = m_context.resource.loadSound(sound::SE_DECIDE);
+		m_backSound = m_context.resource.loadSound(sound::SE_BACK);
+
+		m_context.resource.setVolume(m_bgm, BGM_VOLUME);
+		m_context.resource.playLoop(m_bgm);
+
 		m_titleFont = m_context.resource.loadFont(font::HEADING_FAMILY, TITLE_FONT_SIZE);
 		m_headingFont = m_context.resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
 		m_bodyFont = m_context.resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);
+	}
+
+	TitleScene::~TitleScene()
+	{
+		m_context.resource.stopSound(m_bgm);
 	}
 
 	view::ChoiceList::Content TitleScene::buildContent() const
@@ -123,12 +153,17 @@ namespace game::scene
 
 	void TitleScene::update(float deltaTime)
 	{
+		m_backdrop.update(deltaTime);
+
 		const view::ChoiceList::Content content{ buildContent() };
 		const auto count{ static_cast<int>(content.items.size()) };
 
-		// マウスを乗せたものへ指を移す。押せることが動きで分かる
+		// マウスを乗せたものへ指を移す。押せることが動きで分かる。
+		// ただし動かしたときだけ。置いたままだと、キーで選んでも引き戻されてしまう
 		const int hovered{ m_choices.hitTest(m_context.screen, m_context.input.getMousePosition()) };
-		if (hovered >= 0)
+		const int previousIndex{ m_index };
+
+		if (hovered >= 0 && m_context.input.isMouseMoved())
 			m_index = hovered;
 
 		// 十字キーでも選べるようにしておく。
@@ -146,9 +181,14 @@ namespace game::scene
 		if (isPrevious)
 			m_index = (m_index + count - 1) % count;
 
+		// 指しているものが変わったら、それが分かる音を鳴らす
+		if (m_index != previousIndex)
+			m_context.resource.playSe(m_cursorSound);
+
 		// 左で一つ前の段へ戻る（強さを選んでいる途中で選び直せるように）
 		if (isBack && m_step == Step::Strength)
 		{
+			m_context.resource.playSe(m_backSound);
 			m_step = Step::Mode;
 			m_index = 1;
 			return;
@@ -157,6 +197,11 @@ namespace game::scene
 		const bool isClicked{ m_context.input.isMouseLeftPressed() && hovered >= 0 };
 		if (isClicked || isDecided)
 		{
+			// 「戻る」を選んだときは決めた音にしない
+			const bool isBackItem{ m_step == Step::Strength &&
+				                   m_index >= static_cast<int>(STRENGTHS.size()) };
+			m_context.resource.playSe(isBackItem ? m_backSound : m_decideSound);
+
 			decide();
 			return;
 		}
@@ -166,10 +211,13 @@ namespace game::scene
 
 	void TitleScene::draw()
 	{
+		m_backdrop.draw();
 	}
 
 	void TitleScene::drawOverlay()
 	{
+		m_backdrop.drawOverlay();
+
 		const float centerX{ m_context.screen.getWidth() * 0.5f };
 		const float height{ static_cast<float>(m_context.screen.getHeight()) };
 

@@ -71,6 +71,11 @@ namespace infrastructure::debug
 		return m_inner.getMousePosition();
 	}
 
+	bool ScriptedInput::isMouseMoved() const
+	{
+		return m_inner.isMouseMoved();
+	}
+
 	bool ScriptedInput::isMouseLeftDown() const
 	{
 		return m_inner.isMouseLeftDown();

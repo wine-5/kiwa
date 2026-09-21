@@ -74,6 +74,15 @@ namespace core::iface
 		[[nodiscard]] virtual core::utility::Vector2 getMousePosition() const = 0;
 
 		/**
+		 * @brief このフレームでマウスが動いたかを返す
+		 *
+		 * 置いたままのカーソルの上でキー操作をしたとき、カーソルの下の項目へ
+		 * 引き戻されないようにするために使う
+		 * @return 動いたならtrue
+		 */
+		[[nodiscard]] virtual bool isMouseMoved() const = 0;
+
+		/**
 		 * @brief マウス左ボタンが押されているか判定する
 		 * @return 押されているならtrue
 		 */

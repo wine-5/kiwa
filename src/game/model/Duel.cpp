@@ -2,15 +2,8 @@
 
 namespace
 {
-	/// @brief 手番を渡すために注がなければならない最低の嵩
-	///
-	/// 「注がずに渡す」を防ぐためだけのもので、我慢を強いるためのものではない。
-	/// 一瞬だけ押した（更新1回ぶん注いだ）なら渡せる大きさにしてある。
-	/// いちばん大きい茶碗でも更新1回で 0.0027 ほど進むので、それを下回る値を置く
-	constexpr float MINIMUM_TURN_AMOUNT{ 0.0025f };
-
 	/// @brief 試合に必要な勝ち数
-	constexpr int TARGET_WINS{ 3 };
+	constexpr int TARGET_WINS{ 2 };
 
 	/// @brief こぼれ始める嵩
 	///
@@ -47,11 +40,6 @@ namespace game::model
 		return m_scoreOne >= m_scoreTwo ? Player::One : Player::Two;
 	}
 
-	float Duel::getMinimumTurnAmount() noexcept
-	{
-		return MINIMUM_TURN_AMOUNT;
-	}
-
 	int Duel::getTargetWins() noexcept
 	{
 		return TARGET_WINS;
@@ -79,7 +67,7 @@ namespace game::model
 
 	bool Duel::canEndTurn() const noexcept
 	{
-		return !m_isRoundOver && m_turnAmount >= MINIMUM_TURN_AMOUNT;
+		return !m_isRoundOver && m_turnAmount > 0.0f;
 	}
 
 	void Duel::endTurn() noexcept

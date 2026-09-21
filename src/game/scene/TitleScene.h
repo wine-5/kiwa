@@ -2,6 +2,7 @@
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
 #include "game/view/ChoiceList.h"
+#include "game/view/RoomBackdrop.h"
 
 namespace game::scene
 {
@@ -19,6 +20,11 @@ namespace game::scene
 		 * @param context シーンが使う外部機能の束
 		 */
 		explicit TitleScene(const SceneContext& context);
+
+		/**
+		 * @brief TitleScene のデストラクタ（曲を止める）
+		 */
+		~TitleScene() override;
 
 		void update(float deltaTime) override;
 
@@ -49,6 +55,9 @@ namespace game::scene
 
 		SceneContext m_context;
 
+		/// @brief 後ろに敷く茶室
+		view::RoomBackdrop m_backdrop;
+
 		/// @brief いま何を選ばせているか
 		Step m_step{ Step::Mode };
 
@@ -66,6 +75,18 @@ namespace game::scene
 
 		/// @brief 本文の書体
 		int m_bodyFont{ -1 };
+
+		/// @brief タイトルの曲
+		int m_bgm{ -1 };
+
+		/// @brief 指しているものが変わる音
+		int m_cursorSound{ -1 };
+
+		/// @brief 決める音
+		int m_decideSound{ -1 };
+
+		/// @brief 一つ前へ戻る音
+		int m_backSound{ -1 };
 
 	};
 } // namespace game::scene

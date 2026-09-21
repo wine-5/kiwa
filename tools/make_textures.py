@@ -1,4 +1,4 @@
-"""assets/textures/ のテクスチャを生成する。
+﻿"""assets/textures/ のテクスチャを生成する。
 
 画像ファイルを外から持ってこずに済ませるため、木目と水面の細かな凹凸を
 計算で作って PNG に書き出す。実行すると assets/textures/ の中身を作り直す。
@@ -192,6 +192,46 @@ def make_tatami(size, seed):
     return np.clip(color, 0, 255).astype(np.uint8)
 
 
+def make_fusuma(size, seed):
+    """襖（ふすま）の紙。場面の切り替わりに、左右から閉じてくる板に貼る。
+
+    縦に漉き目が走る和紙に、上下の框（かまち）を暗く置く。
+    横へ引き伸ばして使うので、横方向は一様に、縦方向だけ模様を作る。
+    """
+    from PIL import ImageDraw
+
+    rng = np.random.default_rng(seed)
+
+    # 和紙の地。ごく薄い斑と、縦に走る漉き目
+    base = np.zeros((size, size, 3), dtype=np.float64)
+    base[..., 0] = 226
+    base[..., 1] = 216
+    base[..., 2] = 192
+
+    cloud = fractal_noise(size, 6, 4, rng)
+    base += ((cloud - 0.5) * 22.0)[:, :, None]
+
+    # 縦の漉き目（横方向に細かく、縦方向には長く伸びる）
+    fiber = stretched_noise(size, 260, 4, rng)
+    base -= (fiber * 10.0)[:, :, None]
+
+    # 引き手のあたりに、ほんのり陰を落とす
+    axis = np.linspace(-1.0, 1.0, size)
+    x, y = np.meshgrid(axis, axis)
+    shade = np.clip(1.0 - (x * x * 0.35 + y * y * 0.25), 0.0, 1.0)
+    base *= (0.86 + 0.14 * shade)[:, :, None]
+
+    image = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
+    draw = ImageDraw.Draw(image)
+
+    # 上下の框。襖は縁が暗い木で締まっている
+    rail = int(size * 0.045)
+    draw.rectangle([0, 0, size, rail], fill=(58, 44, 36))
+    draw.rectangle([0, size - rail, size, size], fill=(58, 44, 36))
+
+    return np.asarray(image)
+
+
 def save(image, name):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = os.path.join(OUTPUT_DIR, name)
@@ -237,6 +277,9 @@ def make_grain(size, seed):
 def main():
     # 床は茶室に合わせて畳表にする。器の近くは焦点が合うので、ぼかしはごく軽く
     save(blur(make_tatami(SIZE, seed=404), 1), "tatami.png")
+
+    # 場面の切り替わりに閉じてくる襖
+    save(make_fusuma(512, seed=7), "fusuma.png")
 
     save(make_water_normal(SIZE, seed=31415), "water_normal.png")
     save(make_vignette(512), "vignette.png")

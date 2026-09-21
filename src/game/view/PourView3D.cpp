@@ -8,7 +8,9 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/UiTextures.h"
 #include "game/constant/Palette.h"
+#include "game/constant/Sounds.h"
 #include "game/view/CupGeometry.h"
 #include "game/view/SceneryMesh.h"
 #include <algorithm>
@@ -26,6 +28,17 @@ namespace
 
 	/// @brief 染みの広さ（器の口の半径に対する倍率）
 	constexpr float PUDDLE_EXTENT{ 1.7f };
+
+	// ---- 音 ----
+
+	/// @brief 器が空のときの注ぎ音の高さ
+	constexpr float POUR_PITCH_LOW{ 0.92f };
+
+	/// @brief 縁いっぱいのときの注ぎ音の高さ
+	constexpr float POUR_PITCH_HIGH{ 1.22f };
+
+	/// @brief 水面が縁に届いたとみなす嵩
+	constexpr float TREMBLE_AMOUNT{ 0.9f };
 
 	/// @brief 手番を告げる文字の大きさ
 	constexpr int CALL_FONT_SIZE{ 76 };
@@ -154,7 +167,6 @@ namespace
 		return POT_PIVOT_WORLD + rotateZ((POT_SPOUT_LOCAL - POT_PIVOT_LOCAL) * POT_SCALE, tilt);
 	}
 
-	// ---- カメラ ----
 
 	// 器の中を覗き込む高さから、少し横にずらして構える。
 	// 画角は狭めにして、写真のように歪みを抑える
@@ -163,6 +175,9 @@ namespace
 	constexpr Vector3 CAMERA_POSITION{ 0.4f, 1.62f, -1.9f };
 	constexpr Vector3 CAMERA_TARGET{ -0.12f, 0.52f, 0.0f };
 	constexpr float CAMERA_FOV{ 0.85f };
+
+	/// @brief 寄り切ったときに周辺減光へ足す濃さ
+	constexpr float CLOSE_VIGNETTE{ 0.22f };
 	constexpr float CAMERA_NEAR{ 0.1f };
 	constexpr float CAMERA_FAR{ 100.0f };
 } // namespace
@@ -172,8 +187,8 @@ namespace game::view
 	PourView3D::PourView3D(core::iface::IRenderer3D& renderer3D, core::iface::IRenderer& renderer,
 	                       core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
 	                       core::iface::IResourceManager& resource, core::iface::IScreen& screen)
-	    : m_renderer3D{ renderer3D }, m_renderer{ renderer }, m_camera{ camera },
-	      m_modelRenderer{ modelRenderer }, m_screen{ screen }
+	    : m_renderer3D{ renderer3D }, m_renderer{ renderer }, m_modelRenderer{ modelRenderer },
+	      m_screen{ screen }, m_duelCamera{ camera }, m_resource{ resource }
 	{
 		// 枡も台も動かないので、形は最初に一度だけ組んで使い回す
 		SceneryMesh::buildFloor(m_floorVertices, m_floorIndices);
@@ -186,11 +201,33 @@ namespace game::view
 		m_cardBackTexture = resource.loadTexture(CARD_BACK_TEXTURE_PATH);
 		m_cardFirstTexture = resource.loadTexture(CARD_FIRST_TEXTURE_PATH);
 		m_cardSecondTexture = resource.loadTexture(CARD_SECOND_TEXTURE_PATH);
+
+		// 画面に重ねる紙物。読み込みはここでまとめて済ませる
+		namespace ui = game::constant::ui;
+		m_turnPlateTexture = resource.loadTexture(ui::TURN_PLATE);
+		m_scorePlateTexture = resource.loadTexture(ui::SCORE_PLATE);
+		m_emblemOneTexture = resource.loadTexture(ui::EMBLEM_ONE);
+		m_emblemTwoTexture = resource.loadTexture(ui::EMBLEM_TWO);
+		m_keyCapSpaceTexture = resource.loadTexture(ui::KEY_CAP_SPACE);
+		m_keyCapEnterTexture = resource.loadTexture(ui::KEY_CAP_ENTER);
 		// 器はどれが出ても待たせないよう、はじめに全部読んでおく
 		for (std::size_t i{ 0 }; i < m_cupModels.size(); ++i)
 			m_cupModels[i] = resource.loadModel(cupModelPath(static_cast<VesselLook>(i)));
 
 		m_potModel = resource.loadModel(POT_MODEL_PATH);
+
+		namespace sound = game::constant::sound;
+		m_pourSound = resource.loadSound(sound::SE_POUR_LOOP);
+		m_trembleSound = resource.loadSound(sound::SE_SURFACE_TREMBLE);
+		m_spillSound = resource.loadSound(sound::SE_SPILL);
+		m_spillRunSound = resource.loadSound(sound::SE_SPILL_RUN);
+		m_potLiftSound = resource.loadSound(sound::SE_POT_LIFT);
+		m_potPlaceSound = resource.loadSound(sound::SE_POT_PLACE);
+		m_turnSound = resource.loadSound(sound::SE_TURN_CHANGE);
+		m_roundLoseSound = resource.loadSound(sound::SE_ROUND_LOSE);
+		m_cardAppearSound = resource.loadSound(sound::SE_CARD_APPEAR);
+		m_cardDrawSound = resource.loadSound(sound::SE_CARD_DRAW);
+		m_cardFlipSound = resource.loadSound(sound::SE_CARD_FLIP);
 
 		m_headingFont = resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
 		m_callFont = resource.loadFont(font::HEADING_FAMILY, CALL_FONT_SIZE);
@@ -206,6 +243,10 @@ namespace game::view
 		// 液体は傾いた注ぎ口の先から出る
 		m_liquid.setPourOrigin(spoutTip(m_potTilt));
 
+		m_duelCamera.update(deltaTime, DuelCamera::Focus{ m_amountRatio, m_isPouring,
+		                                                  m_isOverflowed,
+		                                                  cup::shapeOf(m_vesselLook).rimHeight });
+
 		m_liquid.update(deltaTime, m_isPouring, m_amountRatio);
 		m_spill.update(deltaTime, m_isOverflowed);
 
@@ -215,15 +256,78 @@ namespace game::view
 		                     ? core::utility::Easing::approach(m_puddleGrowth, 1.0f, PUDDLE_SOAK_RATE,
 		                                                       deltaTime)
 		                     : 0.0f;
+		m_hud.update(deltaTime, m_hudContent);
 		m_turnCall.update(deltaTime, m_turnCallContent);
 		m_cardDraw.update(deltaTime, m_cardContent);
 		m_grainTime += deltaTime;
+
+		updateSounds();
+	}
+
+	void PourView3D::updateSounds()
+	{
+		// 注いでいる間は鳴らし続け、嵩が上がるほど響きを高くする。
+		// 画面に数字を出していないので、ここが「そろそろ危ない」の手がかりになる
+		if (m_isPouring)
+		{
+			// 注ぎ始めは、土瓶を持ち上げる音から入る
+			if (!m_wasPouringSound)
+				m_resource.playSe(m_potLiftSound);
+
+			m_resource.playLoop(m_pourSound);
+			m_resource.setPitch(m_pourSound, POUR_PITCH_LOW +
+			                                     (POUR_PITCH_HIGH - POUR_PITCH_LOW) * m_amountRatio);
+		}
+		else if (m_wasPouringSound)
+		{
+			// 手を離したら筋が切れ、土瓶が畳に戻る
+			m_resource.stopSound(m_pourSound);
+			m_resource.playSe(m_potPlaceSound);
+		}
+
+		// 水面が縁に届いたら一度だけ。一番につき一度に抑える
+		if (!m_hasTrembled && m_amountRatio >= TREMBLE_AMOUNT)
+		{
+			m_resource.playSe(m_trembleSound);
+			m_hasTrembled = true;
+		}
+
+		if (m_amountRatio <= 0.05f)
+			m_hasTrembled = false;
+
+		// こぼれた瞬間。決定的な音と、一番を落とした音を続けて置く
+		// 絵と同じく、越える・伝う・落ちるの順に重ねる
+		if (m_isOverflowed && !m_wasOverflowed)
+		{
+			m_resource.playSe(m_spillSound);
+			m_resource.playSe(m_spillRunSound);
+			m_resource.playSe(m_roundLoseSound);
+		}
+
+		// 手番が移ったことを告げる頭に合わせる
+		if (m_turnCallContent.serial != m_lastTurnSerial)
+			m_resource.playSe(m_turnSound);
+
+		// 札は、現れる・引く・返るの三つに音を当てる
+		if (m_cardContent.isActive && !m_wasCardActive)
+			m_resource.playSe(m_cardAppearSound);
+
+		if (m_cardContent.picked >= 0 && !m_wasCardPicked)
+			m_resource.playSe(m_cardDrawSound);
+
+		if (m_cardDraw.consumeFlipMoment())
+			m_resource.playSe(m_cardFlipSound);
+
+		m_wasPouringSound = m_isPouring;
+		m_wasOverflowed = m_isOverflowed;
+		m_wasCardActive = m_cardContent.isActive;
+		m_wasCardPicked = m_cardContent.picked >= 0;
+		m_lastTurnSerial = m_turnCallContent.serial;
 	}
 
 	void PourView3D::draw()
 	{
-		m_camera.setPerspective(CAMERA_FOV, CAMERA_NEAR, CAMERA_FAR);
-		m_camera.lookAt(CAMERA_POSITION, CAMERA_TARGET);
+		m_duelCamera.apply();
 
 		drawScenery();
 		m_modelRenderer.draw(m_cupModels[static_cast<std::size_t>(m_vesselLook)],
@@ -232,7 +336,7 @@ namespace game::view
 		                     POT_SCALE);
 		m_spill.draw(m_renderer3D);
 		drawPuddle();
-		m_liquid.draw(m_renderer3D, CAMERA_POSITION);
+		m_liquid.draw(m_renderer3D, m_duelCamera.getEye());
 
 		// 溜まっている 3D を吐き出しておく
 		m_renderer3D.flush();
@@ -241,7 +345,12 @@ namespace game::view
 	void PourView3D::drawOverlay()
 	{
 		drawFilmLook();
-		drawTexts();
+
+		m_hud.draw(m_renderer, m_screen,
+		           GameHud::Resources{ m_turnPlateTexture, m_scorePlateTexture, m_emblemOneTexture,
+			                           m_emblemTwoTexture, m_keyCapSpaceTexture,
+			                           m_keyCapEnterTexture, m_headingFont, m_bodyFont,
+			                           font::HEADING_SIZE, font::BODY_SIZE });
 
 		// 手番の告知は、器の上の空いたところで一度だけ大きく見せる
 		m_turnCall.draw(m_renderer, m_screen, m_callFont, CALL_FONT_SIZE);
@@ -277,7 +386,9 @@ namespace game::view
 		                                core::utility::Vector2{ size.x + 64.0f, size.y + 64.0f },
 		                                GRAIN_STRENGTH);
 
-		m_renderer.drawTextureStretched(m_vignetteTexture, origin, size, VIGNETTE_STRENGTH);
+		// 寄っているあいだは四隅をさらに落とす。視野が狭まると息が詰まる
+		m_renderer.drawTextureStretched(m_vignetteTexture, origin, size,
+		                                VIGNETTE_STRENGTH + CLOSE_VIGNETTE * m_duelCamera.getCloseUp());
 	}
 
 	void PourView3D::buildPuddle()
@@ -363,31 +474,4 @@ namespace game::view
 		m_renderer3D.setBackCulling(true);
 	}
 
-	void PourView3D::drawTexts() const
-	{
-		const float centerX{ m_screen.getWidth() * 0.5f };
-		const float height{ static_cast<float>(m_screen.getHeight()) };
-
-		// 見出しは毛筆、本文は明朝と使い分ける
-		m_renderer.setFont(m_headingFont);
-
-		if (!m_turnLabel.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, 52.0f }, m_turnLabel,
-			                            palette::TEXT_PRIMARY);
-
-		m_renderer.setFont(m_bodyFont);
-
-		// 勝敗は隅に小さく置く。手番の表示と重ねると読みにくい
-		if (!m_scoreLabel.empty())
-			m_renderer.drawText(core::utility::Vector2{ 36.0f, 32.0f }, m_scoreLabel,
-			                    palette::TEXT_SUB);
-
-		if (!m_message.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, height - 140.0f }, m_message,
-			                            palette::TEXT_PRIMARY);
-
-		if (!m_prompt.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, height - 100.0f }, m_prompt,
-			                            palette::TEXT_SUB);
-	}
 } // namespace game::view

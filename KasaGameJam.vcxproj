@@ -115,6 +115,11 @@
     <ClCompile Include="src\game\view\SpillStreaks.cpp" />
     <ClCompile Include="src\game\view\TurnCall.cpp" />
     <ClCompile Include="src\game\view\ChoiceList.cpp" />
+    <ClCompile Include="src\game\view\GameHud.cpp" />
+    <ClCompile Include="src\game\view\RoomBackdrop.cpp" />
+    <ClCompile Include="src\game\view\DuelCamera.cpp" />
+    <ClCompile Include="src\game\view\SceneTransition.cpp" />
+    <ClCompile Include="src\game\view\Plate.cpp" />
     <ClCompile Include="src\game\view\CardDraw.cpp" />
     <ClCompile Include="src\platform\font\FontFile.cpp" />
     <ClCompile Include="src\infrastructure\debug\ScriptedInput.cpp" />
@@ -131,6 +136,11 @@
     <ClInclude Include="src\game\view\SpillStreaks.h" />
     <ClInclude Include="src\game\view\TurnCall.h" />
     <ClInclude Include="src\game\view\ChoiceList.h" />
+    <ClInclude Include="src\game\view\GameHud.h" />
+    <ClInclude Include="src\game\view\RoomBackdrop.h" />
+    <ClInclude Include="src\game\view\DuelCamera.h" />
+    <ClInclude Include="src\game\view\SceneTransition.h" />
+    <ClInclude Include="src\game\view\Plate.h" />
     <ClInclude Include="src\game\view\CardDraw.h" />
     <ClInclude Include="src\game\presenter\DuelPresenter.h" />
     <ClInclude Include="src\game\model\Duel.h" />
@@ -152,6 +162,8 @@
     <ClInclude Include="src\game\view\LiquidVisual.h" />
     <ClInclude Include="src\core\utility\BlendMode.h" />
     <ClInclude Include="src\game\constant\Fonts.h" />
+    <ClInclude Include="src\game\constant\Sounds.h" />
+    <ClInclude Include="src\game\constant\UiTextures.h" />
     <ClInclude Include="src\game\constant\Palette.h" />
     <ClInclude Include="src\game\view\PourView3D.h" />
     <ClInclude Include="src\game\view\IPourView.h" />

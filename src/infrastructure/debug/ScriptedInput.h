@@ -59,6 +59,8 @@ namespace infrastructure::debug
 
 		[[nodiscard]] core::utility::Vector2 getMousePosition() const override;
 
+		[[nodiscard]] bool isMouseMoved() const override;
+
 		[[nodiscard]] bool isMouseLeftDown() const override;
 
 		[[nodiscard]] bool isMouseLeftPressed() const override;
