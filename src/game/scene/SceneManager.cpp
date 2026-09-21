@@ -1,5 +1,6 @@
 ﻿#include "game/scene/SceneManager.h"
 #include "game/scene/SceneFactory.h"
+#include "core/interface/IResourceManager.h"
 
 namespace game::scene
 {
@@ -15,6 +16,8 @@ namespace game::scene
 
 	void SceneManager::start(SceneType sceneType)
 	{
+		m_transition.load(m_context.resource);
+
 		m_currentSceneType = sceneType;
 		m_currentScene = SceneFactory::create(sceneType, m_context);
 		m_currentScene->onEnter();
@@ -22,12 +25,20 @@ namespace game::scene
 
 	void SceneManager::changeScene(SceneType sceneType)
 	{
+		// すでに襖が動いているなら、行き先だけ差し替える
+		if (!m_pendingSceneType.has_value())
+			m_transition.begin();
+
 		m_pendingSceneType = sceneType;
 	}
 
 	void SceneManager::update(float deltaTime)
 	{
-		applyPendingChange();
+		m_transition.update(deltaTime);
+
+		// 入れ替えるのは襖が閉じ切った瞬間。開いたときには次の場面になっている
+		if (m_transition.consumeClosedMoment())
+			applyPendingChange();
 
 		if (m_currentScene)
 			m_currentScene->update(deltaTime);
@@ -43,6 +54,9 @@ namespace game::scene
 	{
 		if (m_currentScene)
 			m_currentScene->drawOverlay();
+
+		// 襖はいちばん手前。場面が描いたものをすべて覆う
+		m_transition.draw(m_context.renderer, m_context.screen);
 	}
 
 	void SceneManager::applyPendingChange()

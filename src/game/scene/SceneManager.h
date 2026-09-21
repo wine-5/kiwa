@@ -3,6 +3,7 @@
 #include "game/scene/IScene.h"
 #include "game/scene/SceneContext.h"
 #include "game/scene/SceneType.h"
+#include "game/view/SceneTransition.h"
 #include <memory>
 #include <optional>
 
@@ -76,6 +77,9 @@ namespace game::scene
 		void applyPendingChange();
 
 		SceneContext m_context;
+
+		/// @brief 場面の切り替わりに閉じる襖
+		view::SceneTransition m_transition{};
 		std::unique_ptr<IScene> m_currentScene{};
 		SceneType m_currentSceneType{ SceneType::Title };
 
