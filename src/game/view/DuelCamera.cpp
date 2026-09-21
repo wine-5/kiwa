@@ -23,10 +23,10 @@ namespace
 	constexpr float CAMERA_FAR{ 100.0f };
 
 	/// @brief 寄り切ったときの視点
-	constexpr Vector3 CAMERA_CLOSE{ 0.22f, 1.14f, -1.18f };
+	constexpr Vector3 CAMERA_CLOSE{ 0.28f, 1.26f, -1.40f };
 
 	/// @brief 寄り切ったときの画角（狭いほど寄って見える）
-	constexpr float CAMERA_CLOSE_FOV{ 0.70f };
+	constexpr float CAMERA_CLOSE_FOV{ 0.76f };
 
 	/// @brief じわりと寄り始める嵩
 	constexpr float CREEP_START{ 0.5f };
@@ -75,10 +75,14 @@ namespace game::view
 	{
 		m_focus = focus;
 
-		// 嵩が上がるほど、じわりと寄る
-		const float creep{ std::clamp((focus.amountRatio - CREEP_START) / (1.0f - CREEP_START), 0.0f,
-			                          1.0f) *
-			               CREEP_MAX };
+		// 注いでいるあいだだけ、嵩が上がるほどじわりと寄る。
+		// 手を離したら引いて元の画へ戻す。毎回そこから寄り直すほうが、
+		// 寄ったことがはっきり分かる
+		const float creep{ focus.isPouring
+			                   ? std::clamp((focus.amountRatio - CREEP_START) / (1.0f - CREEP_START),
+			                                0.0f, 1.0f) *
+			                         CREEP_MAX
+			                   : 0.0f };
 
 		// 注いでいた手が離れた瞬間、際が近ければ寄って一拍止まる。
 		// 「越えたか」を見せる時間を作るのがこの寄りの要
