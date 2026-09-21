@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "game/model/Duel.h"
+#include "game/model/MatchSetup.h"
 #include "game/model/Npc.h"
 #include "game/view/TurnCall.h"
 #include "game/view/VesselLook.h"
@@ -32,17 +33,24 @@ namespace game::presenter
 		 * @brief DuelPresenter のコンストラクタ
 		 * @param view 映す先
 		 * @param input 入力の取得
-		 * @param npc 二の手を誰が打つか（None なら二人で打つ）
+		 * @param setup 対局の設定（二の手を誰が打つか。結末もここへ書き戻す）
 		 * @param seed 先攻と器を決める乱数の種
 		 */
 		DuelPresenter(game::view::IPourView& view, core::iface::IInputProvider& input,
-		              model::NpcType npc, unsigned int seed);
+		              model::MatchSetup& setup, unsigned int seed);
 
 		/**
 		 * @brief 進行を1ステップ進める
 		 * @param deltaTime 進める時間（秒）
 		 */
 		void update(float deltaTime);
+
+		/**
+		 * @brief 試合の決着がついたかを返す
+		 * @details ついていればリザルトへ移ってよい。結末は設定へ書き戻してある
+		 * @return ついているならtrue
+		 */
+		[[nodiscard]] bool isMatchDecided() const noexcept;
 
 	  private:
 		/**
@@ -159,6 +167,9 @@ namespace game::presenter
 		game::view::IPourView& m_view;
 		core::iface::IInputProvider& m_input;
 
+		/// @brief 対局の設定と結末
+		model::MatchSetup& m_setup;
+
 		model::Duel m_duel{};
 		Phase m_phase{ Phase::Draw };
 
@@ -185,9 +196,6 @@ namespace game::presenter
 
 		/// @brief 手番を告げ始めてから経った時間（秒）
 		float m_callTime{ 0.0f };
-
-		/// @brief 二の手を誰が打つか
-		model::NpcType m_npc{ model::NpcType::None };
 
 		/// @brief 相手が迷っている時間（秒）
 		float m_thinkTime{ 0.0f };

@@ -27,10 +27,15 @@ namespace
 namespace game::presenter
 {
 	DuelPresenter::DuelPresenter(game::view::IPourView& view, core::iface::IInputProvider& input,
-	                             model::NpcType npc, unsigned int seed)
-	    : m_view{ view }, m_input{ input }, m_npc{ npc }, m_random{ seed }
+	                             model::MatchSetup& setup, unsigned int seed)
+	    : m_view{ view }, m_input{ input }, m_setup{ setup }, m_random{ seed }
 	{
 		beginDraw();
+	}
+
+	bool DuelPresenter::isMatchDecided() const noexcept
+	{
+		return m_phase == Phase::MatchOver;
 	}
 
 	void DuelPresenter::update(float deltaTime)
@@ -118,12 +123,12 @@ namespace game::presenter
 	bool DuelPresenter::isNpcTurn() const noexcept
 	{
 		return m_duel.getCurrentPlayer() == model::Player::Two &&
-		       model::npcOf(m_npc).isPresent();
+		       model::npcOf(m_setup.npc).isPresent();
 	}
 
 	void DuelPresenter::updateNpc(float deltaTime)
 	{
-		const model::Npc& npc{ model::npcOf(m_npc) };
+		const model::Npc& npc{ model::npcOf(m_setup.npc) };
 
 		if (m_phase == Phase::Ready)
 		{
@@ -241,6 +246,11 @@ namespace game::presenter
 	{
 		if (m_duel.isMatchOver())
 		{
+			// 結末をリザルトへ持っていけるよう、設定へ書き戻してから移る
+			m_setup.winner = m_duel.getMatchWinner();
+			m_setup.oneWins = m_duel.getScore(model::Player::One);
+			m_setup.twoWins = m_duel.getScore(model::Player::Two);
+
 			m_input.clearPendingPresses();
 			m_phase = Phase::MatchOver;
 			return;
@@ -297,7 +307,7 @@ namespace game::presenter
 	{
 		// 二の手を相手（NPC）が打つなら、その呼び名で通す
 		if (player == model::Player::Two)
-			return model::npcOf(m_npc).name;
+			return model::npcOf(m_setup.npc).name;
 
 		return "一の手";
 	}

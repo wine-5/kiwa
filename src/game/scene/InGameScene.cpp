@@ -8,13 +8,17 @@ namespace game::scene
 	    : m_context{ context },
 	      m_view{ context.renderer3D, context.renderer,      context.camera,
 		          context.modelRenderer, context.resource, context.screen },
-	      m_presenter{ m_view, context.input, context.setup.npc, std::random_device{}() }
+	      m_presenter{ m_view, context.input, context.setup, std::random_device{}() }
 	{
 	}
 
 	void InGameScene::update(float deltaTime)
 	{
 		m_presenter.update(deltaTime);
+
+		// 三本先取で決着。結末は設定に書き戻されているので、あとはリザルトが読む
+		if (m_presenter.isMatchDecided())
+			m_context.changeScene(SceneType::Result);
 
 		// Presenter が渡したあとに View の動き（液面の揺れなど）を進める
 		m_view.update(deltaTime);
