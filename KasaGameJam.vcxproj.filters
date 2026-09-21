@@ -108,6 +108,9 @@
     <ClCompile Include="src\game\view\RoomBackdrop.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\view\DuelCamera.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\view\Plate.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
@@ -300,6 +303,9 @@
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\RoomBackdrop.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\DuelCamera.h">
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\Plate.h">
