@@ -15,6 +15,9 @@ namespace
 	/// 人が指を離すときの遅れにも当たるので、少しだけ残して止める
 	constexpr float NPC_STOP_MARGIN{ 0.001f };
 
+	/// @brief 狙いを越えているときに、相手（NPC）が渡すためだけに足す一滴
+	constexpr float NPC_TOKEN_POUR{ 0.008f };
+
 	/// @brief 札を返してから対局へ移るまでの間（秒）
 	///
 	/// 返す動き・役の振り分け・読む間を合わせた長さ
@@ -132,7 +135,7 @@ namespace game::presenter
 			// 震えは外から渡す（Model に乱数を持ち込まないため）
 			std::uniform_real_distribution<float> noise{ -1.0f, 1.0f };
 			m_npcAim = model::decideAim(npc, m_duel.getAmount(),
-			                                 model::Duel::getMinimumTurnAmount(), noise(m_random));
+			                                 NPC_TOKEN_POUR, noise(m_random));
 			m_phase = Phase::Pouring;
 			return;
 		}
@@ -374,13 +377,6 @@ namespace game::presenter
 			break;
 
 		case Phase::Ready:
-			if (m_duel.getTurnAmount() > 0.0f && !m_duel.canEndTurn())
-			{
-				m_view.showMessage("まだ渡せない。もう少し注げ");
-				m_view.showPrompt(waitPrompt);
-				break;
-			}
-
 			// 嵩は数字で出さない。目で見て決めるのがこの勝負の要
 			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
 			m_view.showPrompt(waitPrompt);

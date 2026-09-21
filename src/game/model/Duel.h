@@ -8,7 +8,7 @@ namespace game::model
 	/**
 	 * @brief 二人で交互に注ぐ勝負のルール
 	 *
-	 * 交互に注ぎ、こぼした方が負け。手番を渡すには最低量を注がなければならない
+	 * 交互に注ぎ、こぼした方が負け。手番を渡すには一滴でも注がなければならない
 	 * （注がずに渡せてしまうと勝負にならないため）。
 	 *
 	 * 際は器の口そのもの（常に満杯）で、隠された数字ではない。代わりに毎局
@@ -49,6 +49,8 @@ namespace game::model
 
 		/**
 		 * @brief 手番を渡せるかを返す
+		 * @details 一滴でも注いでいれば渡せる。注がずに渡せてしまうと勝負にならないので、
+		 *          「注いだかどうか」だけを見る
 		 * @return 渡せるならtrue
 		 */
 		[[nodiscard]] bool canEndTurn() const noexcept;
@@ -103,12 +105,6 @@ namespace game::model
 		 * @return 勝った側
 		 */
 		[[nodiscard]] Player getMatchWinner() const noexcept;
-
-		/**
-		 * @brief 手番を渡すために注がなければならない最低の嵩を返す
-		 * @return 最低の嵩
-		 */
-		[[nodiscard]] static float getMinimumTurnAmount() noexcept;
 
 		/**
 		 * @brief 試合に必要な勝ち数を返す
