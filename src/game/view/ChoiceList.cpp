@@ -151,7 +151,7 @@ namespace game::view
 			renderer.setFont(isSelected ? resources.headingFont : resources.bodyFont);
 			renderer.drawTextCentered(Vector2{ centerX, y }, m_content.items[i],
 			                          faded(isSelected ? palette::TEXT_PRIMARY : palette::TEXT_SUB,
-			                                appear * (isSelected ? 1.0f : 0.45f)));
+			                                appear * (isSelected ? 1.0f : 0.62f)));
 
 			if (!isSelected || i >= static_cast<int>(m_content.notes.size()))
 				continue;
