@@ -100,6 +100,12 @@ namespace game::view
 		virtual void showMessage(const std::string& message) = 0;
 
 		/**
+		 * @brief 押すキーの合図を出すかを伝える
+		 * @param isVisible 出すならtrue（相手の番や、見せる場面でないときは false）
+		 */
+		virtual void showKeyHint(bool isVisible) = 0;
+
+		/**
 		 * @brief 操作の案内を伝える
 		 * @param prompt 案内の文言
 		 */

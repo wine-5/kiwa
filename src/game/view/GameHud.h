@@ -46,6 +46,12 @@ namespace game::view
 
 			/// @brief いまの手番を NPC が打っているか
 			bool isNpcTurn{ false };
+
+			/// @brief 押すキーの合図を出すか
+			bool showsKeyHint{ false };
+
+			/// @brief いま注いでいるか（キーが押し込まれた絵にする）
+			bool isPouring{ false };
 		};
 
 		/**
@@ -104,6 +110,15 @@ namespace game::view
 
 	  private:
 		/**
+		 * @brief 押すキーの合図を描く
+		 * @param renderer 2D 描画
+		 * @param screen 画面の大きさ
+		 * @param resources 使う画像と書体
+		 */
+		void drawKeyHint(core::iface::IRenderer& renderer, core::iface::IScreen& screen,
+		                 const Resources& resources) const;
+
+		/**
 		 * @brief 片側の勝ち星を描く
 		 * @param renderer 2D 描画
 		 * @param resources 使う画像と書体
@@ -120,5 +135,11 @@ namespace game::view
 
 		/// @brief 手番の短冊の幅（文言が変わると滑らかに伸び縮みする）
 		float m_turnWidth{ 0.0f };
+
+		/// @brief キーが押し込まれている具合（0.0〜1.0）
+		float m_press{ 0.0f };
+
+		/// @brief 経過時間（押す合図の明滅に使う）
+		float m_time{ 0.0f };
 	};
 } // namespace game::view

@@ -353,13 +353,10 @@ namespace game::presenter
 		                    nameOf(model::Player::One) + "  " + (isFirstCard ? "先攻" : "後攻"),
 		                    nameOf(model::Player::Two) + "  " + (isFirstCard ? "後攻" : "先攻"));
 
-		const std::string keyName{ m_duel.getCurrentPlayer() == model::Player::One ? "スペース"
-			                                                                      : "Enter" };
-
-		// 相手が打っている間は、こちらの操作の案内を出さず、何をしているかを見せる
-		const std::string waitPrompt{ isNpcTurn()
-			                              ? nameOf(model::Player::Two) + " が思案している"
-			                              : keyName + " を押している間だけ注がれる" };
+		// 自分の番はキーの絵で示す（文字での説明は要らない）。
+		// 相手の番は、何をしているのかだけを文字で見せる
+		const bool isPlaying{ m_phase == Phase::Ready || m_phase == Phase::Pouring };
+		m_view.showKeyHint(isPlaying && !isNpcTurn());
 
 		switch (m_phase)
 		{
@@ -388,15 +385,14 @@ namespace game::presenter
 			break;
 
 		case Phase::Ready:
-			// 嵩は数字で出さない。目で見て決めるのがこの勝負の要
-			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
-			m_view.showPrompt(waitPrompt);
+			// 嵩も器の名も出さない。目で見て決めるのがこの勝負の要
+			m_view.showMessage(isNpcTurn() ? nameOf(model::Player::Two) + " が思案している" : "");
+			m_view.showPrompt("");
 			break;
 
 		case Phase::Pouring:
-			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
-			m_view.showPrompt(isNpcTurn() ? nameOf(model::Player::Two) + " が注いでいる"
-			                              : "離せば手番を渡す");
+			m_view.showMessage(isNpcTurn() ? nameOf(model::Player::Two) + " が注いでいる" : "");
+			m_view.showPrompt("");
 			break;
 
 		case Phase::RoundOver:

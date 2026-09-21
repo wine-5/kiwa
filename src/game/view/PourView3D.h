@@ -62,6 +62,12 @@ namespace game::view
 		void showPouring(bool isPouring) override
 		{
 			m_isPouring = isPouring;
+			m_hudContent.isPouring = isPouring;
+		}
+
+		void showKeyHint(bool isVisible) override
+		{
+			m_hudContent.showsKeyHint = isVisible;
 		}
 
 		void showOverflowed(bool isOverflowed) override

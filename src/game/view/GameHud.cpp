@@ -4,7 +4,9 @@
 #include "core/utility/Easing.h"
 #include "game/constant/Palette.h"
 #include "game/view/Plate.h"
+#include "core/utility/MathConstants.h"
 #include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -53,8 +55,21 @@ namespace
 	/// 絵は枠が太く、中の字は小さい。小さく置くと字が読めないので大きめに取る
 	constexpr float KEY_CAP_HEIGHT{ 48.0f };
 
-	/// @brief キーの絵と案内のあいだ
-	constexpr float KEY_CAP_GAP{ 14.0f };
+	/// @brief キーが押し込まれる深さ
+	constexpr float KEY_PRESS_DEPTH{ 7.0f };
+
+	/// @brief キーが押し込まれる速さ
+	constexpr float KEY_PRESS_RATE{ 18.0f };
+
+	/// @brief 押していないときに上下する周期（秒）
+	constexpr float KEY_BOB_CYCLE{ 1.5f };
+
+	/// @brief 押していないときに上下する幅
+	constexpr float KEY_BOB{ 4.0f };
+
+	/// @brief 下向きの山形の大きさ
+	constexpr float CHEVRON_WIDTH{ 17.0f };
+	constexpr float CHEVRON_HEIGHT{ 11.0f };
 
 	/**
 	 * @brief 背景へ溶かして濃さを変える
@@ -73,6 +88,11 @@ namespace game::view
 	void GameHud::update(float deltaTime, const Content& content)
 	{
 		m_content = content;
+		m_time += deltaTime;
+
+		// 押している間はキーが沈んだままになる
+		m_press = Easing::approach(m_press, content.isPouring ? 1.0f : 0.0f, KEY_PRESS_RATE,
+		                           deltaTime);
 
 		// 文言が変わると短冊の幅も変わる。急に伸び縮みすると目が行ってしまうので追わせる
 		const float target{ Plate::widthFor(content.turnLabel, 48, TURN_PADDING) };
@@ -127,9 +147,10 @@ namespace game::view
 		{
 			Plate::draw(renderer, resources.turnPlate, Vector2{ centerX, TURN_Y }, m_turnWidth);
 
+			// 紙の上に白い字を置くと沈む。短冊の上は墨で書く
 			renderer.setFont(resources.headingFont);
 			renderer.drawTextCentered(Vector2{ centerX, TURN_Y }, m_content.turnLabel,
-			                          palette::TEXT_PRIMARY);
+			                          palette::INK);
 		}
 
 		renderer.setFont(resources.bodyFont);
@@ -138,26 +159,65 @@ namespace game::view
 			renderer.drawTextCentered(Vector2{ centerX, height - MESSAGE_BOTTOM }, m_content.message,
 			                          palette::TEXT_PRIMARY);
 
-		if (m_content.prompt.empty())
+		if (!m_content.prompt.empty())
+			renderer.drawTextCentered(Vector2{ centerX, height - PROMPT_BOTTOM }, m_content.prompt,
+			                          palette::TEXT_SUB);
+
+		drawKeyHint(renderer, screen, resources);
+	}
+
+	void GameHud::drawKeyHint(core::iface::IRenderer& renderer, core::iface::IScreen& screen,
+	                          const Resources& resources) const
+	{
+		if (!m_content.showsKeyHint)
 			return;
 
-		// 人が打つ番なら、押すキーの絵を案内の左へ添える
+		const float centerX{ screen.getWidth() * 0.5f };
+		const float centerY{ screen.getHeight() - PROMPT_BOTTOM };
+
 		const int keyCap{ m_content.isPlayerOneTurn ? resources.keyCapSpace
 			                                        : resources.keyCapEnter };
-		const Vector2 capSource{ renderer.getTextureSize(keyCap) };
-		const bool showsKey{ !m_content.isNpcTurn && capSource.y > 0.0f };
+		const Vector2 source{ renderer.getTextureSize(keyCap) };
+		if (source.y <= 0.0f)
+			return;
 
-		const float capWidth{ showsKey ? capSource.x * (KEY_CAP_HEIGHT / capSource.y) : 0.0f };
-		const float gap{ showsKey ? KEY_CAP_GAP : 0.0f };
-		const float promptWidth{ Plate::widthFor(m_content.prompt, resources.bodySize, 0.0f) };
-		const float left{ centerX - (capWidth + gap + promptWidth) * 0.5f };
-		const float promptY{ height - PROMPT_BOTTOM };
+		// 押していないあいだは軽く上下し、押すと沈んだままになる
+		const float bob{ m_press > 0.5f
+			                 ? 0.0f
+			                 : std::sin(m_time * core::utility::math::TWO_PI / KEY_BOB_CYCLE) *
+			                       KEY_BOB };
+		const float sink{ KEY_PRESS_DEPTH * m_press + bob };
+		const float capWidth{ source.x * (KEY_CAP_HEIGHT / source.y) };
+		const float capTop{ centerY - KEY_CAP_HEIGHT * 0.5f + sink };
 
-		if (showsKey)
-			renderer.drawTextureStretched(keyCap, Vector2{ left, promptY - KEY_CAP_HEIGHT * 0.5f },
-			                              Vector2{ capWidth, KEY_CAP_HEIGHT }, 1.0f);
+		// 押し込む向きを、キーの上から下向きの山形で示す。押している間は引っ込める
+		const float chevronStrength{ (1.0f - m_press) * (0.55f + 0.45f * (bob / KEY_BOB + 1.0f) * 0.5f) };
+		if (chevronStrength > 0.02f)
+		{
+			const float chevronY{ capTop - 18.0f + bob };
+			const core::utility::Color color{ faded(palette::TEXT_SUB, chevronStrength) };
 
-		renderer.drawTextCentered(Vector2{ left + capWidth + gap + promptWidth * 0.5f, promptY },
-		                          m_content.prompt, palette::TEXT_SUB);
+			// 線は1本だと細いので、少しずらして重ね、筆の太さを出す
+			for (int offset{ 0 }; offset < 3; ++offset)
+			{
+				const float y{ chevronY + offset };
+
+				renderer.drawLine(Vector2{ centerX - CHEVRON_WIDTH, y },
+				                  Vector2{ centerX, y + CHEVRON_HEIGHT }, color);
+				renderer.drawLine(Vector2{ centerX, y + CHEVRON_HEIGHT },
+				                  Vector2{ centerX + CHEVRON_WIDTH, y }, color);
+			}
+		}
+
+		renderer.drawTextureStretched(keyCap, Vector2{ centerX - capWidth * 0.5f, capTop },
+		                              Vector2{ capWidth, KEY_CAP_HEIGHT }, 1.0f);
+
+		// 沈んだぶんだけ台に近づくので、下の影を縮める
+		const float shadowWidth{ capWidth * (0.82f - 0.22f * m_press) };
+		const float shadowY{ centerY + KEY_CAP_HEIGHT * 0.5f + 8.0f };
+
+		renderer.drawLine(Vector2{ centerX - shadowWidth * 0.5f, shadowY },
+		                  Vector2{ centerX + shadowWidth * 0.5f, shadowY },
+		                  faded(palette::TEXT_SUB, 0.25f + 0.25f * m_press));
 	}
 } // namespace game::view
