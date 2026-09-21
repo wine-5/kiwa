@@ -52,6 +52,9 @@
     <Filter Include="src\infrastructure\input">
       <UniqueIdentifier>{c7db892e-9c03-4269-90c0-0f6dfd64898e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\infrastructure\audio">
+      <UniqueIdentifier>{aa000000-0000-0000-0000-0000000000a1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\infrastructure\resource">
       <UniqueIdentifier>{ceb3d76f-79c8-4e1b-8fd4-f6b68d671fa8}</UniqueIdentifier>
     </Filter>
@@ -165,6 +168,9 @@
     <ClCompile Include="src\infrastructure\input\InputProvider.cpp">
       <Filter>src\infrastructure\input</Filter>
     </ClCompile>
+    <ClCompile Include="src\infrastructure\audio\AudioManager.cpp">
+      <Filter>src\infrastructure\audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp">
       <Filter>src\infrastructure\resource</Filter>
     </ClCompile>
@@ -374,6 +380,12 @@
     <ClInclude Include="src\infrastructure\input\InputProvider.h">
       <Filter>src\infrastructure\input</Filter>
     </ClInclude>
+    <ClInclude Include="src\infrastructure\audio\AudioManager.h">
+      <Filter>src\infrastructure\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\interface\IAudioPlayer.h">
+      <Filter>src\core\interface</Filter>
+    </ClInclude>
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h">
       <Filter>src\infrastructure\resource</Filter>
     </ClInclude>

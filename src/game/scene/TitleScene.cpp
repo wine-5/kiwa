@@ -1,6 +1,7 @@
 ﻿#include "game/scene/TitleScene.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IRenderer.h"
+#include "core/interface/IAudioPlayer.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
@@ -82,8 +83,8 @@ namespace game::scene
 	{
 		// 茶室の間は場面をまたいで鳴り続ける（切れると場が死ぬ）
 		const int ambience{ m_context.resource.loadSound(game::constant::sound::AMBIENCE_TEAROOM) };
-		m_context.resource.setVolume(ambience, AMBIENCE_VOLUME);
-		m_context.resource.playLoop(ambience);
+		m_context.audio.setVolume(ambience, AMBIENCE_VOLUME);
+		m_context.audio.playLoop(ambience);
 
 		namespace sound = game::constant::sound;
 		m_bgm = m_context.resource.loadSound(sound::BGM_TITLE);
@@ -91,8 +92,8 @@ namespace game::scene
 		m_decideSound = m_context.resource.loadSound(sound::SE_DECIDE);
 		m_backSound = m_context.resource.loadSound(sound::SE_BACK);
 
-		m_context.resource.setVolume(m_bgm, BGM_VOLUME);
-		m_context.resource.playLoop(m_bgm);
+		m_context.audio.setVolume(m_bgm, BGM_VOLUME);
+		m_context.audio.playLoop(m_bgm);
 
 		m_titleFont = m_context.resource.loadFont(font::HEADING_FAMILY, TITLE_FONT_SIZE);
 		m_headingFont = m_context.resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
@@ -101,7 +102,7 @@ namespace game::scene
 
 	TitleScene::~TitleScene()
 	{
-		m_context.resource.stopSound(m_bgm);
+		m_context.audio.stopSound(m_bgm);
 	}
 
 	view::ChoiceList::Content TitleScene::buildContent() const
@@ -195,12 +196,12 @@ namespace game::scene
 
 		// 指しているものが変わったら、それが分かる音を鳴らす
 		if (m_index != previousIndex)
-			m_context.resource.playSe(m_cursorSound);
+			m_context.audio.playSe(m_cursorSound);
 
 		// 左で一つ前の段へ戻る（強さを選んでいる途中で選び直せるように）
 		if (isBack && m_step == Step::Strength)
 		{
-			m_context.resource.playSe(m_backSound);
+			m_context.audio.playSe(m_backSound);
 			m_step = Step::Mode;
 			m_index = 1;
 			return;
@@ -212,7 +213,7 @@ namespace game::scene
 			// 「戻る」を選んだときは決めた音にしない
 			const bool isBackItem{ m_step == Step::Strength &&
 				                   m_index >= static_cast<int>(STRENGTHS.size()) };
-			m_context.resource.playSe(isBackItem ? m_backSound : m_decideSound);
+			m_context.audio.playSe(isBackItem ? m_backSound : m_decideSound);
 
 			decide();
 			return;

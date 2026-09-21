@@ -1,5 +1,6 @@
 ﻿#include "game/scene/SceneManager.h"
 #include "game/scene/SceneFactory.h"
+#include "core/interface/IAudioPlayer.h"
 #include "core/interface/IResourceManager.h"
 #include "game/constant/Sounds.h"
 
@@ -8,6 +9,7 @@ namespace game::scene
 	SceneManager::SceneManager(core::iface::IRenderer& renderer, core::iface::IRenderer3D& renderer3D,
 	                           core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
 	                           core::iface::IInputProvider& input, core::iface::IResourceManager& resource,
+	                           core::iface::IAudioPlayer& audio,
 	                           core::iface::IScreen& screen, model::MatchSetup& setup,
 	                           std::function<void()> quitGame)
 	    : m_context{ renderer,
@@ -16,6 +18,7 @@ namespace game::scene
 		             modelRenderer,
 		             input,
 		             resource,
+		             audio,
 		             screen,
 		             setup,
 		             [this](SceneType sceneType) { changeScene(sceneType); },
@@ -39,7 +42,7 @@ namespace game::scene
 		if (!m_pendingSceneType.has_value())
 		{
 			m_transition.begin();
-			m_context.resource.playSe(m_sceneChangeSound);
+			m_context.audio.playSe(m_sceneChangeSound);
 		}
 
 		m_pendingSceneType = sceneType;

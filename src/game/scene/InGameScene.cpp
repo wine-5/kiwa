@@ -1,5 +1,6 @@
 ﻿#include "game/scene/InGameScene.h"
 #include "core/interface/IInputProvider.h"
+#include "core/interface/IAudioPlayer.h"
 #include "core/interface/IResourceManager.h"
 #include "game/constant/Sounds.h"
 #include <random>
@@ -17,8 +18,8 @@ namespace game::scene
 {
 	InGameScene::InGameScene(const SceneContext& context)
 	    : m_context{ context },
-	      m_view{ context.renderer3D, context.renderer,      context.camera,
-		          context.modelRenderer, context.resource, context.screen },
+	      m_view{ context.renderer3D,   context.renderer, context.camera, context.modelRenderer,
+		          context.resource,      context.audio,    context.screen },
 	      m_presenter{ m_view, context.input, context.setup, std::random_device{}() }
 	{
 		namespace sound = game::constant::sound;
@@ -26,16 +27,16 @@ namespace game::scene
 		m_bgm = m_context.resource.loadSound(sound::BGM_DUEL_CALM);
 
 		// 間は薄く、曲はその下。注ぐ音の邪魔をしない大きさに置く
-		m_context.resource.setVolume(m_ambience, AMBIENCE_VOLUME);
-		m_context.resource.setVolume(m_bgm, BGM_VOLUME);
-		m_context.resource.playLoop(m_ambience);
-		m_context.resource.playLoop(m_bgm);
+		m_context.audio.setVolume(m_ambience, AMBIENCE_VOLUME);
+		m_context.audio.setVolume(m_bgm, BGM_VOLUME);
+		m_context.audio.playLoop(m_ambience);
+		m_context.audio.playLoop(m_bgm);
 	}
 
 	InGameScene::~InGameScene()
 	{
 		// 対局を離れたら曲は止める。間（環境音）はそのまま鳴らし続ける
-		m_context.resource.stopSound(m_bgm);
+		m_context.audio.stopSound(m_bgm);
 	}
 
 	void InGameScene::update(float deltaTime)

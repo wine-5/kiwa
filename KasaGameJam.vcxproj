@@ -93,6 +93,7 @@
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\input\InputProvider.cpp" />
+    <ClCompile Include="src\infrastructure\audio\AudioManager.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
     <ClCompile Include="src\game\scene\TitleScene.cpp" />
     <ClCompile Include="src\game\scene\InGameScene.cpp" />
@@ -188,6 +189,8 @@
     <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\game\scene\SceneContext.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />
+    <ClInclude Include="src\infrastructure\audio\AudioManager.h" />
+    <ClInclude Include="src\core\interface\IAudioPlayer.h" />
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\infrastructure\input\InputProvider.h" />

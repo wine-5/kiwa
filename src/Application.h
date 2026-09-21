@@ -5,6 +5,7 @@
 #include "game/scene/SceneManager.h"
 #include "infrastructure/debug/FrameCapture.h"
 #include "infrastructure/debug/ScriptedInput.h"
+#include "infrastructure/audio/AudioManager.h"
 #include "infrastructure/graphics/Camera.h"
 #include "infrastructure/graphics/Renderer.h"
 #include "infrastructure/graphics/ModelRenderer.h"
@@ -70,6 +71,7 @@ class Application final : private core::base::NonCopyable
 	infrastructure::debug::ScriptedInput m_scriptedInput{ m_input };
 	infrastructure::debug::FrameCapture m_frameCapture{};
 	infrastructure::resource::ResourceManager m_resource{};
+	infrastructure::audio::AudioManager m_audio{};
 
 	/// @brief タイトルで選んだ対局の設定（シーンをまたいで残る）
 	game::model::MatchSetup m_matchSetup{};

@@ -21,7 +21,7 @@ namespace
 Application::Application(int screenWidth, int screenHeight)
     : m_screen{ screenWidth, screenHeight }, m_postEffect{ screenWidth, screenHeight },
       m_sceneManager{ m_renderer,      m_renderer3D, m_camera,  m_modelRenderer,
-	                  m_scriptedInput, m_resource,   m_screen,  m_matchSetup,
+	                  m_scriptedInput, m_resource,   m_audio,   m_screen,  m_matchSetup,
 	                  [this] { m_isRunning = false; } }
 {
 	// 同梱のフォントを使える状態にする。資源を読み始める前に済ませること
@@ -69,9 +69,6 @@ void Application::run()
 
 		// このフレームで使う入力をここで確定させる（以降は同じ状態を見続ける）
 		m_scriptedInput.captureFrameInput();
-
-		if (m_scriptedInput.isKeyPressed(core::input::KeyCode::Escape))
-			m_isRunning = false;
 
 		if (m_scriptedInput.consumeKeyPress(core::input::KeyCode::F1))
 			toggleFullscreen();

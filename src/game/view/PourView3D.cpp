@@ -5,6 +5,7 @@
 #include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "core/interface/IRenderer3D.h"
+#include "core/interface/IAudioPlayer.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
@@ -186,9 +187,10 @@ namespace game::view
 {
 	PourView3D::PourView3D(core::iface::IRenderer3D& renderer3D, core::iface::IRenderer& renderer,
 	                       core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
-	                       core::iface::IResourceManager& resource, core::iface::IScreen& screen)
+	                       core::iface::IResourceManager& resource, core::iface::IAudioPlayer& audio,
+	                       core::iface::IScreen& screen)
 	    : m_renderer3D{ renderer3D }, m_renderer{ renderer }, m_modelRenderer{ modelRenderer },
-	      m_screen{ screen }, m_duelCamera{ camera }, m_resource{ resource }
+	      m_screen{ screen }, m_duelCamera{ camera }, m_audio{ audio }
 	{
 		// 枡も台も動かないので、形は最初に一度だけ組んで使い回す
 		SceneryMesh::buildFloor(m_floorVertices, m_floorIndices);
@@ -272,23 +274,23 @@ namespace game::view
 		{
 			// 注ぎ始めは、土瓶を持ち上げる音から入る
 			if (!m_wasPouringSound)
-				m_resource.playSe(m_potLiftSound);
+				m_audio.playSe(m_potLiftSound);
 
-			m_resource.playLoop(m_pourSound);
-			m_resource.setPitch(m_pourSound, POUR_PITCH_LOW +
+			m_audio.playLoop(m_pourSound);
+			m_audio.setPitch(m_pourSound, POUR_PITCH_LOW +
 			                                     (POUR_PITCH_HIGH - POUR_PITCH_LOW) * m_amountRatio);
 		}
 		else if (m_wasPouringSound)
 		{
 			// 手を離したら筋が切れ、土瓶が畳に戻る
-			m_resource.stopSound(m_pourSound);
-			m_resource.playSe(m_potPlaceSound);
+			m_audio.stopSound(m_pourSound);
+			m_audio.playSe(m_potPlaceSound);
 		}
 
 		// 水面が縁に届いたら一度だけ。一番につき一度に抑える
 		if (!m_hasTrembled && m_amountRatio >= TREMBLE_AMOUNT)
 		{
-			m_resource.playSe(m_trembleSound);
+			m_audio.playSe(m_trembleSound);
 			m_hasTrembled = true;
 		}
 
@@ -299,24 +301,24 @@ namespace game::view
 		// 絵と同じく、越える・伝う・落ちるの順に重ねる
 		if (m_isOverflowed && !m_wasOverflowed)
 		{
-			m_resource.playSe(m_spillSound);
-			m_resource.playSe(m_spillRunSound);
-			m_resource.playSe(m_roundLoseSound);
+			m_audio.playSe(m_spillSound);
+			m_audio.playSe(m_spillRunSound);
+			m_audio.playSe(m_roundLoseSound);
 		}
 
 		// 手番が移ったことを告げる頭に合わせる
 		if (m_turnCallContent.serial != m_lastTurnSerial)
-			m_resource.playSe(m_turnSound);
+			m_audio.playSe(m_turnSound);
 
 		// 札は、現れる・引く・返るの三つに音を当てる
 		if (m_cardContent.isActive && !m_wasCardActive)
-			m_resource.playSe(m_cardAppearSound);
+			m_audio.playSe(m_cardAppearSound);
 
 		if (m_cardContent.picked >= 0 && !m_wasCardPicked)
-			m_resource.playSe(m_cardDrawSound);
+			m_audio.playSe(m_cardDrawSound);
 
 		if (m_cardDraw.consumeFlipMoment())
-			m_resource.playSe(m_cardFlipSound);
+			m_audio.playSe(m_cardFlipSound);
 
 		m_wasPouringSound = m_isPouring;
 		m_wasOverflowed = m_isOverflowed;
