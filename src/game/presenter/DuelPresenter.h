@@ -156,12 +156,6 @@ namespace game::presenter
 		 */
 		[[nodiscard]] std::string buildTurnLabel() const;
 
-		/**
-		 * @brief 勝敗の表示を作る
-		 * @return 文言
-		 */
-		[[nodiscard]] std::string buildScoreLabel() const;
-
 		game::view::IPourView& m_view;
 		core::iface::IInputProvider& m_input;
 

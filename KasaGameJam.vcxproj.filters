@@ -102,6 +102,9 @@
     <ClCompile Include="src\game\view\ChoiceList.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\view\GameHud.cpp">
+      <Filter>src\game\view</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\view\Plate.cpp">
       <Filter>src\game\view</Filter>
     </ClCompile>
@@ -288,6 +291,9 @@
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\ChoiceList.h">
+      <Filter>src\game\view</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\view\GameHud.h">
       <Filter>src\game\view</Filter>
     </ClInclude>
     <ClInclude Include="src\game\view\Plate.h">

@@ -2,6 +2,7 @@
 #include "game/view/IPourView.h"
 #include "core/utility/Vertex3D.h"
 #include "game/view/CardDraw.h"
+#include "game/view/GameHud.h"
 #include "game/view/CupGeometry.h"
 #include "game/view/LiquidVisual.h"
 #include "game/view/SpillStreaks.h"
@@ -95,22 +96,30 @@ namespace game::view
 
 		void showTurn(const std::string& turnLabel) override
 		{
-			m_turnLabel = turnLabel;
+			m_hudContent.turnLabel = turnLabel;
 		}
 
-		void showScore(const std::string& scoreLabel) override
+		void showScore(int oneWins, int twoWins, int targetWins) override
 		{
-			m_scoreLabel = scoreLabel;
+			m_hudContent.oneWins = oneWins;
+			m_hudContent.twoWins = twoWins;
+			m_hudContent.targetWins = targetWins;
+		}
+
+		void showTurnOwner(bool isPlayerOne, bool isNpcTurn) override
+		{
+			m_hudContent.isPlayerOneTurn = isPlayerOne;
+			m_hudContent.isNpcTurn = isNpcTurn;
 		}
 
 		void showMessage(const std::string& message) override
 		{
-			m_message = message;
+			m_hudContent.message = message;
 		}
 
 		void showPrompt(const std::string& prompt) override
 		{
-			m_prompt = prompt;
+			m_hudContent.prompt = prompt;
 		}
 
 		void update(float deltaTime) override;
@@ -142,11 +151,6 @@ namespace game::view
 		 * @brief 画面全体へ被せる仕上げ（周辺減光と粒状感）を描く
 		 */
 		void drawFilmLook() const;
-
-		/**
-		 * @brief 文字を描く
-		 */
-		void drawTexts() const;
 
 		core::iface::IRenderer3D& m_renderer3D;
 		core::iface::IRenderer& m_renderer;
@@ -193,6 +197,24 @@ namespace game::view
 		/// @brief 手番を告げる大きな書体
 		int m_callFont{ -1 };
 
+		/// @brief 手番を載せる短冊
+		int m_turnPlateTexture{ -1 };
+
+		/// @brief 勝ち星を載せる短冊
+		int m_scorePlateTexture{ -1 };
+
+		/// @brief 一の手の紋
+		int m_emblemOneTexture{ -1 };
+
+		/// @brief 二の手の紋
+		int m_emblemTwoTexture{ -1 };
+
+		/// @brief スペースキーの絵
+		int m_keyCapSpaceTexture{ -1 };
+
+		/// @brief Enter キーの絵
+		int m_keyCapEnterTexture{ -1 };
+
 		/// @brief 器のモデル（VesselLook の順に並べる）
 		std::array<int, 4> m_cupModels{ -1, -1, -1, -1 };
 
@@ -217,6 +239,9 @@ namespace game::view
 		/// @brief 染みの広がり具合（0.0〜1.0）
 		float m_puddleGrowth{ 0.0f };
 
+		/// @brief 手番・勝ち星・案内の見せ方
+		GameHud m_hud{};
+
 		/// @brief 手番が移ったことの告げ方
 		TurnCall m_turnCall{};
 
@@ -236,9 +261,7 @@ namespace game::view
 		/// @brief 手番の告知に必要な内容
 		TurnCall::Content m_turnCallContent{};
 
-		std::string m_turnLabel{};
-		std::string m_scoreLabel{};
-		std::string m_message{};
-		std::string m_prompt{};
+		/// @brief 画面に重ねる表示の内容
+		GameHud::Content m_hudContent{};
 	};
 } // namespace game::view

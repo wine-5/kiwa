@@ -8,6 +8,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/UiTextures.h"
 #include "game/constant/Palette.h"
 #include "game/view/CupGeometry.h"
 #include "game/view/SceneryMesh.h"
@@ -186,6 +187,15 @@ namespace game::view
 		m_cardBackTexture = resource.loadTexture(CARD_BACK_TEXTURE_PATH);
 		m_cardFirstTexture = resource.loadTexture(CARD_FIRST_TEXTURE_PATH);
 		m_cardSecondTexture = resource.loadTexture(CARD_SECOND_TEXTURE_PATH);
+
+		// 画面に重ねる紙物。読み込みはここでまとめて済ませる
+		namespace ui = game::constant::ui;
+		m_turnPlateTexture = resource.loadTexture(ui::TURN_PLATE);
+		m_scorePlateTexture = resource.loadTexture(ui::SCORE_PLATE);
+		m_emblemOneTexture = resource.loadTexture(ui::EMBLEM_ONE);
+		m_emblemTwoTexture = resource.loadTexture(ui::EMBLEM_TWO);
+		m_keyCapSpaceTexture = resource.loadTexture(ui::KEY_CAP_SPACE);
+		m_keyCapEnterTexture = resource.loadTexture(ui::KEY_CAP_ENTER);
 		// 器はどれが出ても待たせないよう、はじめに全部読んでおく
 		for (std::size_t i{ 0 }; i < m_cupModels.size(); ++i)
 			m_cupModels[i] = resource.loadModel(cupModelPath(static_cast<VesselLook>(i)));
@@ -215,6 +225,7 @@ namespace game::view
 		                     ? core::utility::Easing::approach(m_puddleGrowth, 1.0f, PUDDLE_SOAK_RATE,
 		                                                       deltaTime)
 		                     : 0.0f;
+		m_hud.update(deltaTime, m_hudContent);
 		m_turnCall.update(deltaTime, m_turnCallContent);
 		m_cardDraw.update(deltaTime, m_cardContent);
 		m_grainTime += deltaTime;
@@ -241,7 +252,12 @@ namespace game::view
 	void PourView3D::drawOverlay()
 	{
 		drawFilmLook();
-		drawTexts();
+
+		m_hud.draw(m_renderer, m_screen,
+		           GameHud::Resources{ m_turnPlateTexture, m_scorePlateTexture, m_emblemOneTexture,
+			                           m_emblemTwoTexture, m_keyCapSpaceTexture,
+			                           m_keyCapEnterTexture, m_headingFont, m_bodyFont,
+			                           font::HEADING_SIZE, font::BODY_SIZE });
 
 		// 手番の告知は、器の上の空いたところで一度だけ大きく見せる
 		m_turnCall.draw(m_renderer, m_screen, m_callFont, CALL_FONT_SIZE);
@@ -363,31 +379,4 @@ namespace game::view
 		m_renderer3D.setBackCulling(true);
 	}
 
-	void PourView3D::drawTexts() const
-	{
-		const float centerX{ m_screen.getWidth() * 0.5f };
-		const float height{ static_cast<float>(m_screen.getHeight()) };
-
-		// 見出しは毛筆、本文は明朝と使い分ける
-		m_renderer.setFont(m_headingFont);
-
-		if (!m_turnLabel.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, 52.0f }, m_turnLabel,
-			                            palette::TEXT_PRIMARY);
-
-		m_renderer.setFont(m_bodyFont);
-
-		// 勝敗は隅に小さく置く。手番の表示と重ねると読みにくい
-		if (!m_scoreLabel.empty())
-			m_renderer.drawText(core::utility::Vector2{ 36.0f, 32.0f }, m_scoreLabel,
-			                    palette::TEXT_SUB);
-
-		if (!m_message.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, height - 140.0f }, m_message,
-			                            palette::TEXT_PRIMARY);
-
-		if (!m_prompt.empty())
-			m_renderer.drawTextCentered(core::utility::Vector2{ centerX, height - 100.0f }, m_prompt,
-			                            palette::TEXT_SUB);
-	}
 } // namespace game::view

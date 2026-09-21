@@ -314,13 +314,6 @@ namespace game::presenter
 		}
 	}
 
-	std::string DuelPresenter::buildScoreLabel() const
-	{
-		// 見出しとぶつからないよう短く保つ。先取数は決着の場面で伝える
-		return "一 " + std::to_string(m_duel.getScore(model::Player::One)) + " - " +
-		       std::to_string(m_duel.getScore(model::Player::Two)) + " 二";
-	}
-
 	void DuelPresenter::pushToView()
 	{
 		// 相手を選ぶ場面と札を引く場面では、前の勝負の残りが見えないよう器を空にしておく。
@@ -336,7 +329,9 @@ namespace game::presenter
 		// 一の手は左、二の手は右。告知もその側から出すと、どちらの番か動きで分かる
 		m_view.showTurnCall(m_turnSerial, nameOf(m_duel.getCurrentPlayer()) + " の番",
 		                    m_duel.getCurrentPlayer() == model::Player::One);
-		m_view.showScore(buildScoreLabel());
+		m_view.showScore(m_duel.getScore(model::Player::One), m_duel.getScore(model::Player::Two),
+		                 model::Duel::getTargetWins());
+		m_view.showTurnOwner(m_duel.getCurrentPlayer() == model::Player::One, isNpcTurn());
 		// 札を引くのは一の手。引いた札が「先攻」なら一の手が先、「後攻」なら二の手が先
 		const bool isFirstCard{ m_firstPlayer == model::Player::One };
 		m_view.showCardDraw(m_phase == Phase::Draw, m_cardHighlight, m_cardPicked, m_isCardRevealed,
