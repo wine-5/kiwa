@@ -93,6 +93,7 @@
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\input\InputProvider.cpp" />
+    <ClCompile Include="src\infrastructure\audio\AudioManager.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
     <ClCompile Include="src\game\scene\TitleScene.cpp" />
     <ClCompile Include="src\game\scene\InGameScene.cpp" />
@@ -121,17 +122,22 @@
     <ClCompile Include="src\game\view\SceneTransition.cpp" />
     <ClCompile Include="src\game\view\Plate.cpp" />
     <ClCompile Include="src\game\view\CardDraw.cpp" />
-    <ClCompile Include="src\platform\font\FontFile.cpp" />
+    <ClCompile Include="src\platform\windows\WindowsFontInstaller.cpp" />
     <ClCompile Include="src\infrastructure\debug\ScriptedInput.cpp" />
     <ClCompile Include="src\infrastructure\debug\FrameCapture.cpp" />
     <ClCompile Include="src\infrastructure\debug\Scenario.cpp" />
-    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Bootstrap.cpp" />
+    <ClCompile Include="src\platform\windows\WindowsMain.cpp" />
+    <ClCompile Include="src\platform\PlatformFactory.cpp" />
   </ItemGroup>
   <ItemGroup Label="Headers">
     <ClInclude Include="src\infrastructure\debug\Scenario.h" />
     <ClInclude Include="src\infrastructure\debug\FrameCapture.h" />
     <ClInclude Include="src\infrastructure\debug\ScriptedInput.h" />
-    <ClInclude Include="src\platform\font\FontFile.h" />
+    <ClInclude Include="src\platform\windows\WindowsFontInstaller.h" />
+    <ClInclude Include="src\platform\PlatformFactory.h" />
+    <ClInclude Include="src\Bootstrap.h" />
+    <ClInclude Include="src\core\interface\IFontInstaller.h" />
     <ClInclude Include="src\game\view\VesselLook.h" />
     <ClInclude Include="src\game\view\SpillStreaks.h" />
     <ClInclude Include="src\game\view\TurnCall.h" />
@@ -183,6 +189,8 @@
     <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\game\scene\SceneContext.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />
+    <ClInclude Include="src\infrastructure\audio\AudioManager.h" />
+    <ClInclude Include="src\core\interface\IAudioPlayer.h" />
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\infrastructure\input\InputProvider.h" />

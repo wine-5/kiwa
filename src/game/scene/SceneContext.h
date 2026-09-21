@@ -6,6 +6,7 @@
 namespace core::iface
 {
 	class ICamera;        // 前方宣言
+	class IAudioPlayer;    // 前方宣言
 	class IInputProvider;  // 前方宣言
 	class IModelRenderer;  // 前方宣言
 	class IRenderer;      // 前方宣言
@@ -42,6 +43,9 @@ namespace game::scene
 		/// @brief 画像・音の読み込み
 		core::iface::IResourceManager& resource;
 
+		/// @brief 音を鳴らす
+		core::iface::IAudioPlayer& audio;
+
 		/// @brief 画面サイズの取得
 		core::iface::IScreen& screen;
 
@@ -50,5 +54,8 @@ namespace game::scene
 
 		/// @brief シーンの切り替えを申し込む（実際の入れ替えはフレームの終わりに行われる）
 		std::function<void(SceneType)> changeScene;
+
+		/// @brief アプリを終わらせる
+		std::function<void()> quitGame;
 	};
 } // namespace game::scene

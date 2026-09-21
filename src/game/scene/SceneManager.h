@@ -4,6 +4,7 @@
 #include "game/scene/SceneContext.h"
 #include "game/scene/SceneType.h"
 #include "game/view/SceneTransition.h"
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -31,7 +32,9 @@ namespace game::scene
 		SceneManager(core::iface::IRenderer& renderer, core::iface::IRenderer3D& renderer3D,
 		             core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
 		             core::iface::IInputProvider& input, core::iface::IResourceManager& resource,
-		             core::iface::IScreen& screen, model::MatchSetup& setup);
+		             core::iface::IAudioPlayer& audio,
+		             core::iface::IScreen& screen, model::MatchSetup& setup,
+		             std::function<void()> quitGame);
 
 		/**
 		 * @brief 最初のシーンを開始する

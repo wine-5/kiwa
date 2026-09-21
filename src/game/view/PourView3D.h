@@ -17,6 +17,7 @@ namespace core::iface
 	class IRenderer;        // 前方宣言
 	class IModelRenderer;   // 前方宣言
 	class IRenderer3D;      // 前方宣言
+	class IAudioPlayer;     // 前方宣言
 	class IResourceManager; // 前方宣言
 	class IScreen;          // 前方宣言
 } // namespace core::iface
@@ -42,7 +43,8 @@ namespace game::view
 		 */
 		PourView3D(core::iface::IRenderer3D& renderer3D, core::iface::IRenderer& renderer,
 		           core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
-		           core::iface::IResourceManager& resource, core::iface::IScreen& screen);
+		           core::iface::IResourceManager& resource, core::iface::IAudioPlayer& audio,
+		           core::iface::IScreen& screen);
 
 		void showAmount(float ratio) override
 		{
@@ -302,8 +304,8 @@ namespace game::view
 		/// @brief 何を写すかを決めるカメラ（寄り引きはここが持つ）
 		DuelCamera m_duelCamera;
 
-		/// @brief 資源の読み込みと音の再生
-		core::iface::IResourceManager& m_resource;
+		/// @brief 音を鳴らす
+		core::iface::IAudioPlayer& m_audio;
 
 		// ---- 音を鳴らす切り替わりを見つけるために持つ、1フレーム前の状態 ----
 
