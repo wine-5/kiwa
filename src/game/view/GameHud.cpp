@@ -49,7 +49,9 @@ namespace
 	constexpr float PROMPT_BOTTOM{ 96.0f };
 
 	/// @brief キーの絵の高さ
-	constexpr float KEY_CAP_HEIGHT{ 34.0f };
+	///
+	/// 絵は枠が太く、中の字は小さい。小さく置くと字が読めないので大きめに取る
+	constexpr float KEY_CAP_HEIGHT{ 48.0f };
 
 	/// @brief キーの絵と案内のあいだ
 	constexpr float KEY_CAP_GAP{ 14.0f };
@@ -153,7 +155,7 @@ namespace game::view
 
 		if (showsKey)
 			renderer.drawTextureStretched(keyCap, Vector2{ left, promptY - KEY_CAP_HEIGHT * 0.5f },
-			                              Vector2{ capWidth, KEY_CAP_HEIGHT }, 0.9f);
+			                              Vector2{ capWidth, KEY_CAP_HEIGHT }, 1.0f);
 
 		renderer.drawTextCentered(Vector2{ left + capWidth + gap + promptWidth * 0.5f, promptY },
 		                          m_content.prompt, palette::TEXT_SUB);
