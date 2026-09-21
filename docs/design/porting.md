@@ -28,9 +28,11 @@ platform → infrastructure → game → core
 - `src/platform/windows/WindowsMain.cpp` … `WinMain` があるだけ
 - `src/Bootstrap.{h,cpp}` … DxLib を起こしてゲームを回し、後片付けまで
 
-**入口は OS ごとに別ファイルを足し、そこから `bootstrap::run()` を呼ぶ。**
-iOS なら `src/platform/ios/IosMain.mm` のような形になる。
-`Bootstrap` には OS ごとの違いを持ち込まないこと。
+- `src/platform/ios/IosMain.cpp` … iOS の入口（用意済み）
+
+**入口は OS ごとに別ファイルを置き、そこから `bootstrap::run()` を呼ぶ。**
+DXライブラリの iOS 版は、通常の `main` ではなく **`int ios_main(void)`** を呼ぶ決まりなので、
+その形で用意してある。`Bootstrap` には OS ごとの違いを持ち込まないこと。
 
 ### 2. フォントの登録
 
@@ -58,7 +60,11 @@ iOS は同梱フォントをアプリの持ち物として扱えるので、`Nul
 3. **画面の比** — 1280×720 で組んであり、HUD は画面サイズに対する割合で置いている。
    端末の比が違うときに端が切れないかを見る
 4. **ビルド** — vcxproj ではなく Xcode プロジェクトを用意する。
-   ソースの一覧は `KasaGameJam.vcxproj` を見れば分かる
+   ソースの一覧は `KasaGameJam.vcxproj` を見れば分かる。
+   - テンプレートは iOS → App、Language は **Objective-C**、Interface は Storyboard
+   - `Header Search Paths` と `Library Search Paths` に DXライブラリ iOS 版の場所を足す
+   - `Other Linker Flags` に `-lDxLib_iOS` などを足す
+   - **`src/platform/windows/` はターゲットに含めない**（Windows 専用のため）
 
 ## 足すときの約束
 
