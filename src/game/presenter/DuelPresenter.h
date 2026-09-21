@@ -197,6 +197,9 @@ namespace game::presenter
 		/// @brief 手番を告げ始めてから経った時間（秒）
 		float m_callTime{ 0.0f };
 
+		/// @brief 手番が渡ったとき、キーを一度離すのを待っているか
+		bool m_needsRelease{ false };
+
 		/// @brief 相手が迷っている時間（秒）
 		float m_thinkTime{ 0.0f };
 

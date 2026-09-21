@@ -74,6 +74,15 @@ namespace game::presenter
 				break;
 			}
 
+			// 同じキーを二人で使うので、前の手が押したままなら一度離させる。
+			// そうしないと、手番が渡った瞬間に相手が注ぎ始めてしまう
+			if (m_needsRelease)
+			{
+				if (!m_input.isKeyDown(key))
+					m_needsRelease = false;
+				break;
+			}
+
 			if (m_input.isKeyDown(key))
 				m_phase = Phase::Pouring;
 			break;
@@ -117,6 +126,9 @@ namespace game::presenter
 	{
 		// 相手は手番をもらってから少し迷う。すぐ注ぎ始めると機械に見える
 		m_thinkTime = 0.0f;
+
+		// 押しっぱなしで手番が渡ったときは、離すまで注げないようにする
+		m_needsRelease = m_input.isKeyDown(keyFor(m_duel.getCurrentPlayer()));
 		m_phase = Phase::Ready;
 	}
 
@@ -283,9 +295,10 @@ namespace game::presenter
 		return space || enter;
 	}
 
-	core::input::KeyCode DuelPresenter::keyFor(model::Player player) noexcept
+	core::input::KeyCode DuelPresenter::keyFor([[maybe_unused]] model::Player player) noexcept
 	{
-		return player == model::Player::One ? core::input::KeyCode::Space : core::input::KeyCode::Enter;
+		// 注ぐのは両者ともスペース。一つの器を回し飲みするように、同じキーを渡し合う
+		return core::input::KeyCode::Space;
 	}
 
 	game::view::VesselLook DuelPresenter::lookOf(model::VesselType vessel) noexcept

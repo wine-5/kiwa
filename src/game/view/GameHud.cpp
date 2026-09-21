@@ -175,9 +175,8 @@ namespace game::view
 		const float centerX{ screen.getWidth() * 0.5f };
 		const float centerY{ screen.getHeight() - PROMPT_BOTTOM };
 
-		const int keyCap{ m_content.isPlayerOneTurn ? resources.keyCapSpace
-			                                        : resources.keyCapEnter };
-		const Vector2 source{ renderer.getTextureSize(keyCap) };
+		// 注ぐのは両者ともスペース。どちらの番でも同じ絵を出す
+		const Vector2 source{ renderer.getTextureSize(resources.keyCapSpace) };
 		if (source.y <= 0.0f)
 			return;
 
@@ -209,7 +208,8 @@ namespace game::view
 			}
 		}
 
-		renderer.drawTextureStretched(keyCap, Vector2{ centerX - capWidth * 0.5f, capTop },
+		renderer.drawTextureStretched(resources.keyCapSpace,
+		                              Vector2{ centerX - capWidth * 0.5f, capTop },
 		                              Vector2{ capWidth, KEY_CAP_HEIGHT }, 1.0f);
 
 		// 沈んだぶんだけ台に近づくので、下の影を縮める
