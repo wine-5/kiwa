@@ -89,6 +89,30 @@ namespace core::iface
 		                                  const core::utility::Vector2& size, float alpha) = 0;
 
 		/**
+		 * @brief 画像の一部を切り出して、指定した矩形へ引き伸ばして描く
+		 *
+		 * 短冊や枠のように「端の飾りはそのまま、中ほどだけ伸ばしたい」ものに使う。
+		 * 全体を引き伸ばすと、端の飾りまで一緒に間延びしてしまう
+		 * @param handle 画像ハンドル
+		 * @param sourcePosition 切り出す位置（画像の中の左上）
+		 * @param sourceSize 切り出す大きさ
+		 * @param position 描く位置（画面の中の左上）
+		 * @param size 描く大きさ
+		 * @param alpha 濃さ（0.0〜1.0）
+		 */
+		virtual void drawTexturePart(int handle, const core::utility::Vector2& sourcePosition,
+		                             const core::utility::Vector2& sourceSize,
+		                             const core::utility::Vector2& position,
+		                             const core::utility::Vector2& size, float alpha = 1.0f) = 0;
+
+		/**
+		 * @brief 画像の大きさを返す
+		 * @param handle 画像ハンドル
+		 * @return 幅と高さ（読めなければ 0）
+		 */
+		[[nodiscard]] virtual core::utility::Vector2 getTextureSize(int handle) const = 0;
+
+		/**
 		 * @brief 画像を中心・拡大率・回転を指定して描く
 		 * @param handle ResourceManager が返した画像ハンドル
 		 * @param center 中心の座標

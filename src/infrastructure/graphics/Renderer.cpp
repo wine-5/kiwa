@@ -1,5 +1,6 @@
 ﻿#include "infrastructure/graphics/Renderer.h"
 #include "DxLib.h"
+#include <algorithm>
 
 namespace
 {
@@ -95,6 +96,36 @@ namespace infrastructure::graphics
 		                static_cast<int>(position.x + size.x), static_cast<int>(position.y + size.y),
 		                handle, TRUE);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
+
+	void Renderer::drawTexturePart(int handle, const core::utility::Vector2& sourcePosition,
+	                               const core::utility::Vector2& sourceSize,
+	                               const core::utility::Vector2& position,
+	                               const core::utility::Vector2& size, float alpha)
+	{
+		if (handle < 0 || sourceSize.x <= 0.0f || sourceSize.y <= 0.0f)
+			return;
+
+		const int value{ static_cast<int>(alpha * 255.0f) };
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(value, 0, 255));
+		DrawRectExtendGraphF(position.x, position.y, position.x + size.x, position.y + size.y,
+		                     static_cast<int>(sourcePosition.x), static_cast<int>(sourcePosition.y),
+		                     static_cast<int>(sourceSize.x), static_cast<int>(sourceSize.y), handle,
+		                     TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
+
+	core::utility::Vector2 Renderer::getTextureSize(int handle) const
+	{
+		if (handle < 0)
+			return core::utility::Vector2{};
+
+		int width{ 0 };
+		int height{ 0 };
+		if (GetGraphSize(handle, &width, &height) != 0)
+			return core::utility::Vector2{};
+
+		return core::utility::Vector2{ static_cast<float>(width), static_cast<float>(height) };
 	}
 
 	void Renderer::drawTextureRotated(int handle, const core::utility::Vector2& center, float scale,
