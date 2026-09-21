@@ -20,16 +20,6 @@ namespace
 	///
 	/// 返す動き・役の振り分け・読む間を合わせた長さ
 	constexpr float REVEAL_HOLD{ 3.0f };
-
-	/**
-	 * @brief 割合を百分率の文字列にする
-	 * @param ratio 割合（0.0〜1.0）
-	 * @return 「82%」のような文字列
-	 */
-	std::string toPercent(float ratio)
-	{
-		return std::to_string(static_cast<int>(ratio * 100.0f + 0.5f)) + "%";
-	}
 } // namespace
 
 namespace game::presenter
@@ -361,14 +351,13 @@ namespace game::presenter
 				break;
 			}
 
-			m_view.showMessage(std::string{ model::vesselOf(m_duel.getVessel()).name } + "　嵩 " +
-			                   toPercent(m_duel.getAmount()));
+			// 嵩は数字で出さない。目で見て決めるのがこの勝負の要
+			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
 			m_view.showPrompt(waitPrompt);
 			break;
 
 		case Phase::Pouring:
-			m_view.showMessage(std::string{ model::vesselOf(m_duel.getVessel()).name } + "　嵩 " +
-			                   toPercent(m_duel.getAmount()));
+			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
 			m_view.showPrompt(isNpcTurn() ? nameOf(model::Player::Two) + " が注いでいる"
 			                                   : "離せば手番を渡す");
 			break;
