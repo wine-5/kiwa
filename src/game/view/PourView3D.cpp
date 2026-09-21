@@ -164,6 +164,47 @@ namespace
 	constexpr Vector3 CAMERA_POSITION{ 0.4f, 1.62f, -1.9f };
 	constexpr Vector3 CAMERA_TARGET{ -0.12f, 0.52f, 0.0f };
 	constexpr float CAMERA_FOV{ 0.85f };
+
+	// ---- 際が近いときの寄り ----
+
+	/**
+	 * @brief 2点のあいだを取る
+	 * @param from 進み具合が 0.0 のときの点
+	 * @param to 進み具合が 1.0 のときの点
+	 * @param t 進み具合（0.0〜1.0）
+	 * @return あいだの点
+	 */
+	constexpr Vector3 lerp(const Vector3& from, const Vector3& to, float t) noexcept
+	{
+		return from + (to - from) * t;
+	}
+
+	/// @brief 寄り切ったときの視点
+	constexpr Vector3 CAMERA_CLOSE{ 0.22f, 1.14f, -1.18f };
+
+	/// @brief 寄り切ったときの画角（狭いほど寄って見える）
+	constexpr float CAMERA_CLOSE_FOV{ 0.70f };
+
+	/// @brief じわりと寄り始める嵩
+	constexpr float CREEP_START{ 0.5f };
+
+	/// @brief 注いでいる間の寄りの上限（寄り切りは注ぎ終わりのために残す）
+	constexpr float CREEP_MAX{ 0.45f };
+
+	/// @brief この嵩を越えて手を離したら、縁へ寄って一拍置く
+	constexpr float BRINK_AMOUNT{ 0.78f };
+
+	/// @brief 寄ったまま止まっている時間（秒）
+	constexpr float LINGER_TIME{ 1.25f };
+
+	/// @brief 寄る速さ（息を詰める場面なので素早く）
+	constexpr float ZOOM_IN_RATE{ 4.2f };
+
+	/// @brief 引く速さ（ゆっくり戻して余韻を残す）
+	constexpr float ZOOM_OUT_RATE{ 1.3f };
+
+	/// @brief 寄り切ったときに周辺減光へ足す濃さ
+	constexpr float CLOSE_VIGNETTE{ 0.22f };
 	constexpr float CAMERA_NEAR{ 0.1f };
 	constexpr float CAMERA_FAR{ 100.0f };
 } // namespace
@@ -216,6 +257,8 @@ namespace game::view
 		// 液体は傾いた注ぎ口の先から出る
 		m_liquid.setPourOrigin(spoutTip(m_potTilt));
 
+		updateCloseUp(deltaTime);
+
 		m_liquid.update(deltaTime, m_isPouring, m_amountRatio);
 		m_spill.update(deltaTime, m_isOverflowed);
 
@@ -233,8 +276,14 @@ namespace game::view
 
 	void PourView3D::draw()
 	{
-		m_camera.setPerspective(CAMERA_FOV, CAMERA_NEAR, CAMERA_FAR);
-		m_camera.lookAt(CAMERA_POSITION, CAMERA_TARGET);
+		// 際が近いほど器へ寄る。画角も狭めて、見えるものを器だけにする
+		const float closeUp{ core::utility::Easing::easeOut(m_closeUp) };
+		const Vector3 eye{ lerp(CAMERA_POSITION, CAMERA_CLOSE, closeUp) };
+		const Vector3 look{ lerp(CAMERA_TARGET, brinkTarget(), closeUp) };
+
+		m_camera.setPerspective(CAMERA_FOV + (CAMERA_CLOSE_FOV - CAMERA_FOV) * closeUp, CAMERA_NEAR,
+		                        CAMERA_FAR);
+		m_camera.lookAt(eye, look);
 
 		drawScenery();
 		m_modelRenderer.draw(m_cupModels[static_cast<std::size_t>(m_vesselLook)],
@@ -243,7 +292,7 @@ namespace game::view
 		                     POT_SCALE);
 		m_spill.draw(m_renderer3D);
 		drawPuddle();
-		m_liquid.draw(m_renderer3D, CAMERA_POSITION);
+		m_liquid.draw(m_renderer3D, eye);
 
 		// 溜まっている 3D を吐き出しておく
 		m_renderer3D.flush();
@@ -280,6 +329,37 @@ namespace game::view
 		m_renderer3D.setBlend(core::utility::BlendMode::None, 1.0f);
 	}
 
+	Vector3 PourView3D::brinkTarget() const
+	{
+		// 見るのは器の縁。器が変われば高さも変わる
+		const cup::Shape shape{ cup::shapeOf(m_vesselLook) };
+		return Vector3{ 0.0f, shape.rimHeight, 0.0f };
+	}
+
+	void PourView3D::updateCloseUp(float deltaTime)
+	{
+		// 嵩が上がるほど、じわりと寄る
+		const float creep{ std::clamp((m_amountRatio - CREEP_START) / (1.0f - CREEP_START), 0.0f,
+			                          1.0f) *
+			               CREEP_MAX };
+
+		// 注ぎ終わった手が離れた瞬間、際が近ければ寄って一拍止まる。
+		// 「越えたか」を見せる時間を作るのがこの演出の要
+		if (m_wasPouring && !m_isPouring && m_amountRatio >= BRINK_AMOUNT)
+			m_lingerTime = LINGER_TIME;
+
+		// こぼしたときも、伝い落ちるところを見せたいので寄ったままにする
+		if (m_isOverflowed)
+			m_lingerTime = LINGER_TIME;
+
+		m_wasPouring = m_isPouring;
+		m_lingerTime = std::max(0.0f, m_lingerTime - deltaTime);
+
+		const float target{ m_lingerTime > 0.0f ? 1.0f : creep };
+		const float rate{ target > m_closeUp ? ZOOM_IN_RATE : ZOOM_OUT_RATE };
+		m_closeUp = core::utility::Easing::approach(m_closeUp, target, rate, deltaTime);
+	}
+
 	void PourView3D::drawFilmLook() const
 	{
 		const core::utility::Vector2 origin{ 0.0f, 0.0f };
@@ -293,7 +373,9 @@ namespace game::view
 		                                core::utility::Vector2{ size.x + 64.0f, size.y + 64.0f },
 		                                GRAIN_STRENGTH);
 
-		m_renderer.drawTextureStretched(m_vignetteTexture, origin, size, VIGNETTE_STRENGTH);
+		// 寄っているあいだは四隅をさらに落とす。視野が狭まると息が詰まる
+		m_renderer.drawTextureStretched(m_vignetteTexture, origin, size,
+		                                VIGNETTE_STRENGTH + CLOSE_VIGNETTE * m_closeUp);
 	}
 
 	void PourView3D::buildPuddle()

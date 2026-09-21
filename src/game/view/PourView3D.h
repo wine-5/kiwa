@@ -154,6 +154,18 @@ namespace game::view
 
 
 		/**
+		 * @brief 際へ寄る動きを進める
+		 * @param deltaTime 進める時間（秒）
+		 */
+		void updateCloseUp(float deltaTime);
+
+		/**
+		 * @brief 寄り切ったときに見る先（器の縁）を返す
+		 * @return 見る先
+		 */
+		[[nodiscard]] core::utility::Vector3 brinkTarget() const;
+
+		/**
 		 * @brief 画面全体へ被せる仕上げ（周辺減光と粒状感）を描く
 		 */
 		void drawFilmLook() const;
@@ -258,6 +270,15 @@ namespace game::view
 
 		/// @brief いま出ている器
 		VesselLook m_vesselLook{ VesselLook::Yunomi };
+
+		/// @brief 器へ寄っている具合（0.0〜1.0）
+		float m_closeUp{ 0.0f };
+
+		/// @brief 寄ったまま止まっている残り時間（秒）
+		float m_lingerTime{ 0.0f };
+
+		/// @brief 1フレーム前に注いでいたか（注ぎ終わりを見つけるために持つ）
+		bool m_wasPouring{ false };
 
 		bool m_isPouring{ false };
 		bool m_isOverflowed{ false };
