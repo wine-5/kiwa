@@ -19,7 +19,7 @@ namespace
 	constexpr float CLOSE_TIME{ 0.34f };
 
 	/// @brief 閉じ切って止まっている時間（秒）
-	constexpr float HOLD_TIME{ 0.14f };
+	constexpr float HOLD_TIME{ 0.30f };
 
 	/// @brief 開くのにかかる時間（秒）
 	constexpr float OPEN_TIME{ 0.42f };
@@ -29,6 +29,14 @@ namespace
 
 	/// @brief 合わせ目に立てる框（かまち）の太さ
 	constexpr float STILE_WIDTH{ 7.0f };
+
+	/// @brief 突き当たったときに食い込む深さ
+	///
+	/// ぴたりと止めると、当たった手応えが出ない。わずかに行き過ぎてから戻す
+	constexpr float IMPACT_DEPTH{ 6.0f };
+
+	/// @brief 食い込みが収まるまでの時間（秒）
+	constexpr float IMPACT_TIME{ 0.16f };
 
 	/**
 	 * @brief 背景へ溶かして濃さを変える
@@ -127,9 +135,14 @@ namespace game::view
 		else if (m_step == Step::Opening)
 			covered = 1.0f - Easing::easeOut(m_time / OPEN_TIME);
 
-		const float panel{ half * std::clamp(covered, 0.0f, 1.0f) };
+		float panel{ half * std::clamp(covered, 0.0f, 1.0f) };
 		if (panel <= 0.0f)
 			return;
+
+		// 突き当たった直後だけ、わずかに食い込ませてから戻す。
+		// ぴたりと止めるより、閉め切った手応えが出る
+		if (m_step == Step::Holding && m_time < IMPACT_TIME)
+			panel += IMPACT_DEPTH * (1.0f - Easing::easeOut(m_time / IMPACT_TIME));
 
 		// 左右の端から一枚ずつ、中央へ向かって引いてくる。
 		// 紙は横へ伸ばすので、縦の漉き目はそのまま残る
