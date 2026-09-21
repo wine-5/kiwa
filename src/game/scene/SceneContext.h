@@ -50,5 +50,8 @@ namespace game::scene
 
 		/// @brief シーンの切り替えを申し込む（実際の入れ替えはフレームの終わりに行われる）
 		std::function<void(SceneType)> changeScene;
+
+		/// @brief アプリを終わらせる
+		std::function<void()> quitGame;
 	};
 } // namespace game::scene

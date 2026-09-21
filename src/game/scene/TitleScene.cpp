@@ -29,6 +29,12 @@ namespace
 	/// @brief 副題を置く高さ（画面の高さに対する割合）
 	constexpr float SUBTITLE_Y{ 0.33f };
 
+	/// @brief 「二人で注ぎ合う」の並び順
+	constexpr int MODE_TWO_PLAYERS{ 0 };
+
+	/// @brief 「終わる」の並び順
+	constexpr int MODE_QUIT{ 2 };
+
 	/// @brief 茶室の間の大きさ
 	constexpr float AMBIENCE_VOLUME{ 0.35f };
 
@@ -107,8 +113,8 @@ namespace game::scene
 
 		if (m_step == Step::Mode)
 		{
-			content.items = { "二人で注ぎ合う", "一人で注ぎ合う" };
-			content.notes = { "向かい合って", "二の手は任せる" };
+			content.items = { "二人で注ぎ合う", "一人で注ぎ合う", "終わる" };
+			content.notes = { "向かい合って", "二の手は任せる", "" };
 			return content;
 		}
 
@@ -128,10 +134,16 @@ namespace game::scene
 		if (m_step == Step::Mode)
 		{
 			// 二人で打つなら、そのまま対局へ。一人なら続けて強さを選ばせる
-			if (m_index == 0)
+			if (m_index == MODE_TWO_PLAYERS)
 			{
 				m_context.setup.npc = model::NpcType::None;
 				m_context.changeScene(SceneType::InGame);
+				return;
+			}
+
+			if (m_index == MODE_QUIT)
+			{
+				m_context.quitGame();
 				return;
 			}
 
