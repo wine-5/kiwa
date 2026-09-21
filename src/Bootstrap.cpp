@@ -5,6 +5,12 @@
 #include "core/constant/ScreenConstants.h"
 #include "DxLib.h"
 
+namespace
+{
+	/// @brief app.rc で埋めたアイコンの番号
+	constexpr int ICON_RESOURCE_ID{ 1 };
+} // namespace
+
 namespace bootstrap
 {
 	int run()
@@ -12,6 +18,9 @@ namespace bootstrap
 		// ソースは UTF-8 で書くため、DxLib 側の文字コードも UTF-8 に合わせる
 		// （DxLib_Init より前でしか変更できない）
 		SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
+
+		// 窓の左上と、タスクバーに出す顔。app.rc で埋めたアイコンを指す
+		SetWindowIconID(ICON_RESOURCE_ID);
 
 		SetGraphMode(core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT, core::constant::COLOR_BIT);
 		// 全画面と窓を行き来しても、読み込んだ画像やモデルを作り直さずに済ませる

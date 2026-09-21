@@ -130,6 +130,9 @@
     <ClCompile Include="src\platform\windows\WindowsMain.cpp" />
     <ClCompile Include="src\platform\PlatformFactory.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
   <ItemGroup Label="Headers">
     <ClInclude Include="src\infrastructure\debug\Scenario.h" />
     <ClInclude Include="src\infrastructure\debug\FrameCapture.h" />

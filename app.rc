@@ -1,0 +1,3 @@
+// アプリのアイコン。tools/make_icon.py が作る
+// 番号の小さいものが実行ファイルの顔になるので、これ一つだけを置く
+1 ICON "assets\icon\kiwa.ico"
