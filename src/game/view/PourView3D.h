@@ -219,6 +219,15 @@ namespace game::view
 		/// @brief こぼれた瞬間の音
 		int m_spillSound{ -1 };
 
+		/// @brief 茶が外壁を伝って落ちる音
+		int m_spillRunSound{ -1 };
+
+		/// @brief 土瓶を持ち上げる音
+		int m_potLiftSound{ -1 };
+
+		/// @brief 土瓶を置く音
+		int m_potPlaceSound{ -1 };
+
 		/// @brief 手番が移る音
 		int m_turnSound{ -1 };
 

@@ -80,6 +80,9 @@ namespace game::scene
 
 		/// @brief 場面の切り替わりに閉じる襖
 		view::SceneTransition m_transition{};
+
+		/// @brief 襖が閉まる音
+		int m_sceneChangeSound{ -1 };
 		std::unique_ptr<IScene> m_currentScene{};
 		SceneType m_currentSceneType{ SceneType::Title };
 

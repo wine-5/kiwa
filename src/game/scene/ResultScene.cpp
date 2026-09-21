@@ -48,8 +48,14 @@ namespace
 	/// @brief 落款の大きさ
 	constexpr float SEAL_SIZE{ 104.0f };
 
+	/// @brief リザルトの曲の大きさ
+	constexpr float BGM_VOLUME{ 0.5f };
+
 	/// @brief 案内が出るまでの間（秒）
 	constexpr float PROMPT_DELAY{ 2.1f };
+
+	/// @brief 締めの音が鳴るまでの間（秒）。落款が押し切ったすぐあと
+	constexpr float MATCH_WIN_DELAY{ SEAL_DELAY + SEAL_TIME + 0.1f };
 
 	/**
 	 * @brief 背景へ溶かして濃さを変える
@@ -65,13 +71,30 @@ namespace
 
 namespace game::scene
 {
+	ResultScene::~ResultScene()
+	{
+		m_context.resource.stopSound(m_bgm);
+	}
+
 	ResultScene::ResultScene(const SceneContext& context)
 	    : m_context{ context }, m_backdrop{ context.renderer3D, context.renderer, context.camera,
 		                                    context.modelRenderer, context.resource, context.screen }
 	{
 		m_scrollTexture = m_context.resource.loadTexture(constant::ui::RESULT_SCROLL);
 		m_sealTexture = m_context.resource.loadTexture(constant::ui::SEAL_VICTORY);
-		m_winSound = m_context.resource.loadSound(game::constant::sound::SE_ROUND_WIN);
+		namespace sound = game::constant::sound;
+		m_winSound = m_context.resource.loadSound(sound::SE_ROUND_WIN);
+		m_scrollSound = m_context.resource.loadSound(sound::SE_SCROLL_OPEN);
+		m_sealSound = m_context.resource.loadSound(sound::SE_SEAL_STAMP);
+		m_matchWinSound = m_context.resource.loadSound(sound::SE_MATCH_WIN);
+		m_bgm = m_context.resource.loadSound(sound::BGM_RESULT_MATCH);
+
+		// 短い締めをひとつ置いてから、余韻の曲を流す
+		m_context.resource.playSe(m_context.resource.loadSound(sound::BGM_RESULT_ROUND));
+		m_context.resource.playSe(m_scrollSound);
+
+		m_context.resource.setVolume(m_bgm, BGM_VOLUME);
+		m_context.resource.playLoop(m_bgm);
 
 		m_winnerFont = m_context.resource.loadFont(font::HEADING_FAMILY, WINNER_FONT_SIZE);
 		m_bodyFont = m_context.resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);
@@ -95,6 +118,13 @@ namespace game::scene
 		// 掛軸が下り切って名が浮かぶところで、勝ちの音を一度だけ
 		if (previous < NAME_DELAY && m_elapsedTime >= NAME_DELAY)
 			m_context.resource.playSe(m_winSound);
+
+		// 落款が紙を打つ瞬間と、そのあとの締め
+		if (previous < SEAL_DELAY && m_elapsedTime >= SEAL_DELAY)
+			m_context.resource.playSe(m_sealSound);
+
+		if (previous < MATCH_WIN_DELAY && m_elapsedTime >= MATCH_WIN_DELAY)
+			m_context.resource.playSe(m_matchWinSound);
 
 		// 押し切るまでは受け付けない。見せ切ってから次へ進ませる
 		if (m_elapsedTime < PROMPT_DELAY)

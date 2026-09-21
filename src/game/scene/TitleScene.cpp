@@ -32,6 +32,9 @@ namespace
 	/// @brief 茶室の間の大きさ
 	constexpr float AMBIENCE_VOLUME{ 0.35f };
 
+	/// @brief タイトルの曲の大きさ
+	constexpr float BGM_VOLUME{ 0.55f };
+
 	/// @brief 選ばせる並びを置く高さ（画面の高さに対する割合）
 	///
 	/// 後ろの茶室と重ならない、手前の畳が空いているところに置く
@@ -76,9 +79,23 @@ namespace game::scene
 		m_context.resource.setVolume(ambience, AMBIENCE_VOLUME);
 		m_context.resource.playLoop(ambience);
 
+		namespace sound = game::constant::sound;
+		m_bgm = m_context.resource.loadSound(sound::BGM_TITLE);
+		m_cursorSound = m_context.resource.loadSound(sound::SE_CURSOR);
+		m_decideSound = m_context.resource.loadSound(sound::SE_DECIDE);
+		m_backSound = m_context.resource.loadSound(sound::SE_BACK);
+
+		m_context.resource.setVolume(m_bgm, BGM_VOLUME);
+		m_context.resource.playLoop(m_bgm);
+
 		m_titleFont = m_context.resource.loadFont(font::HEADING_FAMILY, TITLE_FONT_SIZE);
 		m_headingFont = m_context.resource.loadFont(font::HEADING_FAMILY, font::HEADING_SIZE);
 		m_bodyFont = m_context.resource.loadFont(font::BODY_FAMILY, font::BODY_SIZE);
+	}
+
+	TitleScene::~TitleScene()
+	{
+		m_context.resource.stopSound(m_bgm);
 	}
 
 	view::ChoiceList::Content TitleScene::buildContent() const
@@ -144,6 +161,8 @@ namespace game::scene
 		// マウスを乗せたものへ指を移す。押せることが動きで分かる。
 		// ただし動かしたときだけ。置いたままだと、キーで選んでも引き戻されてしまう
 		const int hovered{ m_choices.hitTest(m_context.screen, m_context.input.getMousePosition()) };
+		const int previousIndex{ m_index };
+
 		if (hovered >= 0 && m_context.input.isMouseMoved())
 			m_index = hovered;
 
@@ -162,9 +181,14 @@ namespace game::scene
 		if (isPrevious)
 			m_index = (m_index + count - 1) % count;
 
+		// 指しているものが変わったら、それが分かる音を鳴らす
+		if (m_index != previousIndex)
+			m_context.resource.playSe(m_cursorSound);
+
 		// 左で一つ前の段へ戻る（強さを選んでいる途中で選び直せるように）
 		if (isBack && m_step == Step::Strength)
 		{
+			m_context.resource.playSe(m_backSound);
 			m_step = Step::Mode;
 			m_index = 1;
 			return;
@@ -173,6 +197,11 @@ namespace game::scene
 		const bool isClicked{ m_context.input.isMouseLeftPressed() && hovered >= 0 };
 		if (isClicked || isDecided)
 		{
+			// 「戻る」を選んだときは決めた音にしない
+			const bool isBackItem{ m_step == Step::Strength &&
+				                   m_index >= static_cast<int>(STRENGTHS.size()) };
+			m_context.resource.playSe(isBackItem ? m_backSound : m_decideSound);
+
 			decide();
 			return;
 		}

@@ -21,6 +21,11 @@ namespace game::scene
 		 */
 		explicit TitleScene(const SceneContext& context);
 
+		/**
+		 * @brief TitleScene のデストラクタ（曲を止める）
+		 */
+		~TitleScene() override;
+
 		void update(float deltaTime) override;
 
 		void draw() override;
@@ -70,6 +75,18 @@ namespace game::scene
 
 		/// @brief 本文の書体
 		int m_bodyFont{ -1 };
+
+		/// @brief タイトルの曲
+		int m_bgm{ -1 };
+
+		/// @brief 指しているものが変わる音
+		int m_cursorSound{ -1 };
+
+		/// @brief 決める音
+		int m_decideSound{ -1 };
+
+		/// @brief 一つ前へ戻る音
+		int m_backSound{ -1 };
 
 	};
 } // namespace game::scene

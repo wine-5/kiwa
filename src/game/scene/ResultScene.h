@@ -21,6 +21,11 @@ namespace game::scene
 		 */
 		explicit ResultScene(const SceneContext& context);
 
+		/**
+		 * @brief ResultScene のデストラクタ（曲を止める）
+		 */
+		~ResultScene() override;
+
 		void update(float deltaTime) override;
 
 		void draw() override;
@@ -53,6 +58,18 @@ namespace game::scene
 
 		/// @brief 勝ちを告げる音
 		int m_winSound{ -1 };
+
+		/// @brief 掛軸が下りる音
+		int m_scrollSound{ -1 };
+
+		/// @brief 落款が押される音
+		int m_sealSound{ -1 };
+
+		/// @brief 対局の決着を締める音
+		int m_matchWinSound{ -1 };
+
+		/// @brief リザルトの曲
+		int m_bgm{ -1 };
 
 		/// @brief 場面が始まってから経った時間（秒）
 		float m_elapsedTime{ 0.0f };

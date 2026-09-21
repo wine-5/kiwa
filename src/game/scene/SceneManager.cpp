@@ -1,6 +1,7 @@
 ﻿#include "game/scene/SceneManager.h"
 #include "game/scene/SceneFactory.h"
 #include "core/interface/IResourceManager.h"
+#include "game/constant/Sounds.h"
 
 namespace game::scene
 {
@@ -17,6 +18,7 @@ namespace game::scene
 	void SceneManager::start(SceneType sceneType)
 	{
 		m_transition.load(m_context.resource);
+		m_sceneChangeSound = m_context.resource.loadSound(constant::sound::SE_SCENE_CHANGE);
 
 		m_currentSceneType = sceneType;
 		m_currentScene = SceneFactory::create(sceneType, m_context);
@@ -27,7 +29,10 @@ namespace game::scene
 	{
 		// すでに襖が動いているなら、行き先だけ差し替える
 		if (!m_pendingSceneType.has_value())
+		{
 			m_transition.begin();
+			m_context.resource.playSe(m_sceneChangeSound);
+		}
 
 		m_pendingSceneType = sceneType;
 	}

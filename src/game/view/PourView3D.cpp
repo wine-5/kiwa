@@ -220,6 +220,9 @@ namespace game::view
 		m_pourSound = resource.loadSound(sound::SE_POUR_LOOP);
 		m_trembleSound = resource.loadSound(sound::SE_SURFACE_TREMBLE);
 		m_spillSound = resource.loadSound(sound::SE_SPILL);
+		m_spillRunSound = resource.loadSound(sound::SE_SPILL_RUN);
+		m_potLiftSound = resource.loadSound(sound::SE_POT_LIFT);
+		m_potPlaceSound = resource.loadSound(sound::SE_POT_PLACE);
 		m_turnSound = resource.loadSound(sound::SE_TURN_CHANGE);
 		m_roundLoseSound = resource.loadSound(sound::SE_ROUND_LOSE);
 		m_cardAppearSound = resource.loadSound(sound::SE_CARD_APPEAR);
@@ -267,13 +270,19 @@ namespace game::view
 		// 画面に数字を出していないので、ここが「そろそろ危ない」の手がかりになる
 		if (m_isPouring)
 		{
+			// 注ぎ始めは、土瓶を持ち上げる音から入る
+			if (!m_wasPouringSound)
+				m_resource.playSe(m_potLiftSound);
+
 			m_resource.playLoop(m_pourSound);
 			m_resource.setPitch(m_pourSound, POUR_PITCH_LOW +
 			                                     (POUR_PITCH_HIGH - POUR_PITCH_LOW) * m_amountRatio);
 		}
 		else if (m_wasPouringSound)
 		{
+			// 手を離したら筋が切れ、土瓶が畳に戻る
 			m_resource.stopSound(m_pourSound);
+			m_resource.playSe(m_potPlaceSound);
 		}
 
 		// 水面が縁に届いたら一度だけ。一番につき一度に抑える
@@ -287,9 +296,11 @@ namespace game::view
 			m_hasTrembled = false;
 
 		// こぼれた瞬間。決定的な音と、一番を落とした音を続けて置く
+		// 絵と同じく、越える・伝う・落ちるの順に重ねる
 		if (m_isOverflowed && !m_wasOverflowed)
 		{
 			m_resource.playSe(m_spillSound);
+			m_resource.playSe(m_spillRunSound);
 			m_resource.playSe(m_roundLoseSound);
 		}
 
