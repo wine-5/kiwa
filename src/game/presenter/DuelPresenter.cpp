@@ -14,7 +14,7 @@ namespace
 	///
 	/// 狙いちょうどで止めようとすると、更新の刻みぶん行き過ぎる。
 	/// 人が指を離すときの遅れにも当たるので、少しだけ残して止める
-	constexpr float NPC_STOP_MARGIN{ 0.004f };
+	constexpr float NPC_STOP_MARGIN{ 0.001f };
 
 	/// @brief 札を返してから対局へ移るまでの間（秒）
 	///
@@ -144,8 +144,10 @@ namespace game::presenter
 			return;
 		}
 
-		// 狙いまで注いだら手を引く
-		if (m_duel.getAmount() >= m_npcAim - NPC_STOP_MARGIN)
+		// 狙いまで注いだら手を引く。
+		// ただし渡せる量に届くまでは引かない。引いても手番が渡らず、
+		// 決め直しては止まるだけの堂々巡りになる
+		if (m_duel.canEndTurn() && m_duel.getAmount() >= m_npcAim - NPC_STOP_MARGIN)
 		{
 			finishTurn();
 			return;
