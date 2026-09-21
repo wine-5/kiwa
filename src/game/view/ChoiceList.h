@@ -51,6 +51,12 @@ namespace game::view
 
 			/// @brief 選ばれていないものと添え書きに使う書体
 			int bodyFont{ -1 };
+
+			/// @brief 選ばれているものの字の大きさ（罫を字から逃がす幅の見当に使う）
+			int headingSize{ 48 };
+
+			/// @brief 添え書きの字の大きさ
+			int bodySize{ 26 };
 		};
 
 		ChoiceList() = default;
@@ -61,6 +67,13 @@ namespace game::view
 		 * @param content 表示する内容
 		 */
 		void update(float deltaTime, const Content& content);
+
+		/**
+		 * @brief 選ばれている字を避けて罫を引き始める位置を返す
+		 * @param resources 書体
+		 * @return 画面中央からの距離
+		 */
+		[[nodiscard]] float selectedGap(const Resources& resources) const;
 
 		/**
 		 * @brief その座標にある項目の番号を返す

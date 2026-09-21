@@ -5,6 +5,7 @@
 #include "game/constant/Palette.h"
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 namespace
 {
@@ -28,7 +29,10 @@ namespace
 	constexpr float RULE_LENGTH{ 68.0f };
 
 	/// @brief 線と字のあいだ
-	constexpr float RULE_GAP{ 158.0f };
+	constexpr float RULE_GAP{ 34.0f };
+
+	/// @brief 線と添え書きのあいだ
+	constexpr float NOTE_GAP{ 24.0f };
 
 	/// @brief 線の太さ
 	constexpr float RULE_THICKNESS{ 2.0f };
@@ -36,8 +40,30 @@ namespace
 	/// @brief 押せるところの横幅（行の中心からの左右）
 	constexpr float HIT_WIDTH{ 260.0f };
 
-	/// @brief 添え書きを置く横のずれ
-	constexpr float NOTE_OFFSET{ 300.0f };
+	/**
+	 * @brief 文字列の見た目の幅を見積もる
+	 *
+	 * 書体の幅を測る手だてが無いので、字数から見当をつける。全角はほぼ
+	 * 文字の大きさぶん、半角はその半分として数える
+	 * @param text 文字列（UTF-8）
+	 * @param fontSize 文字の大きさ
+	 * @return 幅の見積もり
+	 */
+	float estimateWidth(const std::string& text, int fontSize)
+	{
+		float count{ 0.0f };
+		for (const char character : text)
+		{
+			const auto byte{ static_cast<unsigned char>(character) };
+
+			// UTF-8 の続きのバイト（10xxxxxx）は数えない
+			if ((byte & 0xC0) == 0x80)
+				continue;
+
+			count += byte < 0x80 ? 0.5f : 1.0f;
+		}
+		return count * static_cast<float>(fontSize);
+	}
 
 	/**
 	 * @brief 背景へ溶かして濃さを変える
@@ -53,6 +79,14 @@ namespace
 
 namespace game::view
 {
+	float ChoiceList::selectedGap(const Resources& resources) const
+	{
+		// 選ばれている字は毛筆で大きい。その幅を跨いだところから罫を引く
+		const int index{ std::clamp(m_content.selected, 0,
+			                        static_cast<int>(m_content.items.size()) - 1) };
+		return estimateWidth(m_content.items[index], resources.headingSize) * 0.5f + RULE_GAP;
+	}
+
 	int ChoiceList::hitTest(core::iface::IScreen& screen,
 	                        const core::utility::Vector2& position) const
 	{
@@ -122,9 +156,12 @@ namespace game::view
 			if (!isSelected || i >= static_cast<int>(m_content.notes.size()))
 				continue;
 
+			// 添え書きは罫のさらに外側へ。字幅に合わせて逃がさないと罫と重なる
+			const float noteLeft{ centerX + selectedGap(resources) + RULE_LENGTH + NOTE_GAP };
+
 			renderer.setFont(resources.bodyFont);
-			renderer.drawTextCentered(Vector2{ centerX + NOTE_OFFSET, y }, m_content.notes[i],
-			                          faded(palette::TEXT_SUB, appear * 0.8f));
+			renderer.drawText(Vector2{ noteLeft, y - resources.bodySize * 0.5f },
+			                  m_content.notes[i], faded(palette::TEXT_SUB, appear * 0.8f));
 		}
 
 		// 印は行から行へ滑る。明滅させて、いま動かせるものだと分かるようにする
@@ -132,10 +169,12 @@ namespace game::view
 		const float pulse{ 0.7f + 0.3f * std::sin(m_time * 4.0f) };
 		const core::utility::Color ruleColor{ faded(palette::TEXT_SUB, appear * pulse) };
 
+		const float gap{ selectedGap(resources) };
+
 		for (int side{ 0 }; side < 2; ++side)
 		{
 			const float direction{ side == 0 ? -1.0f : 1.0f };
-			const float from{ centerX + direction * RULE_GAP };
+			const float from{ centerX + direction * gap };
 
 			renderer.drawRect(Vector2{ std::min(from, from + direction * RULE_LENGTH),
 				                       markerY - RULE_THICKNESS * 0.5f },
