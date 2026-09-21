@@ -41,6 +41,14 @@ Application::Application(int screenWidth, int screenHeight)
 	m_sceneManager.start(game::scene::SceneType::Title);
 }
 
+void Application::toggleFullscreen()
+{
+	// DxLib は「窓かどうか」しか返さないので、いまの状態を反転させて渡す
+	m_isFullscreen = !m_isFullscreen;
+	ChangeWindowMode(m_isFullscreen ? FALSE : TRUE);
+	SetDrawScreen(DX_SCREEN_BACK);
+}
+
 void Application::run()
 {
 	LONGLONG previousCount{ GetNowHiPerformanceCount() };
@@ -60,6 +68,9 @@ void Application::run()
 
 		if (m_scriptedInput.isKeyPressed(core::input::KeyCode::Escape))
 			m_isRunning = false;
+
+		if (m_scriptedInput.consumeKeyPress(core::input::KeyCode::F1))
+			toggleFullscreen();
 
 		accumulatedTime += deltaTime;
 		while (accumulatedTime >= core::constant::FIXED_TIME_STEP)

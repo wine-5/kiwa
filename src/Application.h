@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/base/NonCopyable.h"
+#include "core/constant/GameConfig.h"
 #include "game/scene/SceneManager.h"
 #include "infrastructure/debug/FrameCapture.h"
 #include "infrastructure/debug/ScriptedInput.h"
@@ -43,6 +44,11 @@ class Application final : private core::base::NonCopyable
 	void run();
 
   private:
+	/**
+	 * @brief 全画面と窓を切り替える
+	 */
+	void toggleFullscreen();
+
 	// 宣言順にそのまま生成されるため、依存される側を先に置く
 	// 同梱のフォントは、どの資源より先に使える状態にしておく必要がある
 	platform::font::FontFile m_brushFont{ game::constant::font::HEADING_FILE };
@@ -66,4 +72,7 @@ class Application final : private core::base::NonCopyable
 
 	/// @brief メインループを回し続けるか（Escape か ウィンドウを閉じる操作で false になる）
 	bool m_isRunning{ true };
+
+	/// @brief いま全画面かどうか
+	bool m_isFullscreen{ core::constant::GameConfig::STARTS_FULLSCREEN };
 };

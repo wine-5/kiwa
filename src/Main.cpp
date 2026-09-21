@@ -18,7 +18,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
 	SetGraphMode(core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT, core::constant::COLOR_BIT);
-	ChangeWindowMode(TRUE);
+	// 全画面と窓を行き来しても、読み込んだ画像やモデルを作り直さずに済ませる
+	SetChangeScreenModeGraphicsSystemResetFlag(FALSE);
+	ChangeWindowMode(core::constant::GameConfig::STARTS_FULLSCREEN ? FALSE : TRUE);
 	SetMainWindowText(core::constant::GameConfig::WINDOW_TITLE);
 
 	// 開発中は窓の外へ出ても止まらないようにする（製品版では裏で走らせない）

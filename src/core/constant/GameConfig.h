@@ -36,6 +36,12 @@ namespace core::constant
 		/// @brief 窓の外へ出ても動かし続けるか（開発中は止まると困る）
 		static constexpr bool RUNS_WHILE_INACTIVE{ IS_DEBUG };
 
+		/// @brief 全画面で始めるか
+		///
+		/// 開発中は窓のほうが扱いやすいので、製品版だけ全画面にする。
+		/// 実行中は F1 でいつでも切り替えられる
+		static constexpr bool STARTS_FULLSCREEN{ !IS_DEBUG };
+
 		/// @brief 窓の見出し
 		static constexpr const char* WINDOW_TITLE{ IS_DEBUG ? "際 -KIWA- 注ぎ勝負 [Debug]"
 		                                                    : "際 -KIWA- 注ぎ勝負" };
