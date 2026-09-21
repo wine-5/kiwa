@@ -9,27 +9,23 @@ namespace
 	/// 注ぐ速さは器によらず一定。大きい器ほど満ちるまでに時間がかかる
 	constexpr float POUR_VOLUME_RATE{ 0.30f };
 
+	/// @brief 相手（NPC）が注ぎ止めるまでにかかる、狙いの手前の余裕
+	///
+	/// 狙いちょうどで止めようとすると、更新の刻みぶん行き過ぎる。
+	/// 人が指を離すときの遅れにも当たるので、少しだけ残して止める
+	constexpr float NPC_STOP_MARGIN{ 0.001f };
+
 	/// @brief 札を返してから対局へ移るまでの間（秒）
 	///
 	/// 返す動き・役の振り分け・読む間を合わせた長さ
 	constexpr float REVEAL_HOLD{ 3.0f };
-
-	/**
-	 * @brief 割合を百分率の文字列にする
-	 * @param ratio 割合（0.0〜1.0）
-	 * @return 「82%」のような文字列
-	 */
-	std::string toPercent(float ratio)
-	{
-		return std::to_string(static_cast<int>(ratio * 100.0f + 0.5f)) + "%";
-	}
 } // namespace
 
 namespace game::presenter
 {
 	DuelPresenter::DuelPresenter(game::view::IPourView& view, core::iface::IInputProvider& input,
-	                             unsigned int seed)
-	    : m_view{ view }, m_input{ input }, m_random{ seed }
+	                             model::NpcType npc, unsigned int seed)
+	    : m_view{ view }, m_input{ input }, m_npc{ npc }, m_random{ seed }
 	{
 		beginDraw();
 	}
@@ -43,8 +39,7 @@ namespace game::presenter
 		case Phase::Draw:
 			if (!m_isCardRevealed)
 			{
-				if (isAnyKeyPressed())
-					m_isCardRevealed = true;
+				updateCardDraw();
 				break;
 			}
 
@@ -61,41 +56,39 @@ namespace game::presenter
 			// 告げ終わるまでは誰も注げない。誰の番になったのかを見てから始めさせる
 			m_callTime += deltaTime;
 			if (m_callTime >= game::view::TurnCall::READABLE_TIME)
-				m_phase = Phase::Ready;
+				enterReady();
 			break;
 
 		case Phase::Ready:
+			if (isNpcTurn())
+			{
+				updateNpc(deltaTime);
+				break;
+			}
+
 			if (m_input.isKeyDown(key))
 				m_phase = Phase::Pouring;
 			break;
 
 		case Phase::Pouring:
-			if (!m_input.isKeyDown(key))
+			if (isNpcTurn())
 			{
-				// 最低量に届いていなければ手番は渡らない。もう一度押せば続きから注げる
-				const model::Player previous{ m_duel.getCurrentPlayer() };
-				m_duel.endTurn();
-
-				// 渡ったときだけ告げる（届かず押し直すときに出しては紛らわしい）
-				if (m_duel.getCurrentPlayer() != previous)
-				{
-					beginTurnCall();
-					break;
-				}
-
-				m_phase = Phase::Ready;
+				updateNpc(deltaTime);
 				break;
 			}
 
-			// 注ぐ速さは一定なので、器が大きいほど嵩の上がり方は緩やかになる
-			m_duel.pour(POUR_VOLUME_RATE * deltaTime /
-			            model::vesselOf(m_duel.getVessel()).capacity);
-			if (m_duel.isRoundOver())
+			if (!m_input.isKeyDown(key))
 			{
-				// 注ぎながら押していたぶんを持ち越すと、決着がすぐ飛ばされてしまう
-				m_input.clearPendingPresses();
-				m_phase = Phase::RoundOver;
+				// こぼしたなら、手を離したところで決着を見せる
+				if (m_duel.isRoundOver())
+					endRound();
+				else
+					finishTurn();
+				break;
 			}
+
+			// こぼれてからも、押している間はあふれ続ける（注ぐのをやめるのは自分で決める）
+			pourFor(deltaTime);
 			break;
 
 		case Phase::RoundOver:
@@ -112,17 +105,133 @@ namespace game::presenter
 		pushToView();
 	}
 
+	void DuelPresenter::enterReady()
+	{
+		// 相手は手番をもらってから少し迷う。すぐ注ぎ始めると機械に見える
+		m_thinkTime = 0.0f;
+		m_phase = Phase::Ready;
+	}
+
+	bool DuelPresenter::isNpcTurn() const noexcept
+	{
+		return m_duel.getCurrentPlayer() == model::Player::Two &&
+		       model::npcOf(m_npc).isPresent();
+	}
+
+	void DuelPresenter::updateNpc(float deltaTime)
+	{
+		const model::Npc& npc{ model::npcOf(m_npc) };
+
+		if (m_phase == Phase::Ready)
+		{
+			m_thinkTime += deltaTime;
+			if (m_thinkTime < npc.hesitation)
+				return;
+
+			// 迷い終わったところで、この手番でどこまで注ぐかを決める。
+			// 震えは外から渡す（Model に乱数を持ち込まないため）
+			std::uniform_real_distribution<float> noise{ -1.0f, 1.0f };
+			m_npcAim = model::decideAim(npc, m_duel.getAmount(),
+			                                 model::Duel::getMinimumTurnAmount(), noise(m_random));
+			m_phase = Phase::Pouring;
+			return;
+		}
+
+		// こぼしてしまったら、そこで手を引く
+		if (m_duel.isRoundOver())
+		{
+			endRound();
+			return;
+		}
+
+		// 狙いまで注いだら手を引く。
+		// ただし渡せる量に届くまでは引かない。引いても手番が渡らず、
+		// 決め直しては止まるだけの堂々巡りになる
+		if (m_duel.canEndTurn() && m_duel.getAmount() >= m_npcAim - NPC_STOP_MARGIN)
+		{
+			finishTurn();
+			return;
+		}
+
+		pourFor(deltaTime);
+	}
+
+	void DuelPresenter::pourFor(float deltaTime)
+	{
+		// 注ぐ速さは一定なので、器が大きいほど嵩の上がり方は緩やかになる
+		m_duel.pour(POUR_VOLUME_RATE * deltaTime / model::vesselOf(m_duel.getVessel()).capacity);
+	}
+
+	void DuelPresenter::endRound()
+	{
+		// 注ぎながら押していたぶんを持ち越すと、決着がすぐ飛ばされてしまう
+		m_input.clearPendingPresses();
+		m_phase = Phase::RoundOver;
+	}
+
+	void DuelPresenter::finishTurn()
+	{
+		// 最低量に届いていなければ手番は渡らない。人ならもう一度押せば続きから注げる
+		const model::Player previous{ m_duel.getCurrentPlayer() };
+		m_duel.endTurn();
+
+		// 渡ったときだけ告げる（届かず押し直すときに出しては紛らわしい）
+		if (m_duel.getCurrentPlayer() != previous)
+		{
+			beginTurnCall();
+			return;
+		}
+
+		enterReady();
+	}
+
 	void DuelPresenter::beginDraw()
 	{
 		m_input.clearPendingPresses();
 
-		// 折据から引いた札で先攻を決める。引き当てるまで結果は伏せておく
+		// 二枚のうち一枚が「先攻」。どちらに伏せるかは引く前に決めておく
 		std::uniform_int_distribution<int> coin{ 0, 1 };
-		m_firstPlayer = coin(m_random) == 0 ? model::Player::One : model::Player::Two;
+		m_firstCardSide = coin(m_random);
 
+		m_firstPlayer = model::Player::One;
+		m_cardHighlight = 0;
+		m_cardPicked = -1;
 		m_isCardRevealed = false;
 		m_revealedTime = 0.0f;
 		m_phase = Phase::Draw;
+	}
+
+	void DuelPresenter::updateCardDraw()
+	{
+		// 押された印は必ず全部消費する（残すと次の場面へ持ち越されてしまう）
+		const bool isLeft{ m_input.consumeKeyPress(core::input::KeyCode::Left) };
+		const bool isRight{ m_input.consumeKeyPress(core::input::KeyCode::Right) };
+		const bool isSwapped{ m_input.consumeKeyPress(core::input::KeyCode::Space) };
+		const bool isDecided{ m_input.consumeKeyPress(core::input::KeyCode::Enter) };
+
+		if (isLeft)
+			m_cardHighlight = 0;
+
+		if (isRight)
+			m_cardHighlight = 1;
+
+		if (isSwapped)
+			m_cardHighlight = 1 - m_cardHighlight;
+
+		// 札に触れているならそちらを指す。そのまま押せば引ける
+		const int hovered{ m_view.hitTestCard(m_input.getMousePosition()) };
+		if (hovered >= 0)
+			m_cardHighlight = hovered;
+
+		const bool isClicked{ m_input.isMouseLeftPressed() && hovered >= 0 };
+		if (!isClicked && !isDecided)
+			return;
+
+		// 引いた札が「先攻」なら、引いた一の手が先に注ぐ
+		m_cardPicked = m_cardHighlight;
+		m_firstPlayer = m_cardPicked == m_firstCardSide ? model::Player::One : model::Player::Two;
+		m_isCardRevealed = true;
+		m_revealedTime = 0.0f;
 	}
 
 	void DuelPresenter::beginRound()
@@ -147,6 +256,7 @@ namespace game::presenter
 	{
 		++m_turnSerial;
 		m_callTime = 0.0f;
+		m_thinkTime = 0.0f;
 		m_phase = Phase::TurnPassing;
 	}
 
@@ -180,9 +290,13 @@ namespace game::presenter
 		}
 	}
 
-	std::string DuelPresenter::nameOf(model::Player player)
+	std::string DuelPresenter::nameOf(model::Player player) const
 	{
-		return player == model::Player::One ? "一の手" : "二の手";
+		// 二の手を相手（NPC）が打つなら、その呼び名で通す
+		if (player == model::Player::Two)
+			return model::npcOf(m_npc).name;
+
+		return "一の手";
 	}
 
 	std::string DuelPresenter::buildTurnLabel() const
@@ -209,7 +323,7 @@ namespace game::presenter
 
 	void DuelPresenter::pushToView()
 	{
-		// 札を引く場面では、前の勝負の残りが見えないよう器を空にしておく。
+		// 相手を選ぶ場面と札を引く場面では、前の勝負の残りが見えないよう器を空にしておく。
 		// こぼした場面では縁を越えた状態を見せる
 		const bool isDrawing{ m_phase == Phase::Draw };
 		m_view.showAmount(isDrawing               ? 0.0f
@@ -225,12 +339,18 @@ namespace game::presenter
 		m_view.showScore(buildScoreLabel());
 		// 札を引くのは一の手。引いた札が「先攻」なら一の手が先、「後攻」なら二の手が先
 		const bool isFirstCard{ m_firstPlayer == model::Player::One };
-		m_view.showCardDraw(m_phase == Phase::Draw, m_isCardRevealed, isFirstCard,
+		m_view.showCardDraw(m_phase == Phase::Draw, m_cardHighlight, m_cardPicked, m_isCardRevealed,
+		                    isFirstCard,
 		                    nameOf(model::Player::One) + "  " + (isFirstCard ? "先攻" : "後攻"),
 		                    nameOf(model::Player::Two) + "  " + (isFirstCard ? "後攻" : "先攻"));
 
 		const std::string keyName{ m_duel.getCurrentPlayer() == model::Player::One ? "スペース"
 			                                                                      : "Enter" };
+
+		// 相手が打っている間は、こちらの操作の案内を出さず、何をしているかを見せる
+		const std::string waitPrompt{ isNpcTurn()
+			                              ? nameOf(model::Player::Two) + " が思案している"
+			                              : keyName + " を押している間だけ注がれる" };
 
 		switch (m_phase)
 		{
@@ -238,7 +358,7 @@ namespace game::presenter
 			if (!m_isCardRevealed)
 			{
 				m_view.showMessage("折据（おりすえ）から札を引く");
-				m_view.showPrompt("どちらかのキーで引く");
+				m_view.showPrompt("←→ で選び、Enter で引く　　札を押してもよい");
 				break;
 			}
 
@@ -262,19 +382,19 @@ namespace game::presenter
 			if (m_duel.getTurnAmount() > 0.0f && !m_duel.canEndTurn())
 			{
 				m_view.showMessage("まだ渡せない。もう少し注げ");
-				m_view.showPrompt(keyName + " を押している間だけ注がれる");
+				m_view.showPrompt(waitPrompt);
 				break;
 			}
 
-			m_view.showMessage(std::string{ model::vesselOf(m_duel.getVessel()).name } + "　嵩 " +
-			                   toPercent(m_duel.getAmount()));
-			m_view.showPrompt(keyName + " を押している間だけ注がれる");
+			// 嵩は数字で出さない。目で見て決めるのがこの勝負の要
+			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
+			m_view.showPrompt(waitPrompt);
 			break;
 
 		case Phase::Pouring:
-			m_view.showMessage(std::string{ model::vesselOf(m_duel.getVessel()).name } + "　嵩 " +
-			                   toPercent(m_duel.getAmount()));
-			m_view.showPrompt("離せば手番を渡す");
+			m_view.showMessage(model::vesselOf(m_duel.getVessel()).name);
+			m_view.showPrompt(isNpcTurn() ? nameOf(model::Player::Two) + " が注いでいる"
+			                              : "離せば手番を渡す");
 			break;
 
 		case Phase::RoundOver:

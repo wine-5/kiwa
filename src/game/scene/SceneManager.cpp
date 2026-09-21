@@ -6,9 +6,9 @@ namespace game::scene
 	SceneManager::SceneManager(core::iface::IRenderer& renderer, core::iface::IRenderer3D& renderer3D,
 	                           core::iface::ICamera& camera, core::iface::IModelRenderer& modelRenderer,
 	                           core::iface::IInputProvider& input, core::iface::IResourceManager& resource,
-	                           core::iface::IScreen& screen)
+	                           core::iface::IScreen& screen, model::MatchSetup& setup)
 	    : m_context{ renderer, renderer3D, camera,   modelRenderer,
-		             input,    resource,   screen,
+		             input,    resource,   screen,   setup,
 		             [this](SceneType sceneType) { changeScene(sceneType); } }
 	{
 	}

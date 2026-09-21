@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/utility/Vector2.h"
 #include "game/view/VesselLook.h"
 #include <string>
 
@@ -42,13 +43,26 @@ namespace game::view
 		/**
 		 * @brief 札を引く場面の表示を伝える
 		 * @param isActive いま札を引く場面かどうか
+		 * @param highlighted いま指している札（0が左、1が右）
+		 * @param picked 引いた札（まだ引いていなければ -1）
 		 * @param isRevealed 札を返したか
 		 * @param isFirstCard 引いた札が「先攻」か
 		 * @param leftLabel 左に出す役（一の手のぶん）
 		 * @param rightLabel 右に出す役（二の手のぶん）
 		 */
-		virtual void showCardDraw(bool isActive, bool isRevealed, bool isFirstCard,
-		                          const std::string& leftLabel, const std::string& rightLabel) = 0;
+		virtual void showCardDraw(bool isActive, int highlighted, int picked, bool isRevealed,
+		                          bool isFirstCard, const std::string& leftLabel,
+		                          const std::string& rightLabel) = 0;
+
+		/**
+		 * @brief その座標にある札の番号を尋ねる
+		 *
+		 * どこに並べているかは並べた View にしか分からないので、
+		 * 押されたかどうかの判定だけはここへ尋ねる
+		 * @param position 調べる座標（マウスの位置）
+		 * @return 札の番号（0か1）。どちらにも当たらなければ -1
+		 */
+		[[nodiscard]] virtual int hitTestCard(const core::utility::Vector2& position) const = 0;
 
 		/**
 		 * @brief 手番が移ったことを伝える
