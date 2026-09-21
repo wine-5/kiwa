@@ -43,7 +43,7 @@ namespace core::constant
 		static constexpr bool STARTS_FULLSCREEN{ false };
 
 		/// @brief 窓の見出し
-		static constexpr const char* WINDOW_TITLE{ IS_DEBUG ? "際 -KIWA- 注ぎ勝負 [Debug]"
-		                                                    : "際 -KIWA- 注ぎ勝負" };
+		static constexpr const char* WINDOW_TITLE{ IS_DEBUG ? "際 -KIWA- [Debug]"
+		                                                    : "際 -KIWA-" };
 	};
 } // namespace core::constant
