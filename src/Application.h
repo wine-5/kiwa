@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/base/NonCopyable.h"
+#include <memory>
 #include "core/constant/GameConfig.h"
 #include "game/scene/SceneManager.h"
 #include "infrastructure/debug/FrameCapture.h"
@@ -9,7 +10,7 @@
 #include "infrastructure/graphics/ModelRenderer.h"
 #include "infrastructure/graphics/PostEffect.h"
 #include "game/constant/Fonts.h"
-#include "platform/font/FontFile.h"
+#include "platform/PlatformFactory.h"
 #include "infrastructure/graphics/Renderer3D.h"
 #include "infrastructure/graphics/Screen.h"
 #include "infrastructure/input/InputProvider.h"
@@ -49,9 +50,13 @@ class Application final : private core::base::NonCopyable
 	 */
 	void toggleFullscreen();
 
-	// 宣言順にそのまま生成されるため、依存される側を先に置く
-	// 同梱のフォントは、どの資源より先に使える状態にしておく必要がある
-	platform::font::FontFile m_brushFont{ game::constant::font::HEADING_FILE };
+	// 宣言順にそのまま生成されるため、依存される側を先に置く。
+	// 同梱のフォントは、どの資源より先に使える状態にしておく必要があり、
+	// 外すのは最後（＝いちばん上に置く）でなければならない。
+	// どの OS の実体になるかは PlatformFactory が決める
+	std::unique_ptr<core::iface::IFontInstaller> m_fontInstaller{
+		platform::PlatformFactory::createFontInstaller()
+	};
 
 	infrastructure::graphics::Screen m_screen;
 	infrastructure::graphics::Renderer m_renderer{};

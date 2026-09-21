@@ -24,6 +24,9 @@ Application::Application(int screenWidth, int screenHeight)
 	                  m_scriptedInput, m_resource,   m_screen,  m_matchSetup,
 	                  [this] { m_isRunning = false; } }
 {
+	// 同梱のフォントを使える状態にする。資源を読み始める前に済ませること
+	m_fontInstaller->install(game::constant::font::HEADING_FILE);
+
 	// 画面を暗く落としておくと、枡と液体だけが浮かび上がる
 	m_screen.setBackgroundColor(game::constant::palette::BACKGROUND);
 	// 動作確認の段取りは Scenario に書く（ここには配線だけを置く）。

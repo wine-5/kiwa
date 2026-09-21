@@ -1,4 +1,4 @@
-﻿#include "platform/font/FontFile.h"
+﻿#include "platform/windows/WindowsFontInstaller.h"
 #include <windows.h>
 
 namespace
@@ -25,20 +25,22 @@ namespace
 	}
 } // namespace
 
-namespace platform::font
+namespace platform::windows
 {
-	FontFile::FontFile(const std::string& path) : m_widePath{ toWide(path) }
+	bool WindowsFontInstaller::install(const std::string& path)
 	{
+		m_widePath = toWide(path);
 		if (m_widePath.empty())
-			return;
+			return false;
 
 		// FR_PRIVATE を付けると、このアプリの中だけで使える状態になる
 		m_isRegistered = AddFontResourceExW(m_widePath.c_str(), FR_PRIVATE, nullptr) > 0;
+		return m_isRegistered;
 	}
 
-	FontFile::~FontFile()
+	WindowsFontInstaller::~WindowsFontInstaller()
 	{
 		if (m_isRegistered)
 			RemoveFontResourceExW(m_widePath.c_str(), FR_PRIVATE, nullptr);
 	}
-} // namespace platform::font
+} // namespace platform::windows
