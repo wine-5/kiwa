@@ -92,6 +92,11 @@ namespace game::presenter
 		void finishTurn();
 
 		/**
+		 * @brief その局の決着を見せる場面へ移る
+		 */
+		void endRound();
+
+		/**
 		 * @brief 新しい器を引いて次の局を始める
 		 */
 		void beginRound();

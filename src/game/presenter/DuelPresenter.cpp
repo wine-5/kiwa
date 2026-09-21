@@ -91,10 +91,15 @@ namespace game::presenter
 
 			if (!m_input.isKeyDown(key))
 			{
-				finishTurn();
+				// こぼしたなら、手を離したところで決着を見せる
+				if (m_duel.isRoundOver())
+					endRound();
+				else
+					finishTurn();
 				break;
 			}
 
+			// こぼれてからも、押している間はあふれ続ける（注ぐのをやめるのは自分で決める）
 			pourFor(deltaTime);
 			break;
 
@@ -144,6 +149,13 @@ namespace game::presenter
 			return;
 		}
 
+		// こぼしてしまったら、そこで手を引く
+		if (m_duel.isRoundOver())
+		{
+			endRound();
+			return;
+		}
+
 		// 狙いまで注いだら手を引く。
 		// ただし渡せる量に届くまでは引かない。引いても手番が渡らず、
 		// 決め直しては止まるだけの堂々巡りになる
@@ -160,10 +172,10 @@ namespace game::presenter
 	{
 		// 注ぐ速さは一定なので、器が大きいほど嵩の上がり方は緩やかになる
 		m_duel.pour(POUR_VOLUME_RATE * deltaTime / model::vesselOf(m_duel.getVessel()).capacity);
+	}
 
-		if (!m_duel.isRoundOver())
-			return;
-
+	void DuelPresenter::endRound()
+	{
 		// 注ぎながら押していたぶんを持ち越すと、決着がすぐ飛ばされてしまう
 		m_input.clearPendingPresses();
 		m_phase = Phase::RoundOver;
