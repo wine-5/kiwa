@@ -59,6 +59,9 @@ class Application final : private core::base::NonCopyable
 	infrastructure::debug::ScriptedInput m_scriptedInput{ m_input };
 	infrastructure::debug::FrameCapture m_frameCapture{};
 	infrastructure::resource::ResourceManager m_resource{};
+
+	/// @brief タイトルで選んだ対局の設定（シーンをまたいで残る）
+	game::model::MatchSetup m_matchSetup{};
 	game::scene::SceneManager m_sceneManager;
 
 	/// @brief メインループを回し続けるか（Escape か ウィンドウを閉じる操作で false になる）

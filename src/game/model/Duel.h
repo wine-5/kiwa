@@ -105,6 +105,12 @@ namespace game::model
 		[[nodiscard]] Player getMatchWinner() const noexcept;
 
 		/**
+		 * @brief 手番を渡すために注がなければならない最低の嵩を返す
+		 * @return 最低の嵩
+		 */
+		[[nodiscard]] static float getMinimumTurnAmount() noexcept;
+
+		/**
 		 * @brief 試合に必要な勝ち数を返す
 		 * @return 先取する本数
 		 */

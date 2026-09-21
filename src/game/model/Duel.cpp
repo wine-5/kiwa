@@ -47,6 +47,11 @@ namespace game::model
 		return m_scoreOne >= m_scoreTwo ? Player::One : Player::Two;
 	}
 
+	float Duel::getMinimumTurnAmount() noexcept
+	{
+		return MINIMUM_TURN_AMOUNT;
+	}
+
 	int Duel::getTargetWins() noexcept
 	{
 		return TARGET_WINS;

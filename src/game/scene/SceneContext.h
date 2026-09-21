@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "game/model/MatchSetup.h"
 #include "game/scene/SceneType.h"
 #include <functional>
 
@@ -43,6 +44,9 @@ namespace game::scene
 
 		/// @brief 画面サイズの取得
 		core::iface::IScreen& screen;
+
+		/// @brief タイトルで選んだ対局の設定（シーンをまたいで残る）
+		model::MatchSetup& setup;
 
 		/// @brief シーンの切り替えを申し込む（実際の入れ替えはフレームの終わりに行われる）
 		std::function<void(SceneType)> changeScene;
