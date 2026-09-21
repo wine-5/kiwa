@@ -226,9 +226,10 @@ namespace game::presenter
 		if (isSwapped)
 			m_cardHighlight = 1 - m_cardHighlight;
 
-		// 札に触れているならそちらを指す。そのまま押せば引ける
+		// 札に触れているならそちらを指す。そのまま押せば引ける。
+		// ただしカーソルを動かしたときだけ（置いたままだとキーで選べなくなる）
 		const int hovered{ m_view.hitTestCard(m_input.getMousePosition()) };
-		if (hovered >= 0)
+		if (hovered >= 0 && m_input.isMouseMoved())
 			m_cardHighlight = hovered;
 
 		const bool isClicked{ m_input.isMouseLeftPressed() && hovered >= 0 };

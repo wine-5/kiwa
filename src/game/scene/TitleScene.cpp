@@ -132,9 +132,10 @@ namespace game::scene
 		const view::ChoiceList::Content content{ buildContent() };
 		const auto count{ static_cast<int>(content.items.size()) };
 
-		// マウスを乗せたものへ指を移す。押せることが動きで分かる
+		// マウスを乗せたものへ指を移す。押せることが動きで分かる。
+		// ただし動かしたときだけ。置いたままだと、キーで選んでも引き戻されてしまう
 		const int hovered{ m_choices.hitTest(m_context.screen, m_context.input.getMousePosition()) };
-		if (hovered >= 0)
+		if (hovered >= 0 && m_context.input.isMouseMoved())
 			m_index = hovered;
 
 		// 十字キーでも選べるようにしておく。

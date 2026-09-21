@@ -32,6 +32,8 @@ namespace infrastructure::input
 
 		[[nodiscard]] core::utility::Vector2 getMousePosition() const override;
 
+		[[nodiscard]] bool isMouseMoved() const override;
+
 		[[nodiscard]] bool isMouseLeftDown() const override;
 
 		[[nodiscard]] bool isMouseLeftPressed() const override;
@@ -50,6 +52,12 @@ namespace infrastructure::input
 		std::array<bool, KEY_COUNT> m_pendingPresses{};
 
 		/// @brief このフレームのマウス左ボタンの状態
+		/// @brief いまのマウスの位置
+		core::utility::Vector2 m_currentMousePosition{};
+
+		/// @brief 1フレーム前のマウスの位置
+		core::utility::Vector2 m_previousMousePosition{};
+
 		bool m_currentMouseLeft{ false };
 
 		/// @brief 前フレームのマウス左ボタンの状態
