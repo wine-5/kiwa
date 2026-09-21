@@ -31,9 +31,6 @@ namespace
 	/// @brief 選ばせる並びを置く高さ（画面の高さに対する割合）
 	constexpr float LIST_Y{ 0.58f };
 
-	/// @brief 案内が1回点滅する周期（秒）
-	constexpr float BLINK_CYCLE{ 1.6f };
-
 	/// @brief 一人で打つときに選べる打ち手（弱い順に並べる）
 	constexpr std::array<game::model::NpcType, 3> STRENGTHS{
 		game::model::NpcType::Monk,
@@ -80,7 +77,7 @@ namespace game::scene
 
 		if (m_step == Step::Mode)
 		{
-			content.items = { "二人で打つ", "一人で打つ" };
+			content.items = { "二人で注ぎ合う", "一人で注ぎ合う" };
 			content.notes = { "向かい合って", "二の手は任せる" };
 			return content;
 		}
@@ -126,8 +123,6 @@ namespace game::scene
 
 	void TitleScene::update(float deltaTime)
 	{
-		m_elapsedTime += deltaTime;
-
 		const view::ChoiceList::Content content{ buildContent() };
 		const auto count{ static_cast<int>(content.items.size()) };
 
@@ -184,18 +179,10 @@ namespace game::scene
 
 		m_context.renderer.setFont(m_bodyFont);
 		m_context.renderer.drawTextCentered(Vector2{ centerX, height * SUBTITLE_Y },
-		                                    "-KIWA-　注ぎ勝負", palette::TEXT_SUB);
+		                                    "-KIWA-", palette::TEXT_SUB);
 
 		m_choices.draw(m_context.renderer, m_context.screen,
-		               view::ChoiceList::Resources{ m_headingFont, m_bodyFont });
-
-		// 押せることを点滅で伝える
-		if (std::fmod(m_elapsedTime, BLINK_CYCLE) < BLINK_CYCLE * 0.62f)
-		{
-			m_context.renderer.setFont(m_bodyFont);
-			m_context.renderer.drawTextCentered(Vector2{ centerX, height - 96.0f },
-			                                    "↑↓ で選び、Enter で決める　　クリックでも選べる",
-			                                    palette::TEXT_SUB);
-		}
+		               view::ChoiceList::Resources{ m_headingFont, m_bodyFont, font::HEADING_SIZE,
+			                                        font::BODY_SIZE });
 	}
 } // namespace game::scene

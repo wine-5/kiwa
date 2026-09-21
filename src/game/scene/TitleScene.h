@@ -67,7 +67,5 @@ namespace game::scene
 		/// @brief 本文の書体
 		int m_bodyFont{ -1 };
 
-		/// @brief 経過時間（案内の点滅に使う）
-		float m_elapsedTime{ 0.0f };
 	};
 } // namespace game::scene
