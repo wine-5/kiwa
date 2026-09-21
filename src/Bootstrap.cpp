@@ -32,7 +32,14 @@ namespace bootstrap
 		SetAlwaysRunFlag(core::constant::GameConfig::RUNS_WHILE_INACTIVE ? TRUE : FALSE);
 
 		if (DxLib_Init() == -1)
-			return -1;
+		{
+			// 全画面で立ち上がらない環境がある（画面を占有できない場合など）。
+			// そのまま終わると何も出ないので、窓へ落として試し直す
+			ChangeWindowMode(TRUE);
+
+			if (DxLib_Init() == -1)
+				return -1;
+		}
 
 		SetDrawScreen(DX_SCREEN_BACK);
 

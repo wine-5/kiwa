@@ -38,9 +38,10 @@ namespace core::constant
 
 		/// @brief 全画面で始めるか
 		///
-		/// 窓で始める。渡した先の環境によっては全画面での起動が通らないことがあり、
-		/// そのとき何も出ないまま終わってしまう。全画面は F1 でいつでも切り替えられる
-		static constexpr bool STARTS_FULLSCREEN{ false };
+		/// 開発中は窓のほうが扱いやすいので、製品版だけ全画面にする。
+		/// 全画面で起動できない環境もあるため、そのときは窓へ落として立ち上げ直す
+		/// （Bootstrap を参照）。実行中は F1 でいつでも切り替えられる
+		static constexpr bool STARTS_FULLSCREEN{ !IS_DEBUG };
 
 		/// @brief 窓の見出し
 		static constexpr const char* WINDOW_TITLE{ IS_DEBUG ? "際 -KIWA- [Debug]"
