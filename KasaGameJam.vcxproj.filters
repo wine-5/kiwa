@@ -165,6 +165,9 @@
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp">
       <Filter>src\infrastructure\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\infrastructure\input\TouchInputProvider.cpp">
+      <Filter>src\infrastructure\input</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\input\InputProvider.cpp">
       <Filter>src\infrastructure\input</Filter>
     </ClCompile>
@@ -377,6 +380,9 @@
     <ClInclude Include="src\infrastructure\graphics\Screen.h">
       <Filter>src\infrastructure\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\infrastructure\input\TouchInputProvider.h">
+      <Filter>src\infrastructure\input</Filter>
+    </ClInclude>
     <ClInclude Include="src\infrastructure\input\InputProvider.h">
       <Filter>src\infrastructure\input</Filter>
     </ClInclude>

@@ -93,6 +93,7 @@
     <ClCompile Include="src\infrastructure\graphics\Screen.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\input\InputProvider.cpp" />
+    <ClCompile Include="src\infrastructure\input\TouchInputProvider.cpp" />
     <ClCompile Include="src\infrastructure\audio\AudioManager.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
     <ClCompile Include="src\game\scene\TitleScene.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\infrastructure\input\InputProvider.h" />
+    <ClInclude Include="src\infrastructure\input\TouchInputProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\infrastructure\graphics\Renderer.h" />

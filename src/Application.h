@@ -65,10 +65,13 @@ class Application final : private core::base::NonCopyable
 	infrastructure::graphics::Camera m_camera{};
 	infrastructure::graphics::ModelRenderer m_modelRenderer{};
 	infrastructure::graphics::PostEffect m_postEffect;
-	infrastructure::input::InputProvider m_input{};
+	/// @brief 操作の読み取り。どの OS の実体になるかは PlatformFactory が決める
+	std::unique_ptr<core::iface::IInputProvider> m_input{
+		platform::PlatformFactory::createInputProvider()
+	};
 
 	// 動作確認のための仕掛け。普段は何も仕掛かっていないので素通しになる
-	infrastructure::debug::ScriptedInput m_scriptedInput{ m_input };
+	infrastructure::debug::ScriptedInput m_scriptedInput{ *m_input };
 	infrastructure::debug::FrameCapture m_frameCapture{};
 	infrastructure::resource::ResourceManager m_resource{};
 	infrastructure::audio::AudioManager m_audio{};

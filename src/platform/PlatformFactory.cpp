@@ -1,5 +1,8 @@
 ﻿#include "platform/PlatformFactory.h"
 
+#include "infrastructure/input/InputProvider.h"
+#include "infrastructure/input/TouchInputProvider.h"
+
 #if defined(_WIN32)
 #include "platform/windows/WindowsFontInstaller.h"
 #endif
@@ -31,6 +34,16 @@ namespace platform
 		return std::make_unique<windows::WindowsFontInstaller>();
 #else
 		return std::make_unique<NullFontInstaller>();
+#endif
+	}
+
+	std::unique_ptr<core::iface::IInputProvider> PlatformFactory::createInputProvider()
+	{
+#if defined(_WIN32)
+		return std::make_unique<infrastructure::input::InputProvider>();
+#else
+		// 携帯の端末にはキーボードもマウスも無いので、画面に触れる操作へ読み替える
+		return std::make_unique<infrastructure::input::TouchInputProvider>();
 #endif
 	}
 } // namespace platform
