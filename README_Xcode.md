@@ -18,11 +18,19 @@ Windows 版と**同じソースをそのまま使います**（分かれてい�
 | Mac | Xcode 15 以降が動くもの |
 | Xcode | App Store から |
 | CMake | `brew install cmake`（3.20 以降） |
-| **DXライブラリ iOS 版** | 公式（https://dxlib.xsrv.jp/dxdload.html）から落として展開しておく |
+| **DXライブラリ iOS 版** | 公式（https://dxlib.xsrv.jp/dxdload.html）の「**ＤＸライブラリ iOS版**」（約78MB）を落として展開しておく。Windows 版とは別物なので注意 |
 | Apple Developer Program | 実機とストアに出すために必要（年額あり） |
 
 DXライブラリ iOS 版は**このフォルダには入っていません**。容量が大きく、版も変わるためです。
-展開した場所（`DxLib.h` があるところ）をあとで渡します。
+展開したら、**その場所（展開してできたフォルダ）**をあとで渡します。
+中の並びは版によって違いますが、こちらで `DxLib.h` と `.a` を探しに行くので、
+**展開先のフォルダを渡せば足ります**。どこに展開したか分からなくなったら、次で探せます。
+
+```sh
+find ~/Downloads -name DxLib.h -maxdepth 5
+```
+
+出てきたパスの**フォルダ部分**（`.../DxLib.h` の手前まで）か、その親を渡してください。
 
 ---
 

@@ -1,4 +1,4 @@
-# 際 -KIWA- を iOS（App Store）向けに組むための定義
+﻿# 際 -KIWA- を iOS（App Store）向けに組むための定義
 #
 # Xcode プロジェクトは、これを元に CMake が作る。手で .xcodeproj を書くより、
 # ソースが増えたときの取り回しが楽で、取りこぼしも起きにくい。
@@ -23,6 +23,46 @@ if(NOT DXLIB_IOS_DIR)
         "DXライブラリ iOS 版の場所を渡してください：cmake ... -DDXLIB_IOS_DIR=/path/to/DxLib_iOS")
 endif()
 
+if(NOT EXISTS "${DXLIB_IOS_DIR}")
+    message(FATAL_ERROR
+        "その場所がありません: ${DXLIB_IOS_DIR}
+"
+        "  DXライブラリ iOS 版を https://dxlib.xsrv.jp/dxdload.html から落として展開し、
+"
+        "  展開した場所を -DDXLIB_IOS_DIR= に渡してください。")
+endif()
+
+# ---- DXライブラリの中身を探す ----
+#
+# 版によって中の並びが変わるので、名前を決め打ちにせず探しに行く。
+# ヘッダは DxLib.h があるところ、ライブラリは中にある .a を全部使う
+file(GLOB_RECURSE DXLIB_HEADER_CANDIDATES "${DXLIB_IOS_DIR}/DxLib.h" "${DXLIB_IOS_DIR}/*/DxLib.h")
+
+if(NOT DXLIB_HEADER_CANDIDATES)
+    message(FATAL_ERROR
+        "${DXLIB_IOS_DIR} の中に DxLib.h が見つかりません。
+"
+        "  展開先を間違えていないか確かめてください（find で探せます）：
+"
+        "    find ~/Downloads -name DxLib.h -maxdepth 5")
+endif()
+
+list(GET DXLIB_HEADER_CANDIDATES 0 DXLIB_HEADER)
+get_filename_component(DXLIB_INCLUDE_DIR "${DXLIB_HEADER}" DIRECTORY)
+message(STATUS "DXライブラリのヘッダ: ${DXLIB_INCLUDE_DIR}")
+
+file(GLOB_RECURSE DXLIB_LIBRARIES "${DXLIB_IOS_DIR}/*.a")
+
+if(NOT DXLIB_LIBRARIES)
+    message(FATAL_ERROR
+        "${DXLIB_IOS_DIR} の中に .a（ライブラリ）が見つかりません。
+"
+        "  iOS 版ではなく Windows 版を展開していないか確かめてください。")
+endif()
+
+list(LENGTH DXLIB_LIBRARIES DXLIB_LIBRARY_COUNT)
+message(STATUS "DXライブラリのライブラリ: ${DXLIB_LIBRARY_COUNT} 個")
+
 # ---- ソース ----
 #
 # Windows 専用の入口とフォント登録は外す。中身（core / game）は触らずそのまま使う
@@ -33,27 +73,15 @@ add_executable(Kiwa MACOSX_BUNDLE ${KIWA_SOURCES})
 
 target_include_directories(Kiwa PRIVATE
     "${CMAKE_SOURCE_DIR}/src"
-    "${DXLIB_IOS_DIR}"
+    "${DXLIB_INCLUDE_DIR}"
 )
 
 # ---- DXライブラリと、それが要る枠組み ----
 #
-# ライブラリ名と枠組みの顔ぶれは DXライブラリ iOS 版の版によって変わる。
-# 合わないときは公式の手引き（README_Xcode.md にリンクあり）に合わせて直すこと
-target_link_directories(Kiwa PRIVATE "${DXLIB_IOS_DIR}")
+# ライブラリは上で見つけたものをそのまま渡す（名前を決め打ちにしない）。
+# 枠組みの顔ぶれは版によって変わるので、足りなければここへ足す
 target_link_libraries(Kiwa PRIVATE
-    DxLib_iOS
-    DxUseCLib_iOS
-    jpeg_iOS
-    png_iOS
-    zlib_iOS
-    tiff_iOS
-    theora_iOS
-    vorbis_iOS
-    ogg_iOS
-    bullet_iOS
-    opusfile_iOS
-    opus_iOS
+    ${DXLIB_LIBRARIES}
 
     "-framework UIKit"
     "-framework Foundation"
