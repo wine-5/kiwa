@@ -96,6 +96,32 @@ chmod +x ~/Downloads/Kiwa_IOS/generate_xcode.command
 
 Windows で作った Zip は実行の権限も落ちるので、`chmod +x` も要ります。
 
+### `iphoneos is not an iOS SDK` と出る
+
+CMake が iOS の SDK を見つけられていません。**Xcode 本体ではなくコマンドラインツールのほうを
+向いている**のが、たいていの原因です（`-G Xcode` には Xcode 本体が要ります）。
+
+```sh
+xcode-select -p
+```
+
+これが `/Library/Developer/CommandLineTools` を返したら、Xcode 本体へ向け直します。
+
+```sh
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+sudo xcodebuild -license accept          # 初回だけ聞かれる
+xcrun --sdk iphoneos --show-sdk-path     # パスが返れば直っている
+```
+
+最後の行がパスを返すようになってから、`build-ios` を作り直してください。
+
+```sh
+rm -rf build-ios
+cmake -G Xcode -B build-ios -DCMAKE_SYSTEM_NAME=iOS -DDXLIB_IOS_DIR=~/Downloads/DxLib_iOS
+```
+
+（`xcode-select -p` の時点で Xcode が入っていないようなら、App Store から入れてください）
+
 ### ライブラリが見つからない / リンクが通らない
 
 `CMakeLists.txt` の `target_link_libraries` に並べてあるライブラリ名と枠組みは、
