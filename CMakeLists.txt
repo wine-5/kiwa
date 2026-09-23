@@ -98,6 +98,23 @@ endforeach()
 list(LENGTH DXLIB_LINK_FLAGS DXLIB_LIBRARY_COUNT)
 message(STATUS "DXライブラリのライブラリ: ${DXLIB_LIBRARY_COUNT} 個")
 
+# ---- ソース ----
+#
+# Windows 専用の入口とフォント登録は外す。中身（core / game）は触らずそのまま使う
+file(GLOB_RECURSE KIWA_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
+list(FILTER KIWA_SOURCES EXCLUDE REGEX "/src/platform/windows/")
+
+list(LENGTH KIWA_SOURCES KIWA_SOURCE_COUNT)
+
+if(KIWA_SOURCE_COUNT EQUAL 0)
+    message(FATAL_ERROR
+        "${CMAKE_SOURCE_DIR}/src の中に .cpp が一つも見つかりません。
+"
+        "  展開したフォルダの中で ls を打ち、src がフォルダとして見えるか確かめてください。")
+endif()
+
+message(STATUS "ソース: ${KIWA_SOURCE_COUNT} 個")
+
 add_executable(Kiwa MACOSX_BUNDLE ${KIWA_SOURCES})
 
 target_include_directories(Kiwa PRIVATE "${CMAKE_SOURCE_DIR}/src")
