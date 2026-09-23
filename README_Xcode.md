@@ -30,7 +30,22 @@ DXライブラリ iOS 版は**このフォルダには入っていません**。
 find ~/Downloads -name DxLib.h -maxdepth 5
 ```
 
-出てきたパスの**フォルダ部分**（`.../DxLib.h` の手前まで）か、その親を渡してください。
+渡すのは、**展開してできた一番上のフォルダ**（例：`~/Downloads/DxLib_iOS`）で構いません。
+
+iOS 版は中がこう分かれています。
+
+```
+DxLib_iOS/
+  プロジェクトに追加すべきファイル_iOS用/
+    Debug-iphoneos/            実機・デバッグ用
+    Release-iphoneos/          実機・製品用
+    Debug-iphonesimulator/     シミュレータ・デバッグ用
+    Release-iphonesimulator/   シミュレータ・製品用
+```
+
+**どれを使うかはビルドのたびに変わる**ので、こちらでは決め打ちにせず、
+Xcode に選ばせる形（`$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)`）で渡しています。
+実機とシミュレータを行き来しても、そのまま通ります。
 
 ---
 

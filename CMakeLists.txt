@@ -34,9 +34,13 @@ endif()
 
 # ---- DXライブラリの中身を探す ----
 #
-# 版によって中の並びが変わるので、名前を決め打ちにせず探しに行く。
-# ヘッダは DxLib.h があるところ、ライブラリは中にある .a を全部使う
-file(GLOB_RECURSE DXLIB_HEADER_CANDIDATES "${DXLIB_IOS_DIR}/DxLib.h" "${DXLIB_IOS_DIR}/*/DxLib.h")
+# iOS 版は「Debug-iphoneos」「Release-iphonesimulator」のように、
+# 構成と実機/シミュレータの組み合わせごとにフォルダが分かれている。
+# どれを使うかはビルドのたびに変わるので、Xcode に決めさせる（後述）。
+# ここでは、その入れ物になっているフォルダと、リンクするライブラリの名前だけを拾う
+file(GLOB_RECURSE DXLIB_HEADER_CANDIDATES
+    "${DXLIB_IOS_DIR}/DxLib.h"
+    "${DXLIB_IOS_DIR}/*/DxLib.h")
 
 if(NOT DXLIB_HEADER_CANDIDATES)
     message(FATAL_ERROR
@@ -44,44 +48,66 @@ if(NOT DXLIB_HEADER_CANDIDATES)
 "
         "  展開先を間違えていないか確かめてください（find で探せます）：
 "
-        "    find ~/Downloads -name DxLib.h -maxdepth 5")
+        "    find ~/Downloads -maxdepth 6 -name DxLib.h")
 endif()
 
-list(GET DXLIB_HEADER_CANDIDATES 0 DXLIB_HEADER)
-get_filename_component(DXLIB_INCLUDE_DIR "${DXLIB_HEADER}" DIRECTORY)
-message(STATUS "DXライブラリのヘッダ: ${DXLIB_INCLUDE_DIR}")
+# 実機向けのフォルダを目印にして、その親を入れ物とみなす
+set(DXLIB_BASE_DIR "")
 
-file(GLOB_RECURSE DXLIB_LIBRARIES "${DXLIB_IOS_DIR}/*.a")
+foreach(header ${DXLIB_HEADER_CANDIDATES})
+    get_filename_component(header_dir "${header}" DIRECTORY)
+    get_filename_component(header_dir_name "${header_dir}" NAME)
 
-if(NOT DXLIB_LIBRARIES)
+    if(header_dir_name MATCHES "-iphoneos$")
+        get_filename_component(DXLIB_BASE_DIR "${header_dir}" DIRECTORY)
+        set(DXLIB_SAMPLE_DIR "${header_dir}")
+        break()
+    endif()
+endforeach()
+
+if(DXLIB_BASE_DIR)
+    # 構成ごとのフォルダを Xcode に選ばせる。この2つの記号はそのまま Xcode へ渡る
+    set(DXLIB_SEARCH_PATH "${DXLIB_BASE_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)")
+    message(STATUS "DXライブラリ: ${DXLIB_BASE_DIR} （構成ごとに切り替え）")
+else()
+    # 構成で分かれていない並びのときは、見つけたところをそのまま使う
+    list(GET DXLIB_HEADER_CANDIDATES 0 DXLIB_HEADER)
+    get_filename_component(DXLIB_SAMPLE_DIR "${DXLIB_HEADER}" DIRECTORY)
+    set(DXLIB_SEARCH_PATH "${DXLIB_SAMPLE_DIR}")
+    message(STATUS "DXライブラリ: ${DXLIB_SAMPLE_DIR}")
+endif()
+
+# リンクするライブラリの名前は、実物から拾う（版によって顔ぶれが変わるため）
+file(GLOB DXLIB_LIBRARY_FILES "${DXLIB_SAMPLE_DIR}/*.a")
+
+if(NOT DXLIB_LIBRARY_FILES)
     message(FATAL_ERROR
-        "${DXLIB_IOS_DIR} の中に .a（ライブラリ）が見つかりません。
+        "${DXLIB_SAMPLE_DIR} の中に .a（ライブラリ）が見つかりません。
 "
         "  iOS 版ではなく Windows 版を展開していないか確かめてください。")
 endif()
 
-list(LENGTH DXLIB_LIBRARIES DXLIB_LIBRARY_COUNT)
-message(STATUS "DXライブラリのライブラリ: ${DXLIB_LIBRARY_COUNT} 個")
+set(DXLIB_LINK_FLAGS "")
 
-# ---- ソース ----
-#
-# Windows 専用の入口とフォント登録は外す。中身（core / game）は触らずそのまま使う
-file(GLOB_RECURSE KIWA_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
-list(FILTER KIWA_SOURCES EXCLUDE REGEX "/src/platform/windows/")
+foreach(library ${DXLIB_LIBRARY_FILES})
+    get_filename_component(library_name "${library}" NAME_WE)
+    string(REGEX REPLACE "^lib" "" library_name "${library_name}")
+    list(APPEND DXLIB_LINK_FLAGS "-l${library_name}")
+endforeach()
+
+list(LENGTH DXLIB_LINK_FLAGS DXLIB_LIBRARY_COUNT)
+message(STATUS "DXライブラリのライブラリ: ${DXLIB_LIBRARY_COUNT} 個")
 
 add_executable(Kiwa MACOSX_BUNDLE ${KIWA_SOURCES})
 
-target_include_directories(Kiwa PRIVATE
-    "${CMAKE_SOURCE_DIR}/src"
-    "${DXLIB_INCLUDE_DIR}"
-)
+target_include_directories(Kiwa PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 # ---- DXライブラリと、それが要る枠組み ----
 #
 # ライブラリは上で見つけたものをそのまま渡す（名前を決め打ちにしない）。
 # 枠組みの顔ぶれは版によって変わるので、足りなければここへ足す
 target_link_libraries(Kiwa PRIVATE
-    ${DXLIB_LIBRARIES}
+    ${DXLIB_LINK_FLAGS}
 
     "-framework UIKit"
     "-framework Foundation"
@@ -125,4 +151,9 @@ set_target_properties(Kiwa PROPERTIES
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
     XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++20"
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
+
+    # DXライブラリの置き場所。構成（Debug/Release）と実機かシミュレータかで
+    # フォルダが変わるので、Xcode の記号のまま渡して向こうに選ばせる
+    XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${DXLIB_SEARCH_PATH}"
+    XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "${DXLIB_SEARCH_PATH}"
 )
