@@ -5,8 +5,9 @@ Windows 版と**同じソースをそのまま使います**（分かれてい�
 
 > **このフォルダを Xcode で直接開くことはできません。**
 > `.xcodeproj` はまだ入っていないので、先に CMake に作らせます。
-> いちばん簡単なのは、Mac で **`generate_xcode.command` をダブルクリック**することです
-> （中の `DXLIB_IOS_DIR` を、DXライブラリ iOS 版を置いた場所に直してから）。
+> **ターミナルで下の3行を打つのが確実です**（`generate_xcode.command` をダブルクリックする手も
+> ありますが、Zip で受け取ったファイルは macOS が実行を止めるので、ひと手間要ります。
+> 「3. うまくいかないときに見るところ」を参照）。
 
 ---
 
@@ -49,6 +50,21 @@ open build-ios/Kiwa.xcodeproj
 ---
 
 ## 3. うまくいかないときに見るところ
+
+### 「マルウェアが含まれていないことを検証できませんでした」と出る
+
+`generate_xcode.command` をダブルクリックしたときに出ます。Zip で受け取ったファイルには
+macOS が印を付けており、そのままでは実行させてくれません（中身の問題ではありません）。
+
+**ターミナルで直に打つのが手っ取り早い**ですが、どうしてもダブルクリックで使いたければ
+一度だけ次を実行してください。
+
+```sh
+xattr -dr com.apple.quarantine ~/Downloads/Kiwa_IOS
+chmod +x ~/Downloads/Kiwa_IOS/generate_xcode.command
+```
+
+Windows で作った Zip は実行の権限も落ちるので、`chmod +x` も要ります。
 
 ### ライブラリが見つからない / リンクが通らない
 
