@@ -47,10 +47,13 @@ Application::Application(int screenWidth, int screenHeight)
 
 void Application::toggleFullscreen()
 {
+	// 窓と全画面があるのは机の上だけ。携帯の端末では何もしない
+#if defined(_WIN32)
 	// DxLib は「窓かどうか」しか返さないので、いまの状態を反転させて渡す
 	m_isFullscreen = !m_isFullscreen;
 	ChangeWindowMode(m_isFullscreen ? FALSE : TRUE);
 	SetDrawScreen(DX_SCREEN_BACK);
+#endif
 }
 
 void Application::run()

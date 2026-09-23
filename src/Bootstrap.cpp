@@ -20,25 +20,36 @@ namespace bootstrap
 		SetUseCharCodeFormat(DX_CHARCODEFORMAT_UTF8);
 
 		// 窓の左上と、タスクバーに出す顔。app.rc で埋めたアイコンを指す
+#if defined(_WIN32)
 		SetWindowIconID(ICON_RESOURCE_ID);
+#endif
 
 		SetGraphMode(core::constant::RENDER_WIDTH, core::constant::RENDER_HEIGHT, core::constant::COLOR_BIT);
 		// 全画面と窓を行き来しても、読み込んだ画像やモデルを作り直さずに済ませる
+		// 窓まわりは机の上の話。携帯の端末には窓が無いので囲っておく
+#if defined(_WIN32)
 		SetChangeScreenModeGraphicsSystemResetFlag(FALSE);
 		ChangeWindowMode(core::constant::GameConfig::STARTS_FULLSCREEN ? FALSE : TRUE);
 		SetMainWindowText(core::constant::GameConfig::WINDOW_TITLE);
+#endif
 
 		// 開発中は窓の外へ出ても止まらないようにする（製品版では裏で走らせない）
+#if defined(_WIN32)
 		SetAlwaysRunFlag(core::constant::GameConfig::RUNS_WHILE_INACTIVE ? TRUE : FALSE);
+#endif
 
 		if (DxLib_Init() == -1)
 		{
+#if defined(_WIN32)
 			// 全画面で立ち上がらない環境がある（画面を占有できない場合など）。
 			// そのまま終わると何も出ないので、窓へ落として試し直す
 			ChangeWindowMode(TRUE);
 
 			if (DxLib_Init() == -1)
 				return -1;
+#else
+			return -1;
+#endif
 		}
 
 		SetDrawScreen(DX_SCREEN_BACK);
