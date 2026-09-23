@@ -40,14 +40,21 @@ find ~/Downloads -name DxLib.h -maxdepth 5
 ソースが増えても並びを直す必要がなく、取りこぼしも起きません。
 
 ```sh
-cd ~/Desktop/Kiwa_AppStore
+cd ~/Downloads/Kiwa_IOS          # このフォルダを置いた場所
 
-cmake -G Xcode -B build-ios \
-  -DCMAKE_SYSTEM_NAME=iOS \
-  -DDXLIB_IOS_DIR=$HOME/Downloads/DxLib_iOS
+# DxLib.h がどこにあるか確かめる
+find ~/Downloads -maxdepth 6 -name DxLib.h
+
+# 出てきたパスのフォルダ部分を、そのまま次の行へ貼る
+DXLIB=~/Downloads/DxLib_iOS
+
+cmake -G Xcode -B build-ios -DCMAKE_SYSTEM_NAME=iOS -DDXLIB_IOS_DIR="$DXLIB"
 
 open build-ios/Kiwa.xcodeproj
 ```
+
+> `< >` で囲んだ書き方をそのまま打つと、ターミナルが記号として読んでしまい
+> `parse error` になります。**山かっこは書かず、実際のパスに置き換えてください**。
 
 あとは Xcode で
 
