@@ -96,6 +96,27 @@ chmod +x ~/Downloads/Kiwa_IOS/generate_xcode.command
 
 Windows で作った Zip は実行の権限も落ちるので、`chmod +x` も要ります。
 
+### `CMake can not determine linker language for target: Kiwa` と出る
+
+ソースが一つも見つかっていません。**Zip の作り方が原因**であることがほとんどです。
+
+Windows 標準の圧縮（Compress-Archive）は、Zip の中のパスを `\` で書いてしまいます。
+Windows では展開できますが、Mac では階層として扱われず、
+`src\Application.cpp` という名前のファイルが一つできるだけになります。
+
+展開したフォルダで確かめてください。
+
+```sh
+ls
+```
+
+`src` というフォルダが無く、`src\Application.cpp` のような**長い名前のファイルが並んでいたら**
+それです。Windows 側で `tools/make_package.py` を使って Zip を作り直してもらってください。
+
+```
+python tools/make_package.py <フォルダ> <出力.zip>
+```
+
 ### `iphoneos is not an iOS SDK` と出る
 
 CMake が iOS の SDK を見つけられていません。**Xcode 本体ではなくコマンドラインツールのほうを
