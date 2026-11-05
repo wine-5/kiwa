@@ -179,6 +179,6 @@ set_target_properties(Kiwa PROPERTIES
 
     # DXライブラリの置き場所。構成（Debug/Release）と実機かシミュレータかで
     # フォルダが変わるので、Xcode の記号のまま渡して向こうに選ばせる
-    XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${DXLIB_SEARCH_PATH}"
+    XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/src ${DXLIB_SEARCH_PATH}"
     XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "${DXLIB_SEARCH_PATH}"
 )
