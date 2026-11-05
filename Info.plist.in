@@ -42,6 +42,10 @@
 		<string>arm64</string>
 		<string>opengles-2</string>
 	</array>
+	<!-- 横向き専用なので、iPad の分割表示（マルチタスク）には対応しない。
+	     対応するなら縦向きも要る、と審査で求められるため、全画面専用と宣言する -->
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<!-- 画面は横向きだけ。茶室を横長の画で組んでいるため -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
