@@ -2,6 +2,7 @@
 #include "core/interface/IRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/utility/Easing.h"
+#include "game/constant/InputGuide.h"
 #include "game/constant/Palette.h"
 #include "game/view/Plate.h"
 #include "core/utility/MathConstants.h"
@@ -174,6 +175,16 @@ namespace game::view
 
 		const float centerX{ screen.getWidth() * 0.5f };
 		const float centerY{ screen.getHeight() - PROMPT_BOTTOM };
+
+		// 触れて遊ぶ環境にはキーが無い。絵のかわりに、押し方を文字で伝える
+		if (!game::constant::input_guide::SHOWS_KEY_CAP)
+		{
+			renderer.setFont(resources.bodyFont);
+			renderer.drawTextCentered(Vector2{ centerX, centerY },
+			                          game::constant::input_guide::POUR_HINT,
+			                          faded(palette::TEXT_SUB, 1.0f - 0.5f * m_press));
+			return;
+		}
 
 		// 注ぐのは両者ともスペース。どちらの番でも同じ絵を出す
 		const Vector2 source{ renderer.getTextureSize(resources.keyCapSpace) };
