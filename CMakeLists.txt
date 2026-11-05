@@ -160,6 +160,11 @@ endforeach()
 
 target_sources(Kiwa PRIVATE ${KIWA_ASSETS})
 
+# アプリアイコン（Asset Catalog）。ストア提出に必須
+set(KIWA_XCASSETS "${CMAKE_SOURCE_DIR}/Assets.xcassets")
+target_sources(Kiwa PRIVATE "${KIWA_XCASSETS}")
+set_source_files_properties("${KIWA_XCASSETS}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
 # ---- バンドルの設定 ----
 set_target_properties(Kiwa PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist.in"
@@ -176,6 +181,7 @@ set_target_properties(Kiwa PROPERTIES
     XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "VZX3BBQM6Q"
     XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
+    XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
 
     # DXライブラリの置き場所。構成（Debug/Release）と実機かシミュレータかで
     # フォルダが変わるので、Xcode の記号のまま渡して向こうに選ばせる
