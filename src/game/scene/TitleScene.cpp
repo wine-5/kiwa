@@ -192,10 +192,18 @@ namespace game::scene
 		// 押された印は必ず全部消費する（残すと次の場面へ持ち越されてしまう）
 		const bool isNext{ m_context.input.consumeKeyPress(core::input::KeyCode::Down) };
 		const bool isPrevious{ m_context.input.consumeKeyPress(core::input::KeyCode::Up) };
-		const bool isSkip{ m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
+		bool isSkip{ m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
 		const bool isBack{ m_context.input.consumeKeyPress(core::input::KeyCode::Left) };
-		const bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
-			                  m_context.input.consumeKeyPress(core::input::KeyCode::Right) };
+		bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
+			            m_context.input.consumeKeyPress(core::input::KeyCode::Right) };
+
+		// 触れた指はスペースと Enter の両方として渡る。そのまま読むと、触れた項目の
+		// 一つ下が決まってしまう。触れて遊ぶときは、項目に触れたかどうかだけで決める
+		if constexpr (game::constant::input_guide::IS_TOUCH_ONLY)
+		{
+			isSkip = false;
+			isDecided = false;
+		}
 
 		if (isNext || isSkip)
 			m_index = (m_index + 1) % count;
