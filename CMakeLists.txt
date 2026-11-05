@@ -188,6 +188,8 @@ set_target_properties(Kiwa PROPERTIES
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
     # アーカイブに dSYM を含める（無いと、ストアへのシンボル送信が失敗する）
     XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym"
+    # CMake のリリース構成は、既定ではデバッグ記号を出さない。dSYM の元になる記号を出す
+    XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS "YES"
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yutoimata.kiwa"
     XCODE_ATTRIBUTE_SKIP_INSTALL "NO"
     XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
