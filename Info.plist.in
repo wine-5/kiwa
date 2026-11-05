@@ -20,6 +20,9 @@
 	<string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
 	<key>CFBundleVersion</key>
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
+	<!-- 暗号化は標準の通信以外に使わない。提出のたびの輸出コンプライアンスの質問を省く -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<!-- 同梱の毛筆フォント。ここに書かないと iOS では名前で呼べない -->
