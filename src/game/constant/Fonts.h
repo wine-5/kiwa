@@ -23,7 +23,12 @@ namespace game::constant
 		inline constexpr const char* HEADING_FILE{ "assets/fonts/KouzanMouhitu.ttf" };
 
 		/// @brief 本文に使う書体（細かい字は明朝のほうが読みやすい）
+#if defined(__APPLE__)
+		// iOS には Noto Serif JP が入っていない。標準で入っているヒラギノ明朝を使う
+		inline constexpr const char* BODY_FAMILY{ "HiraMinProN-W3" };
+#else
 		inline constexpr const char* BODY_FAMILY{ "Noto Serif JP" };
+#endif
 
 
 		// ========== 大きさ ==========

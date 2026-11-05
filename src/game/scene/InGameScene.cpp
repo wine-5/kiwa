@@ -5,6 +5,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/InputGuide.h"
 #include "game/constant/Palette.h"
 #include "game/constant/Sounds.h"
 #include "game/constant/UiTextures.h"
@@ -79,8 +80,16 @@ namespace game::scene
 		content.selected = m_pauseIndex;
 		content.centerY = PAUSE_LIST_Y;
 		content.items = { "続ける", m_context.audio.isMuted() ? "音を出す" : "音を消す",
-			              "タイトルへ", "終わる" };
-		content.notes = { "", m_context.audio.isMuted() ? "いまは消している" : "", "", "" };
+			              "タイトルへ" };
+		content.notes = { "", m_context.audio.isMuted() ? "いまは消している" : "", "" };
+
+		// iOS ではアプリが自分で終わらない。終わる項目は出さない
+		if constexpr (constant::input_guide::CAN_QUIT)
+		{
+			content.items.emplace_back("終わる");
+			content.notes.emplace_back("");
+		}
+
 		return content;
 	}
 
@@ -116,7 +125,8 @@ namespace game::scene
 			break;
 
 		case PAUSE_QUIT:
-			m_context.quitGame();
+			if (constant::input_guide::CAN_QUIT)
+				m_context.quitGame();
 			break;
 
 		case PAUSE_RESUME:
@@ -131,9 +141,14 @@ namespace game::scene
 		// 押された印は必ず全部消費する（残すと戻ったときに持ち越されてしまう）
 		const bool isNext{ m_context.input.consumeKeyPress(core::input::KeyCode::Down) };
 		const bool isPrevious{ m_context.input.consumeKeyPress(core::input::KeyCode::Up) };
-		const bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
-			                  m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
+		bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
+			            m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
 		const bool isClosed{ m_context.input.consumeKeyPress(core::input::KeyCode::Escape) };
+
+		// 触れた指はスペースと Enter の両方として渡る。そのまま読むと、何も無い所に
+		// 触れただけで、指している項目（「タイトルへ」など）が決まってしまう
+		if constexpr (constant::input_guide::IS_TOUCH_ONLY)
+			isDecided = false;
 
 		const int count{ static_cast<int>(buildPauseContent().items.size()) };
 		const int previousIndex{ m_pauseIndex };
@@ -234,6 +249,6 @@ namespace game::scene
 		view::Plate::draw(m_context.renderer, m_plateTexture, center, PAUSE_BUTTON_SIZE.x, 0.8f);
 
 		m_context.renderer.setFont(m_bodyFont);
-		m_context.renderer.drawTextCentered(center, "休み（Esc）", palette::INK);
+		m_context.renderer.drawTextCentered(center, constant::input_guide::PAUSE_LABEL, palette::INK);
 	}
 } // namespace game::scene

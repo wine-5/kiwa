@@ -129,6 +129,9 @@ target_link_libraries(Kiwa PRIVATE
     "-framework UIKit"
     "-framework Foundation"
     "-framework CoreGraphics"
+    "-framework CoreText"
+    "-framework OpenAL"
+    "-framework MessageUI"
     "-framework QuartzCore"
     "-framework OpenGLES"
     "-framework GLKit"
@@ -140,6 +143,9 @@ target_link_libraries(Kiwa PRIVATE
     "-framework ImageIO"
     "-framework MediaPlayer"
     "-framework GameController"
+
+    # storyboard から名前で呼ばれる Objective-C のクラスを、静的ライブラリから取りこぼさないため
+    "-ObjC"
 )
 
 # ---- 素材 ----
@@ -157,20 +163,42 @@ endforeach()
 
 target_sources(Kiwa PRIVATE ${KIWA_ASSETS})
 
+# アプリアイコン（Asset Catalog）。ストア提出に必須
+set(KIWA_XCASSETS "${CMAKE_SOURCE_DIR}/Assets.xcassets")
+target_sources(Kiwa PRIVATE "${KIWA_XCASSETS}")
+set_source_files_properties("${KIWA_XCASSETS}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+# DXライブラリ iOS 版は、画面（DxLibViewController / DxLibGLView）をこの storyboard から作る。
+# これが無いと描画する画面が存在せず、起動しても黒いままになる
+set(KIWA_MAIN_STORYBOARD "${CMAKE_SOURCE_DIR}/ios/Main.storyboard")
+target_sources(Kiwa PRIVATE "${KIWA_MAIN_STORYBOARD}")
+set_source_files_properties("${KIWA_MAIN_STORYBOARD}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
 # ---- バンドルの設定 ----
 set_target_properties(Kiwa PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.plist.in"
     MACOSX_BUNDLE_BUNDLE_NAME "Kiwa"
-    MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "com.example.kiwa"
-    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "13.0"
+    # ストアに登録した版（1.0）と揃える。ビルド番号は、提出のたびに増やす
+    MACOSX_BUNDLE_BUNDLE_VERSION "2"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.yutoimata.kiwa"
+    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "14.0"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
     XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++20"
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
+    # アーカイブに dSYM を含める（無いと、ストアへのシンボル送信が失敗する）
+    XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym"
+    # CMake のリリース構成は、既定ではデバッグ記号を出さない。dSYM の元になる記号を出す
+    XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS "YES"
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.yutoimata.kiwa"
+    XCODE_ATTRIBUTE_SKIP_INSTALL "NO"
+    XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "VZX3BBQM6Q"
+    XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
+    XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
 
     # DXライブラリの置き場所。構成（Debug/Release）と実機かシミュレータかで
     # フォルダが変わるので、Xcode の記号のまま渡して向こうに選ばせる
-    XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${DXLIB_SEARCH_PATH}"
+    XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/src ${DXLIB_SEARCH_PATH}"
     XCODE_ATTRIBUTE_LIBRARY_SEARCH_PATHS "${DXLIB_SEARCH_PATH}"
 )

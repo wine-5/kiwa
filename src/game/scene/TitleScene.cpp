@@ -5,6 +5,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/InputGuide.h"
 #include "game/constant/Palette.h"
 #include "game/constant/Sounds.h"
 #include "game/model/Npc.h"
@@ -114,8 +115,16 @@ namespace game::scene
 
 		if (m_step == Step::Mode)
 		{
-			content.items = { "二人で注ぎ合う", "一人で注ぎ合う", "終わる" };
-			content.notes = { "向かい合って", "二の手は任せる", "" };
+			content.items = { "二人で注ぎ合う", "一人で注ぎ合う" };
+			content.notes = { "向かい合って", "二の手は任せる" };
+
+			// iOS ではアプリが自分で終わらない。終わる項目は出さない
+			if constexpr (game::constant::input_guide::CAN_QUIT)
+			{
+				content.items.emplace_back("終わる");
+				content.notes.emplace_back("");
+			}
+
 			return content;
 		}
 
@@ -142,7 +151,7 @@ namespace game::scene
 				return;
 			}
 
-			if (m_index == MODE_QUIT)
+			if (game::constant::input_guide::CAN_QUIT && m_index == MODE_QUIT)
 			{
 				m_context.quitGame();
 				return;
@@ -183,10 +192,18 @@ namespace game::scene
 		// 押された印は必ず全部消費する（残すと次の場面へ持ち越されてしまう）
 		const bool isNext{ m_context.input.consumeKeyPress(core::input::KeyCode::Down) };
 		const bool isPrevious{ m_context.input.consumeKeyPress(core::input::KeyCode::Up) };
-		const bool isSkip{ m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
+		bool isSkip{ m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
 		const bool isBack{ m_context.input.consumeKeyPress(core::input::KeyCode::Left) };
-		const bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
-			                  m_context.input.consumeKeyPress(core::input::KeyCode::Right) };
+		bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
+			            m_context.input.consumeKeyPress(core::input::KeyCode::Right) };
+
+		// 触れた指はスペースと Enter の両方として渡る。そのまま読むと、触れた項目の
+		// 一つ下が決まってしまう。触れて遊ぶときは、項目に触れたかどうかだけで決める
+		if constexpr (game::constant::input_guide::IS_TOUCH_ONLY)
+		{
+			isSkip = false;
+			isDecided = false;
+		}
 
 		if (isNext || isSkip)
 			m_index = (m_index + 1) % count;

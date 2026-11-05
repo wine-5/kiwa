@@ -20,17 +20,32 @@
 	<string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
 	<key>CFBundleVersion</key>
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
+	<!-- 暗号化は標準の通信以外に使わない。提出のたびの輸出コンプライアンスの質問を省く -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- 同梱の毛筆フォント。ここに書かないと iOS では名前で呼べない -->
+	<key>UIAppFonts</key>
+	<array>
+		<string>assets/fonts/KouzanMouhitu.ttf</string>
+	</array>
+	<!-- DXライブラリ iOS 版の画面（DxLibViewController）を作る storyboard -->
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<!-- 起動時の画面。storyboard を用意していないので、空の指定で黒一色にする
 	     （iOS 14 以降、どちらかの指定が無いとストアで弾かれる） -->
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 		<string>opengles-2</string>
 	</array>
+	<!-- 横向き専用なので、iPad の分割表示（マルチタスク）には対応しない。
+	     対応するなら縦向きも要る、と審査で求められるため、全画面専用と宣言する -->
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<!-- 画面は横向きだけ。茶室を横長の画で組んでいるため -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

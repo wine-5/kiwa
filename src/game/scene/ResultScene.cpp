@@ -6,6 +6,7 @@
 #include "core/interface/IScreen.h"
 #include "core/utility/Easing.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/InputGuide.h"
 #include "game/constant/Palette.h"
 #include "game/constant/Sounds.h"
 #include "game/constant/UiTextures.h"
@@ -195,6 +196,6 @@ namespace game::scene
 
 		m_context.renderer.setFont(m_bodyFont);
 		m_context.renderer.drawTextCentered(Vector2{ centerX, height - 72.0f },
-		                                    "Enter でタイトルへ", palette::TEXT_SUB);
+		                                    game::constant::input_guide::TO_TITLE, palette::TEXT_SUB);
 	}
 } // namespace game::scene
