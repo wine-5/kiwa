@@ -1,5 +1,6 @@
 ﻿#include "game/presenter/DuelPresenter.h"
 #include "core/interface/IInputProvider.h"
+#include "game/constant/InputGuide.h"
 #include "game/view/IPourView.h"
 
 namespace
@@ -377,7 +378,7 @@ namespace game::presenter
 			if (!m_isCardRevealed)
 			{
 				m_view.showMessage("折据（おりすえ）から札を引く");
-				m_view.showPrompt("←→ で選び、Enter で引く　　札を押してもよい");
+				m_view.showPrompt(constant::input_guide::DRAW_CARD);
 				break;
 			}
 
@@ -388,7 +389,7 @@ namespace game::presenter
 		case Phase::MatchOver:
 			m_view.showMessage(std::to_string(model::Duel::getTargetWins()) + "本先取  " +
 			                   nameOf(m_duel.getMatchWinner()) + " の勝ち");
-			m_view.showPrompt("どちらかのキーでもう一番");
+			m_view.showPrompt(constant::input_guide::REMATCH);
 			break;
 
 		case Phase::TurnPassing:
@@ -411,8 +412,8 @@ namespace game::presenter
 		case Phase::RoundOver:
 			m_view.showMessage(nameOf(m_duel.getLoser()) + " がこぼした  " +
 			                   model::vesselOf(m_duel.getVessel()).name + " は縁まで満ちた");
-			m_view.showPrompt(m_duel.isMatchOver() ? "どちらかのキーで結果へ"
-			                                       : "どちらかのキーで次の勝負へ");
+			m_view.showPrompt(m_duel.isMatchOver() ? constant::input_guide::TO_RESULT
+			                                       : constant::input_guide::NEXT_ROUND);
 			break;
 		}
 	}
