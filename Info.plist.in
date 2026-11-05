@@ -31,7 +31,7 @@
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 		<string>opengles-2</string>
 	</array>
 	<!-- 画面は横向きだけ。茶室を横長の画で組んでいるため -->
