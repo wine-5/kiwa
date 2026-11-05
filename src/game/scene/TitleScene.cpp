@@ -5,6 +5,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/InputGuide.h"
 #include "game/constant/Palette.h"
 #include "game/constant/Sounds.h"
 #include "game/model/Npc.h"
@@ -114,8 +115,16 @@ namespace game::scene
 
 		if (m_step == Step::Mode)
 		{
-			content.items = { "二人で注ぎ合う", "一人で注ぎ合う", "終わる" };
-			content.notes = { "向かい合って", "二の手は任せる", "" };
+			content.items = { "二人で注ぎ合う", "一人で注ぎ合う" };
+			content.notes = { "向かい合って", "二の手は任せる" };
+
+			// iOS ではアプリが自分で終わらない。終わる項目は出さない
+			if constexpr (game::constant::input_guide::CAN_QUIT)
+			{
+				content.items.emplace_back("終わる");
+				content.notes.emplace_back("");
+			}
+
 			return content;
 		}
 
@@ -142,7 +151,7 @@ namespace game::scene
 				return;
 			}
 
-			if (m_index == MODE_QUIT)
+			if (game::constant::input_guide::CAN_QUIT && m_index == MODE_QUIT)
 			{
 				m_context.quitGame();
 				return;
