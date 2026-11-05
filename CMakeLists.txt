@@ -143,6 +143,9 @@ target_link_libraries(Kiwa PRIVATE
     "-framework ImageIO"
     "-framework MediaPlayer"
     "-framework GameController"
+
+    # storyboard から名前で呼ばれる Objective-C のクラスを、静的ライブラリから取りこぼさないため
+    "-ObjC"
 )
 
 # ---- 素材 ----
@@ -164,6 +167,12 @@ target_sources(Kiwa PRIVATE ${KIWA_ASSETS})
 set(KIWA_XCASSETS "${CMAKE_SOURCE_DIR}/Assets.xcassets")
 target_sources(Kiwa PRIVATE "${KIWA_XCASSETS}")
 set_source_files_properties("${KIWA_XCASSETS}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+# DXライブラリ iOS 版は、画面（DxLibViewController / DxLibGLView）をこの storyboard から作る。
+# これが無いと描画する画面が存在せず、起動しても黒いままになる
+set(KIWA_MAIN_STORYBOARD "${CMAKE_SOURCE_DIR}/ios/Main.storyboard")
+target_sources(Kiwa PRIVATE "${KIWA_MAIN_STORYBOARD}")
+set_source_files_properties("${KIWA_MAIN_STORYBOARD}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
 # ---- バンドルの設定 ----
 set_target_properties(Kiwa PROPERTIES

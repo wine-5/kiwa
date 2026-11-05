@@ -22,6 +22,9 @@
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- DXライブラリ iOS 版の画面（DxLibViewController）を作る storyboard -->
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
 	<!-- 起動時の画面。storyboard を用意していないので、空の指定で黒一色にする
 	     （iOS 14 以降、どちらかの指定が無いとストアで弾かれる） -->
 	<key>UILaunchScreen</key>
