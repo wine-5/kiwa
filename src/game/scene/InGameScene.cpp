@@ -244,6 +244,6 @@ namespace game::scene
 		view::Plate::draw(m_context.renderer, m_plateTexture, center, PAUSE_BUTTON_SIZE.x, 0.8f);
 
 		m_context.renderer.setFont(m_bodyFont);
-		m_context.renderer.drawTextCentered(center, "休み（Esc）", palette::INK);
+		m_context.renderer.drawTextCentered(center, constant::input_guide::PAUSE_LABEL, palette::INK);
 	}
 } // namespace game::scene
