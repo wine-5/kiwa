@@ -141,9 +141,14 @@ namespace game::scene
 		// 押された印は必ず全部消費する（残すと戻ったときに持ち越されてしまう）
 		const bool isNext{ m_context.input.consumeKeyPress(core::input::KeyCode::Down) };
 		const bool isPrevious{ m_context.input.consumeKeyPress(core::input::KeyCode::Up) };
-		const bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
-			                  m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
+		bool isDecided{ m_context.input.consumeKeyPress(core::input::KeyCode::Enter) ||
+			            m_context.input.consumeKeyPress(core::input::KeyCode::Space) };
 		const bool isClosed{ m_context.input.consumeKeyPress(core::input::KeyCode::Escape) };
+
+		// 触れた指はスペースと Enter の両方として渡る。そのまま読むと、何も無い所に
+		// 触れただけで、指している項目（「タイトルへ」など）が決まってしまう
+		if constexpr (constant::input_guide::IS_TOUCH_ONLY)
+			isDecided = false;
 
 		const int count{ static_cast<int>(buildPauseContent().items.size()) };
 		const int previousIndex{ m_pauseIndex };
