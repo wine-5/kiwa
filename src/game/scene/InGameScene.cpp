@@ -5,6 +5,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "game/constant/Fonts.h"
+#include "game/constant/InputGuide.h"
 #include "game/constant/Palette.h"
 #include "game/constant/Sounds.h"
 #include "game/constant/UiTextures.h"
@@ -79,8 +80,16 @@ namespace game::scene
 		content.selected = m_pauseIndex;
 		content.centerY = PAUSE_LIST_Y;
 		content.items = { "続ける", m_context.audio.isMuted() ? "音を出す" : "音を消す",
-			              "タイトルへ", "終わる" };
-		content.notes = { "", m_context.audio.isMuted() ? "いまは消している" : "", "", "" };
+			              "タイトルへ" };
+		content.notes = { "", m_context.audio.isMuted() ? "いまは消している" : "", "" };
+
+		// iOS ではアプリが自分で終わらない。終わる項目は出さない
+		if constexpr (constant::input_guide::CAN_QUIT)
+		{
+			content.items.emplace_back("終わる");
+			content.notes.emplace_back("");
+		}
+
 		return content;
 	}
 
@@ -116,7 +125,8 @@ namespace game::scene
 			break;
 
 		case PAUSE_QUIT:
-			m_context.quitGame();
+			if (constant::input_guide::CAN_QUIT)
+				m_context.quitGame();
 			break;
 
 		case PAUSE_RESUME:
