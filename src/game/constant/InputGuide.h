@@ -12,6 +12,12 @@ namespace game::constant
 	namespace input_guide
 	{
 #if defined(__APPLE__)
+		/// @brief 画面に触れるだけで遊ぶか（キーが無い）。
+		///
+		/// 触れた指は、スペースと Enter を同時に押した形で渡る。並びを選ぶ場面では、
+		/// その二つをキーとして読むと、触れた項目の一つ下が決まってしまう
+		inline constexpr bool IS_TOUCH_ONLY{ true };
+
 		/// @brief 遊びの途中でアプリを閉じる項目を出すか（iOS は自分で終わらせない作法）
 		inline constexpr bool CAN_QUIT{ false };
 
@@ -39,6 +45,7 @@ namespace game::constant
 		/// @brief 休みへ入る札の文字
 		inline constexpr const char* PAUSE_LABEL{ "休み" };
 #else
+		inline constexpr bool IS_TOUCH_ONLY{ false };
 		inline constexpr bool CAN_QUIT{ true };
 		inline constexpr bool SHOWS_KEY_CAP{ true };
 		inline constexpr const char* POUR_HINT{ "" };
